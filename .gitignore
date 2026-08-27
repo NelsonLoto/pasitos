@@ -1,0 +1,28 @@
+# --- Android / Gradle (app/) ---
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+.gradle/
+**/build/
+captures/
+.cxx/
+*.jks
+*.keystore
+
+# --- IntelliJ IDEA / Android Studio ---
+.idea/
+*.iml
+out/
+
+# --- Kotlin / Ktor (backend/) ---
+.kotlin/
+
+# --- Env / secrets ---
+.env
+.env.*
+*.pem
+
+# --- macOS ---
+.DS_Store
