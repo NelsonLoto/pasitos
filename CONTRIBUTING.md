@@ -25,3 +25,9 @@ Cuando `develop` esté estable y se decida hacer un release, se abre un Pull Req
 ## Commits
 
 Se recomienda un mensaje de commit corto y descriptivo del *qué* y el *por qué*, evitando mensajes genéricos como "fix" o "cambios".
+
+## Sobre la protección de ramas
+
+GitHub Free no permite activar protección de ramas (bloqueo de push directo, revisión obligatoria) en repositorios **privados** — esa función requiere GitHub Pro o que el repositorio sea público. Como el repo se mantiene privado por manejar datos de salud de menores, `main` y `develop` **no están bloqueadas técnicamente**: nada impide un `git push` directo.
+
+Esto significa que el flujo de arriba (rama por tarea + PR) depende de la disciplina del equipo, no de una regla forzada por GitHub. **No se debe pushear directo a `main` ni a `develop` bajo ninguna circunstancia**, aunque el sistema lo permita. Si en algún momento se evalúa pasar a GitHub Pro o a una organización con plan pago, esta sección se actualiza para reflejar la protección real.
