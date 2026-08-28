@@ -6,12 +6,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ninosano.app.core.common.PlaceholderScreen
+import com.ninosano.app.feature.login.LoginScreen
 
 @Composable
 fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(navController = navController, startDestination = NsRoute.Login, modifier = modifier) {
         composable<NsRoute.Login> {
-            PlaceholderScreen(title = "Login") // se reemplaza por la pantalla real en el próximo commit
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(NsRoute.Home) {
+                        popUpTo(NsRoute.Login) { inclusive = true }
+                    }
+                },
+            )
         }
         composable<NsRoute.Register> { PlaceholderScreen(title = "Registro de cuenta") }
         composable<NsRoute.ChildOnboarding> { PlaceholderScreen(title = "Alta de perfil de hijo/a") }
