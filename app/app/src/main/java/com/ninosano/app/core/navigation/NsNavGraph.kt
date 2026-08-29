@@ -18,6 +18,7 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                         popUpTo(NsRoute.Login) { inclusive = true }
                     }
                 },
+                onRegisterClick = { navController.navigate(NsRoute.Register) },
             )
         }
         composable<NsRoute.Register> { PlaceholderScreen(title = "Registro de cuenta") }

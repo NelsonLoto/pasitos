@@ -41,7 +41,7 @@ fun NsInputField(
             isError = errorText != null,
             enabled = enabled,
             singleLine = true,
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = visualTransformation,
             trailingIcon = trailingIcon,
