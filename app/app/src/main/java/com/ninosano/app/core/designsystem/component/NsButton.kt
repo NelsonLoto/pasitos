@@ -65,8 +65,9 @@ fun NsButton(
             onClick = onClick,
             enabled = enabled && !isLoading,
             shape = shape,
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.primary,
             ),
             modifier = modifier.height(52.dp),
         ) { content() }
