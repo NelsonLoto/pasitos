@@ -16,7 +16,9 @@ import com.ninosano.app.core.navigation.NsNavGraph
 import com.ninosano.app.core.navigation.currentTabItemOrNull
 import com.ninosano.app.core.navigation.toRoute
 import com.ninosano.app.ui.theme.NsTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
