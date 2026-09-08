@@ -1,6 +1,7 @@
 package com.ninosano.app.data.auth
 
 import com.ninosano.app.data.auth.model.AuthSession
+import com.ninosano.app.data.auth.model.EmailAlreadyInUseException
 import com.ninosano.app.data.auth.model.InvalidCredentialsException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,6 +19,8 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
 
     private val _currentSession = MutableStateFlow<AuthSession?>(null)
     override val currentSession: StateFlow<AuthSession?> = _currentSession.asStateFlow()
+
+    private val registeredEmails = mutableSetOf("demo@ninosano.app")
 
     override suspend fun login(email: String, password: String): Result<AuthSession> {
         delay(800)
@@ -45,6 +48,24 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
         )
         _currentSession.value = session
         return Result.success(session)
+    }
+
+    override suspend fun register(displayName: String, email: String, password: String): Result<AuthSession> {
+        delay(800)
+        val normalizedEmail = email.trim()
+        return if (registeredEmails.any { it.equals(normalizedEmail, ignoreCase = true) }) {
+            Result.failure(EmailAlreadyInUseException("Ya existe una cuenta con este email"))
+        } else {
+            registeredEmails += normalizedEmail
+            val session = AuthSession(
+                userId = "mock-${registeredEmails.size}",
+                email = normalizedEmail,
+                displayName = displayName.trim(),
+                token = "fake-jwt-token",
+            )
+            _currentSession.value = session
+            Result.success(session)
+        }
     }
 
     override fun logout() {

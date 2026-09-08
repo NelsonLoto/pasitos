@@ -8,3 +8,4 @@ data class AuthSession(
 )
 
 class InvalidCredentialsException(message: String) : Exception(message)
+class EmailAlreadyInUseException(message: String) : Exception(message)

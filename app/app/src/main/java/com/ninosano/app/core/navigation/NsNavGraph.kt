@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ninosano.app.core.common.PlaceholderScreen
 import com.ninosano.app.feature.login.LoginScreen
+import com.ninosano.app.feature.register.RegisterScreen
 
 @Composable
 fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -21,7 +22,17 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                 onRegisterClick = { navController.navigate(NsRoute.Register) },
             )
         }
-        composable<NsRoute.Register> { PlaceholderScreen(title = "Registro de cuenta") }
+        composable<NsRoute.Register> {
+            RegisterScreen(
+                onBackClick = { navController.popBackStack() },
+                onRegisterSuccess = {
+                    navController.navigate(NsRoute.Home) {
+                        popUpTo(NsRoute.Login) { inclusive = true }
+                    }
+                },
+                onLoginClick = { navController.popBackStack() },
+            )
+        }
         composable<NsRoute.ChildOnboarding> { PlaceholderScreen(title = "Alta de perfil de hijo/a") }
         composable<NsRoute.ChildSelector> { PlaceholderScreen(title = "Selector de hijo") }
         composable<NsRoute.Home> { PlaceholderScreen(title = "Home / Dashboard") }
