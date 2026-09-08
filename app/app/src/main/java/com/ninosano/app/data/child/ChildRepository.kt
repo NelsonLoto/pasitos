@@ -14,5 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 interface ChildRepository {
     val children: StateFlow<List<Child>>
 
+    /** Hijo activo (RF03) — el que se muestra en Home y en el resto de las pantallas. */
+    val activeChildId: StateFlow<String?>
+
     suspend fun addChild(name: String, birthDate: LocalDate, sex: ChildSex): Result<Child>
+
+    fun selectChild(childId: String)
 }

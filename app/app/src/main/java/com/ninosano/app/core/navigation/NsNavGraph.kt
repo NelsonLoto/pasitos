@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ninosano.app.core.common.PlaceholderScreen
 import com.ninosano.app.feature.childonboarding.ChildOnboardingScreen
+import com.ninosano.app.feature.childselector.ChildSelectorScreen
+import com.ninosano.app.feature.home.HomeScreen
 import com.ninosano.app.feature.login.LoginScreen
 import com.ninosano.app.feature.register.RegisterScreen
 
@@ -40,8 +42,22 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                 },
             )
         }
-        composable<NsRoute.ChildSelector> { PlaceholderScreen(title = "Selector de hijo") }
-        composable<NsRoute.Home> { PlaceholderScreen(title = "Home / Dashboard") }
+        composable<NsRoute.ChildSelector> {
+            ChildSelectorScreen(
+                onBackClick = { navController.popBackStack() },
+                onAddChildClick = { navController.navigate(NsRoute.ChildOnboarding) },
+            )
+        }
+        composable<NsRoute.Home> {
+            HomeScreen(
+                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
+                onNotificationsClick = { navController.navigate(NsRoute.NotificationCenter) },
+                onMeasurementClick = { childId -> navController.navigate(NsRoute.MeasurementForm(childId)) },
+                onVaccinesClick = { navController.navigate(NsRoute.VaccinationCalendar) },
+                onAdviceClick = { navController.navigate(NsRoute.AdviceList) },
+                onAddChildClick = { navController.navigate(NsRoute.ChildOnboarding) },
+            )
+        }
         composable<NsRoute.MeasurementForm> { PlaceholderScreen(title = "Registro de medición") }
         composable<NsRoute.GrowthChart> { PlaceholderScreen(title = "Curva de crecimiento") }
         composable<NsRoute.MeasurementHistory> { PlaceholderScreen(title = "Historial de mediciones") }
