@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ninosano.app.core.common.PlaceholderScreen
+import com.ninosano.app.feature.advicelist.AdviceListScreen
 import com.ninosano.app.feature.childonboarding.ChildOnboardingScreen
 import com.ninosano.app.feature.childselector.ChildSelectorScreen
 import com.ninosano.app.feature.growthchart.GrowthChartScreen
@@ -95,7 +96,12 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
         composable<NsRoute.NotificationCenter> {
             NotificationCenterScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.AdviceList> { PlaceholderScreen(title = "Consejos por edad") }
+        composable<NsRoute.AdviceList> {
+            AdviceListScreen(
+                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
+                onAdviceClick = { adviceId -> navController.navigate(NsRoute.AdviceDetail(adviceId)) },
+            )
+        }
         composable<NsRoute.AdviceDetail> { PlaceholderScreen(title = "Detalle de consejo") }
         composable<NsRoute.ReportExport> { PlaceholderScreen(title = "Exportar reporte PDF") }
         composable<NsRoute.Profile> { PlaceholderScreen(title = "Perfil / Configuración") }
