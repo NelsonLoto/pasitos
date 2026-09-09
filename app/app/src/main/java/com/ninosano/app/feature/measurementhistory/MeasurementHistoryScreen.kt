@@ -79,13 +79,14 @@ private fun MeasurementRow(measurement: Measurement) {
     NsCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(text = formatDate(measurement.date), style = NsType.BodySmall)
 
             Column(horizontalAlignment = Alignment.End) {
                 measurement.weightKg?.let {
-                    Text(text = "${formatDecimal(it)} kg", style = NsType.Caption, color = NsColor.TextSecondary)
+                    Text(text = "${formatDecimal(it)} kg", style = NsType.H3, color = NsColor.TextPrimary)
                 }
                 val secondaryLine = buildList {
                     measurement.heightCm?.let { add("${formatDecimal(it)} cm") }
