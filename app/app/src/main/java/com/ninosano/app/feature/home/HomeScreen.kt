@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -126,20 +128,25 @@ private fun HomeContent(
                 .padding(top = 6.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max),
+            ) {
                 StatCardEmpty(
                     label = "ÚLTIMO PESO",
                     message = "Todavía no registraste mediciones.",
                     actionLabel = "Registrar medición →",
                     onClick = { state.activeChild?.let { onMeasurementClick(it.id) } },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
                 StatCardEmpty(
                     label = "VACUNAS",
                     message = "Sin calendario cargado.",
                     actionLabel = "Ver calendario →",
                     onClick = onVaccinesClick,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
             }
 

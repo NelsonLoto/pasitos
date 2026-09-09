@@ -17,20 +17,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,18 +35,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ninosano.app.R
 import com.ninosano.app.core.designsystem.component.NsButton
 import com.ninosano.app.core.designsystem.component.NsButtonVariant
+import com.ninosano.app.core.designsystem.component.NsDatePickerField
 import com.ninosano.app.core.designsystem.component.NsInputField
 import com.ninosano.app.core.designsystem.component.NsTopAppBar
 import com.ninosano.app.data.child.model.ChildSex
 import com.ninosano.app.ui.theme.NsColor
 import com.ninosano.app.ui.theme.NsTheme
 import com.ninosano.app.ui.theme.NsType
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
-private val DateDisplayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 @Composable
 fun ChildOnboardingScreen(
@@ -78,7 +66,6 @@ fun ChildOnboardingScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChildOnboardingContent(
     state: ChildOnboardingUiState,
@@ -88,8 +75,6 @@ private fun ChildOnboardingContent(
     onSexSelected: (ChildSex) -> Unit,
     onSubmit: () -> Unit,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -141,14 +126,12 @@ private fun ChildOnboardingContent(
             )
 
             Spacer(modifier = Modifier.height(18.dp))
-            NsInputField(
+            NsDatePickerField(
                 label = "Fecha de nacimiento",
-                value = state.birthDate?.format(DateDisplayFormatter).orEmpty(),
-                onValueChange = {},
-                placeholder = "DD/MM/AAAA",
+                selectedDate = state.birthDate,
+                onDateSelected = onBirthDateSelected,
                 errorText = state.birthDateError,
                 enabled = !state.isLoading,
-                onFieldClick = { showDatePicker = true },
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -185,29 +168,6 @@ private fun ChildOnboardingContent(
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
-        }
-    }
-
-    if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = state.birthDate
-                ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
-        )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        onBirthDateSelected(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
-                    }
-                    showDatePicker = false
-                }) { Text("Confirmar") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
-            },
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }

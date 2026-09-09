@@ -10,6 +10,7 @@ import com.ninosano.app.feature.childonboarding.ChildOnboardingScreen
 import com.ninosano.app.feature.childselector.ChildSelectorScreen
 import com.ninosano.app.feature.home.HomeScreen
 import com.ninosano.app.feature.login.LoginScreen
+import com.ninosano.app.feature.measurement.MeasurementFormScreen
 import com.ninosano.app.feature.register.RegisterScreen
 
 @Composable
@@ -58,7 +59,12 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                 onAddChildClick = { navController.navigate(NsRoute.ChildOnboarding) },
             )
         }
-        composable<NsRoute.MeasurementForm> { PlaceholderScreen(title = "Registro de medición") }
+        composable<NsRoute.MeasurementForm> {
+            MeasurementFormScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() },
+            )
+        }
         composable<NsRoute.GrowthChart> { PlaceholderScreen(title = "Curva de crecimiento") }
         composable<NsRoute.MeasurementHistory> { PlaceholderScreen(title = "Historial de mediciones") }
         composable<NsRoute.VaccinationCalendar> { PlaceholderScreen(title = "Calendario de vacunación") }
