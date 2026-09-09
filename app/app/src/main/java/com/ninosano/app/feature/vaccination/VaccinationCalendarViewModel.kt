@@ -6,19 +6,15 @@ import com.ninosano.app.data.child.ChildRepository
 import com.ninosano.app.data.child.model.Child
 import com.ninosano.app.data.vaccination.VaccinationRepository
 import com.ninosano.app.data.vaccination.model.AppliedDose
-import com.ninosano.app.data.vaccination.model.DoseStatus
 import com.ninosano.app.data.vaccination.model.VaccineDoseSchedule
+import com.ninosano.app.data.vaccination.model.displayName
+import com.ninosano.app.data.vaccination.resolveDoseStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-
-/** Días de gracia antes de marcar una dosis no aplicada como "Atrasada" en vez de "Pendiente". */
-private const val OVERDUE_GRACE_DAYS = 30
 
 @HiltViewModel
 class VaccinationCalendarViewModel @Inject constructor(
@@ -47,15 +43,7 @@ class VaccinationCalendarViewModel @Inject constructor(
         appliedDoses: List<AppliedDose>,
     ): VaccineDoseUiModel {
         val isApplied = appliedDoses.any { it.childId == activeChildId && it.doseScheduleId == dose.id }
-        val status = when {
-            isApplied -> DoseStatus.Applied
-            activeChild == null -> DoseStatus.Pending
-            else -> {
-                val ageInDays = ChronoUnit.DAYS.between(activeChild.birthDate, LocalDate.now())
-                if (ageInDays > dose.recommendedAgeInDays + OVERDUE_GRACE_DAYS) DoseStatus.Overdue else DoseStatus.Pending
-            }
-        }
-        val displayName = if (dose.doseLabel != null) "${dose.vaccineName} (${dose.doseLabel})" else dose.vaccineName
-        return VaccineDoseUiModel(id = dose.id, displayName = displayName, ageLabel = dose.recommendedAgeLabel, status = status)
+        val status = resolveDoseStatus(dose, activeChild?.birthDate, isApplied)
+        return VaccineDoseUiModel(id = dose.id, displayName = dose.displayName, ageLabel = dose.recommendedAgeLabel, status = status)
     }
 }
