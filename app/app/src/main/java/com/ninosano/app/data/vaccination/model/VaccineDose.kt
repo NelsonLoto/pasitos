@@ -18,10 +18,16 @@ data class VaccineDoseSchedule(
     val doseLabel: String?,
     val recommendedAgeLabel: String,
     val recommendedAgeInDays: Int,
+    val description: String,
 )
 
 data class AppliedDose(
     val childId: String,
     val doseScheduleId: String,
     val appliedDate: java.time.LocalDate,
+    val lot: String? = null,
 )
+
+/** Ej: "Pentavalente (3ª dosis)". Mismo criterio usado en el Calendario de vacunación. */
+val VaccineDoseSchedule.displayName: String
+    get() = if (doseLabel != null) "$vaccineName ($doseLabel)" else vaccineName

@@ -6,11 +6,12 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
+// Dummy task to satisfy IDE sync for AGP 9 built-in Kotlin
+tasks.register("prepareKotlinBuildScriptModel") {}
+
 android {
     namespace = "com.ninosano.app"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ninosano.app"
@@ -24,9 +25,11 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
