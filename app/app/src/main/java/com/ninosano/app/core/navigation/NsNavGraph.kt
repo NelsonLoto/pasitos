@@ -14,6 +14,7 @@ import com.ninosano.app.feature.login.LoginScreen
 import com.ninosano.app.feature.measurement.MeasurementFormScreen
 import com.ninosano.app.feature.measurementhistory.MeasurementHistoryScreen
 import com.ninosano.app.feature.register.RegisterScreen
+import com.ninosano.app.feature.vaccination.VaccinationCalendarScreen
 
 @Composable
 fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -77,7 +78,12 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
         composable<NsRoute.MeasurementHistory> {
             MeasurementHistoryScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.VaccinationCalendar> { PlaceholderScreen(title = "Calendario de vacunación") }
+        composable<NsRoute.VaccinationCalendar> {
+            VaccinationCalendarScreen(
+                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
+                onDoseClick = { vaccineId -> navController.navigate(NsRoute.VaccineDetail(vaccineId)) },
+            )
+        }
         composable<NsRoute.VaccineDetail> { PlaceholderScreen(title = "Detalle de vacuna") }
         composable<NsRoute.NotificationCenter> { PlaceholderScreen(title = "Centro de notificaciones") }
         composable<NsRoute.AdviceList> { PlaceholderScreen(title = "Consejos por edad") }
