@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ninosano.app.ui.theme.NsColor
@@ -22,8 +23,8 @@ import com.ninosano.app.ui.theme.NsType
 fun NsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .background(color = NsColor.Border.copy(alpha = 0.4f), shape = RoundedCornerShape(10.dp))
-            .padding(4.dp),
+            .background(color = NsColor.Border, shape = RoundedCornerShape(10.dp))
+            .padding(3.dp),
     ) {
         options.forEachIndexed { index, option ->
             val selected = index == selectedIndex
@@ -35,12 +36,13 @@ fun NsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int
                         color = if (selected) MaterialTheme.colorScheme.surface else androidx.compose.ui.graphics.Color.Transparent,
                         shape = RoundedCornerShape(8.dp),
                     )
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = option,
-                    style = NsType.BodySmall,
+                    style = NsType.Caption,
+                    fontWeight = FontWeight.SemiBold,
                     color = if (selected) MaterialTheme.colorScheme.primary else NsColor.TextSecondary,
                 )
             }

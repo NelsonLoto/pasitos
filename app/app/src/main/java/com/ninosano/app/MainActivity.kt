@@ -9,6 +9,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ninosano.app.core.designsystem.component.NsTabBar
@@ -32,10 +34,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun NsApp() {
+private fun NsApp(appViewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val currentTab = currentTabItemOrNull(currentDestination)
+    val activeChildId by appViewModel.activeChildId.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
@@ -43,7 +46,7 @@ private fun NsApp() {
                 NsTabBar(
                     selected = currentTab,
                     onSelect = { tab ->
-                        navController.navigate(tab.toRoute()) { launchSingleTop = true }
+                        navController.navigate(tab.toRoute(activeChildId)) { launchSingleTop = true }
                     },
                 )
             }
