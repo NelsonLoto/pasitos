@@ -13,6 +13,7 @@ import com.ninosano.app.feature.home.HomeScreen
 import com.ninosano.app.feature.login.LoginScreen
 import com.ninosano.app.feature.measurement.MeasurementFormScreen
 import com.ninosano.app.feature.measurementhistory.MeasurementHistoryScreen
+import com.ninosano.app.feature.notificationcenter.NotificationCenterScreen
 import com.ninosano.app.feature.register.RegisterScreen
 import com.ninosano.app.feature.vaccination.VaccinationCalendarScreen
 import com.ninosano.app.feature.vaccinedetail.VaccineDetailScreen
@@ -91,7 +92,9 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                 onSaveSuccess = { navController.popBackStack() },
             )
         }
-        composable<NsRoute.NotificationCenter> { PlaceholderScreen(title = "Centro de notificaciones") }
+        composable<NsRoute.NotificationCenter> {
+            NotificationCenterScreen(onBackClick = { navController.popBackStack() })
+        }
         composable<NsRoute.AdviceList> { PlaceholderScreen(title = "Consejos por edad") }
         composable<NsRoute.AdviceDetail> { PlaceholderScreen(title = "Detalle de consejo") }
         composable<NsRoute.ReportExport> { PlaceholderScreen(title = "Exportar reporte PDF") }
