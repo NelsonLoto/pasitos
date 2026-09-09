@@ -4,17 +4,13 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.ninosano.app.core.designsystem.component.NsTabItem
 
-/**
- * Placeholder de "hijo activo" hasta que exista selección real de hijo (RF03),
- * que depende del backend. Se resuelve con un ViewModel de estado compartido
- * cuando se implemente el selector de hijo (pantalla 04).
- */
-const val PLACEHOLDER_CHILD_ID = "current"
+/** Fallback si por algún motivo se toca el tab "Crecimiento" sin ningún hijo activo todavía. */
+private const val NO_CHILD_SELECTED_ID = "none"
 
 /** Mapeo entre los 5 tabs de la bottom bar y sus rutas de destino. */
-fun NsTabItem.toRoute(): NsRoute = when (this) {
+fun NsTabItem.toRoute(activeChildId: String?): NsRoute = when (this) {
     NsTabItem.Home -> NsRoute.Home
-    NsTabItem.Growth -> NsRoute.GrowthChart(childId = PLACEHOLDER_CHILD_ID)
+    NsTabItem.Growth -> NsRoute.GrowthChart(childId = activeChildId ?: NO_CHILD_SELECTED_ID)
     NsTabItem.Vaccines -> NsRoute.VaccinationCalendar
     NsTabItem.Advice -> NsRoute.AdviceList
     NsTabItem.Profile -> NsRoute.Profile
