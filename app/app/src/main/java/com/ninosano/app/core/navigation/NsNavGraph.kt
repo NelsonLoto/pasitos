@@ -17,6 +17,7 @@ import com.ninosano.app.feature.measurement.MeasurementFormScreen
 import com.ninosano.app.feature.measurementhistory.MeasurementHistoryScreen
 import com.ninosano.app.feature.notificationcenter.NotificationCenterScreen
 import com.ninosano.app.feature.register.RegisterScreen
+import com.ninosano.app.feature.reportexport.ReportExportScreen
 import com.ninosano.app.feature.vaccination.VaccinationCalendarScreen
 import com.ninosano.app.feature.vaccinedetail.VaccineDetailScreen
 
@@ -106,7 +107,9 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
         composable<NsRoute.AdviceDetail> {
             AdviceDetailScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.ReportExport> { PlaceholderScreen(title = "Exportar reporte PDF") }
+        composable<NsRoute.ReportExport> {
+            ReportExportScreen(onBackClick = { navController.popBackStack() })
+        }
         composable<NsRoute.Profile> { PlaceholderScreen(title = "Perfil / Configuración") }
     }
 }
