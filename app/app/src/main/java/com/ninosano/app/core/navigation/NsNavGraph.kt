@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.ninosano.app.core.common.PlaceholderScreen
 import com.ninosano.app.feature.advicedetail.AdviceDetailScreen
 import com.ninosano.app.feature.advicelist.AdviceListScreen
 import com.ninosano.app.feature.childonboarding.ChildOnboardingScreen
@@ -16,6 +15,7 @@ import com.ninosano.app.feature.login.LoginScreen
 import com.ninosano.app.feature.measurement.MeasurementFormScreen
 import com.ninosano.app.feature.measurementhistory.MeasurementHistoryScreen
 import com.ninosano.app.feature.notificationcenter.NotificationCenterScreen
+import com.ninosano.app.feature.profile.ProfileScreen
 import com.ninosano.app.feature.register.RegisterScreen
 import com.ninosano.app.feature.reportexport.ReportExportScreen
 import com.ninosano.app.feature.vaccination.VaccinationCalendarScreen
@@ -110,6 +110,17 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
         composable<NsRoute.ReportExport> {
             ReportExportScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.Profile> { PlaceholderScreen(title = "Perfil / Configuración") }
+        composable<NsRoute.Profile> {
+            ProfileScreen(
+                onMyChildrenClick = { navController.navigate(NsRoute.ChildSelector) },
+                onNotificationsClick = { navController.navigate(NsRoute.NotificationCenter) },
+                onExportReportsClick = { navController.navigate(NsRoute.ReportExport) },
+                onLogoutClick = {
+                    navController.navigate(NsRoute.Login) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                },
+            )
+        }
     }
 }
