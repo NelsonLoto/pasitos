@@ -14,5 +14,5 @@ interface VaccinationRepository {
     val schedule: List<VaccineDoseSchedule>
     val appliedDoses: StateFlow<List<AppliedDose>>
 
-    suspend fun markApplied(childId: String, doseScheduleId: String, appliedDate: LocalDate): Result<Unit>
+    suspend fun markApplied(childId: String, doseScheduleId: String, appliedDate: LocalDate, lot: String? = null): Result<Unit>
 }
