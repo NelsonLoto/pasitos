@@ -14,7 +14,7 @@ import com.ninosano.app.ui.theme.NsTheme
 import com.ninosano.app.ui.theme.NsType
 import com.ninosano.app.ui.theme.extendedColors
 
-enum class NsBadgeTone { Success, Warning, Error }
+enum class NsBadgeTone { Success, Warning, Error, Info }
 
 @Composable
 fun NsBadge(text: String, tone: NsBadgeTone, modifier: Modifier = Modifier) {
@@ -22,6 +22,7 @@ fun NsBadge(text: String, tone: NsBadgeTone, modifier: Modifier = Modifier) {
         NsBadgeTone.Success -> MaterialTheme.extendedColors.success
         NsBadgeTone.Warning -> MaterialTheme.extendedColors.warning
         NsBadgeTone.Error -> MaterialTheme.colorScheme.error
+        NsBadgeTone.Info -> MaterialTheme.colorScheme.primary
     }
     Row(
         modifier = modifier
