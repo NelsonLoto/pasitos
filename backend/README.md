@@ -6,22 +6,13 @@ PostgreSQL y Flyway para versionar el schema.
 ## Requisitos
 
 - JDK 21
-- Docker (para levantar PostgreSQL)
+- PostgreSQL 18 corriendo local (nativo, no Docker — la base `pasitos` y el
+  usuario `pasitos_dev` ya se crean a mano una sola vez por máquina de
+  desarrollo).
 
 ## Setup
 
-1. Levantar PostgreSQL con Docker (desde la raíz del repo):
-
-   ```
-   docker compose up -d
-   ```
-
-   Esto crea la base `pasitos` con las credenciales de desarrollo definidas en
-   `.env.example` (por defecto, sin necesitar nada más). Para usar otras
-   credenciales, copiá un `.env` en la raíz del repo o corré
-   `docker compose --env-file backend/.env up -d`.
-
-2. Copiar la plantilla de variables de entorno del backend (si no existe
+1. Copiar la plantilla de variables de entorno del backend (si no existe
    todavía `backend/.env`):
 
    ```
@@ -29,9 +20,11 @@ PostgreSQL y Flyway para versionar el schema.
    ```
 
    `.env` está en `.gitignore` — nunca se commitea. Ahí van host, puerto,
-   nombre de base, usuario y contraseña de conexión.
+   nombre de base, usuario y contraseña de conexión a la instancia nativa de
+   Postgres (por defecto `localhost:5432`, base `pasitos`, usuario
+   `pasitos_dev`).
 
-3. Levantar el backend:
+2. Levantar el backend:
 
    ```
    ./gradlew run
@@ -41,7 +34,7 @@ PostgreSQL y Flyway para versionar el schema.
    (`src/main/resources/db/migration`) contra la base `pasitos` y después
    abre el pool de conexiones (HikariCP) que usa Exposed.
 
-4. Verificar: `GET http://localhost:8080/health` debería responder `OK`.
+3. Verificar: `GET http://localhost:8080/health` debería responder `OK`.
 
 ## Schema
 
