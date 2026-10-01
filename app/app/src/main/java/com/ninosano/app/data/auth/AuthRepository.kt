@@ -4,10 +4,9 @@ import com.ninosano.app.data.auth.model.AuthSession
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Contrato de autenticación (RF01). La implementación actual (ver [FakeAuthRepository])
- * es mock/local: el backend todavía no existe. El día que exista, se agrega
- * RemoteAuthRepository y solo cambia el binding en AuthModule — ni los
- * ViewModels ni las pantallas que dependen de esta interfaz se tocan.
+ * Contrato de autenticación (RF01). Implementación real: [AuthApiRepository], contra el
+ * backend Ktor (`POST /auth/login`, `POST /auth/register`). `loginWithGoogle()` sigue
+ * mockeado — Google Sign-In real es Etapa 4.
  */
 interface AuthRepository {
     val currentSession: StateFlow<AuthSession?>

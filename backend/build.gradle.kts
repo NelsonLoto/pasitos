@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.2.10"
+    kotlin("plugin.serialization") version "2.2.10"
     application
 }
 
@@ -20,6 +21,11 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
+
+    // Auth: JWT (emisión) + hashing de contraseñas
+    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("at.favre.lib:bcrypt:0.10.2")
 
     // Acceso a datos: Exposed (ORM liviano tipo DSL) + HikariCP (pool de conexiones)
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

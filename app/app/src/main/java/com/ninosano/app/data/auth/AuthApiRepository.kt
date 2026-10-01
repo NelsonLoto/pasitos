@@ -1,0 +1,76 @@
+package com.ninosano.app.data.auth
+
+import com.ninosano.app.data.auth.model.AuthSession
+import com.ninosano.app.data.auth.model.EmailAlreadyInUseException
+import com.ninosano.app.data.auth.model.InvalidCredentialsException
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+@Singleton
+class AuthApiRepository @Inject constructor(
+    private val httpClient: HttpClient,
+) : AuthRepository {
+
+    private val _currentSession = MutableStateFlow<AuthSession?>(null)
+    override val currentSession: StateFlow<AuthSession?> = _currentSession.asStateFlow()
+
+    override suspend fun login(email: String, password: String): Result<AuthSession> =
+        runCatching {
+            val response = httpClient.post("/auth/login") {
+                contentType(ContentType.Application.Json)
+                setBody(LoginRequestDto(email = email.trim(), password = password))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> response.body<AuthResponseDto>().toSession()
+                HttpStatusCode.Unauthorized -> throw InvalidCredentialsException(response.body<ErrorResponseDto>().message)
+                else -> throw Exception("No se pudo conectar con el servidor")
+            }
+        }.onSuccess { _currentSession.value = it }
+
+    override suspend fun loginWithGoogle(): Result<AuthSession> {
+        // Google Sign-In real queda para Etapa 4 (ver Estado_Proyecto_Nino_Sano.md) — se
+        // mantiene tal cual el comportamiento mockeado que ya tenía FakeAuthRepository.
+        val session = AuthSession(
+            userId = "mock-google-1",
+            email = "demo.google@ninosano.app",
+            displayName = "Familia Demo (Google)",
+            token = "fake-jwt-token",
+        )
+        _currentSession.value = session
+        return Result.success(session)
+    }
+
+    override suspend fun register(displayName: String, email: String, password: String): Result<AuthSession> =
+        runCatching {
+            val response = httpClient.post("/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(RegisterRequestDto(nombre = displayName.trim(), email = email.trim(), password = password))
+            }
+            when (response.status) {
+                HttpStatusCode.Created -> response.body<AuthResponseDto>().toSession()
+                HttpStatusCode.Conflict -> throw EmailAlreadyInUseException(response.body<ErrorResponseDto>().message)
+                else -> throw Exception("No se pudo conectar con el servidor")
+            }
+        }.onSuccess { _currentSession.value = it }
+
+    override fun logout() {
+        _currentSession.value = null
+    }
+
+    private fun AuthResponseDto.toSession() = AuthSession(
+        userId = userId,
+        email = email,
+        displayName = nombre,
+        token = token,
+    )
+}
