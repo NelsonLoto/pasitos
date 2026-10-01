@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Solo para builds debug (no se empaqueta en release): permite tráfico HTTP sin cifrar
+  hacia el backend local de desarrollo, alcanzado vía `adb reverse tcp:8080 tcp:8080`
+  (ver NetworkConfig.kt).
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
