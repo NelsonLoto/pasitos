@@ -35,18 +35,25 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 > de OneDrive, no un error del proyecto — reintentar el build (o excluir
 > `app/build/` y `app/app/build/` de la sincronización) lo resuelve.
 
-## Autenticación (mock)
+## Autenticación
 
-El backend (`../backend/`) todavía no existe. El login actual usa
-`FakeAuthRepository` (in-memory, con latencia simulada). Credenciales de
-prueba:
+Login y registro son reales contra el backend (`../backend/`, ver su propio
+README para levantarlo) — `AuthApiRepository` llama a `POST /auth/login` y
+`POST /auth/register`. Hace falta registrar una cuenta nueva primero (ya no
+hay credenciales de demo hardcodeadas). `loginWithGoogle()` sigue siendo un
+mock (Google Sign-In real es Etapa 4).
 
-- **Email:** `demo@ninosano.app`
-- **Contraseña:** `123456`
+La app apunta a `http://localhost:8080` (`core/network/NetworkConfig.kt`). Para que
+funcione (emulador o dispositivo físico, da igual) hay que correr una vez por sesión
+de depuración, antes de instalar/abrir la app:
 
-Cuando exista el backend real, se agrega `RemoteAuthRepository : AuthRepository`
-y solo cambia el binding en `AuthModule` — ni la UI ni los ViewModels que
-dependen de `AuthRepository` se tocan.
+```bash
+adb reverse tcp:8080 tcp:8080
+```
+
+Esto túnel-ea el puerto a través del cable/canal de `adb` en vez de depender de red
+(evita el alias `10.0.2.2` del emulador, que en esta máquina chocaba con el firewall
+de Windows).
 
 ## Estado del scaffold
 

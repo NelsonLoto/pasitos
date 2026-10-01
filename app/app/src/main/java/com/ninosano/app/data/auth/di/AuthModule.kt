@@ -1,7 +1,7 @@
 package com.ninosano.app.data.auth.di
 
+import com.ninosano.app.data.auth.AuthApiRepository
 import com.ninosano.app.data.auth.AuthRepository
-import com.ninosano.app.data.auth.FakeAuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ abstract class AuthModule {
 
     @Binds
     @Singleton
-    abstract fun bindAuthRepository(impl: FakeAuthRepository): AuthRepository
+    abstract fun bindAuthRepository(impl: AuthApiRepository): AuthRepository
 }
