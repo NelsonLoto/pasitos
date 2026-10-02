@@ -1,17 +1,23 @@
 package com.pasitos.backend
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.pasitos.backend.auth.EmailAlreadyInUseException
 import com.pasitos.backend.auth.ErrorResponse
 import com.pasitos.backend.auth.InvalidCredentialsException
 import com.pasitos.backend.auth.JwtConfig
 import com.pasitos.backend.auth.JwtService
 import com.pasitos.backend.auth.authRoutes
+import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.db.DatabaseFactory
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -50,12 +56,32 @@ fun Application.module() {
 
     DatabaseFactory.init(environment.config)
 
-    val jwtService = JwtService(JwtConfig.from(environment.config))
+    val jwtConfig = JwtConfig.from(environment.config)
+    val jwtService = JwtService(jwtConfig)
+
+    install(Authentication) {
+        jwt("auth-jwt") {
+            realm = jwtConfig.issuer
+            verifier(
+                JWT.require(Algorithm.HMAC256(jwtConfig.secret))
+                    .withIssuer(jwtConfig.issuer)
+                    .withAudience(jwtConfig.audience)
+                    .build()
+            )
+            validate { credential ->
+                if (credential.payload.subject != null) JWTPrincipal(credential.payload) else null
+            }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("unauthorized", "Token inválido o ausente"))
+            }
+        }
+    }
 
     routing {
         get("/health") {
             call.respondText("OK")
         }
         authRoutes(jwtService)
+        childRoutes()
     }
 }

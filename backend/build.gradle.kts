@@ -23,9 +23,11 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
 
-    // Auth: JWT (emisión) + hashing de contraseñas
+    // Auth: JWT (emisión + validación) + hashing de contraseñas
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("at.favre.lib:bcrypt:0.10.2")
+    implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
 
     // Acceso a datos: Exposed (ORM liviano tipo DSL) + HikariCP (pool de conexiones)
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
