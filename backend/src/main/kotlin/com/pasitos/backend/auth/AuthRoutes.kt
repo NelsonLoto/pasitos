@@ -1,6 +1,7 @@
 package com.pasitos.backend.auth
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -38,15 +39,21 @@ fun Route.authRoutes(jwtService: JwtService) {
                     it[tipoPersona] = "tutor"
                     it[Personas.nombre] = nombre
                     it[Personas.email] = email
+                }
+                Usuarios.insert {
+                    it[personaId] = id
                     it[passwordHash] = PasswordHasher.hash(request.password)
                     it[authProvider] = "email"
                 }
+
+                val issued = jwtService.generateToken(id, email)
+                SessionStore.create(id, issued)
 
                 AuthResponse(
                     userId = id.toString(),
                     email = email,
                     nombre = nombre,
-                    token = jwtService.generateToken(id, email),
+                    token = issued.token,
                 )
             }
         }
@@ -62,20 +69,34 @@ fun Route.authRoutes(jwtService: JwtService) {
             transaction {
                 val persona = Personas.selectAll().where { Personas.email eq email }.firstOrNull()
                     ?: throw InvalidCredentialsException()
+                val id = persona[Personas.id]
 
-                val hash = persona[Personas.passwordHash] ?: throw InvalidCredentialsException()
+                val usuario = Usuarios.selectAll().where { Usuarios.personaId eq id }.firstOrNull()
+                    ?: throw InvalidCredentialsException()
+                val hash = usuario[Usuarios.passwordHash] ?: throw InvalidCredentialsException()
                 if (!PasswordHasher.verify(request.password, hash)) throw InvalidCredentialsException()
 
-                val id = persona[Personas.id]
+                val issued = jwtService.generateToken(id, email)
+                SessionStore.create(id, issued)
+
                 AuthResponse(
                     userId = id.toString(),
                     email = email,
                     nombre = persona[Personas.nombre],
-                    token = jwtService.generateToken(id, email),
+                    token = issued.token,
                 )
             }
         }
 
         call.respond(HttpStatusCode.OK, response)
+    }
+
+    authenticate("auth-jwt") {
+        post("/auth/logout") {
+            // authenticate ya garantizó que hay un Bearer válido con sesión vigente.
+            val token = call.request.bearerToken()!!
+            withContext(Dispatchers.IO) { transaction { SessionStore.revoke(token) } }
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }

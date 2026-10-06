@@ -5,6 +5,7 @@ import com.ninosano.app.data.auth.model.EmailAlreadyInUseException
 import com.ninosano.app.data.auth.model.InvalidCredentialsException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -12,14 +13,20 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 @Singleton
 class AuthApiRepository @Inject constructor(
     private val httpClient: HttpClient,
 ) : AuthRepository {
+
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _currentSession = MutableStateFlow<AuthSession?>(null)
     override val currentSession: StateFlow<AuthSession?> = _currentSession.asStateFlow()
@@ -64,7 +71,16 @@ class AuthApiRepository @Inject constructor(
         }.onSuccess { _currentSession.value = it }
 
     override fun logout() {
+        val token = _currentSession.value?.token
         _currentSession.value = null
+        // Revoca la sesión en el servidor (borra la fila de `sesiones`). Best-effort y en
+        // segundo plano: la sesión local ya se limpió, y si no hay red igual queda cerrada
+        // acá — el token vence solo en el servidor.
+        if (token != null) {
+            repositoryScope.launch {
+                runCatching { httpClient.post("/auth/logout") { bearerAuth(token) } }
+            }
+        }
     }
 
     private fun AuthResponseDto.toSession() = AuthSession(
