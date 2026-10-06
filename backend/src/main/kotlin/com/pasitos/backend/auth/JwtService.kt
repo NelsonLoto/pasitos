@@ -23,22 +23,25 @@ data class JwtConfig(
     }
 }
 
-/**
- * Solo emite tokens — todavía no hay ningún endpoint protegido que los valide (ningún
- * dominio lo necesita en este PR), así que no se instala el plugin Authentication/jwt de
- * Ktor. Se agrega recién en el primer dominio que necesite una ruta protegida.
- */
+/** Token emitido + su vencimiento, para que la fila de `sesiones` use exactamente el mismo. */
+data class IssuedToken(val token: String, val expiresAt: Instant)
+
 class JwtService(private val config: JwtConfig) {
 
-    fun generateToken(userId: UUID, email: String): String {
+    fun generateToken(userId: UUID, email: String): IssuedToken {
         val now = Instant.now()
-        return JWT.create()
+        val expiresAt = now.plus(config.expirationMinutes, ChronoUnit.MINUTES)
+        val token = JWT.create()
             .withIssuer(config.issuer)
             .withAudience(config.audience)
             .withSubject(userId.toString())
             .withClaim("email", email)
             .withIssuedAt(now)
-            .withExpiresAt(now.plus(config.expirationMinutes, ChronoUnit.MINUTES))
+            .withExpiresAt(expiresAt)
+            // `iat` tiene precisión de segundos: sin un jti único, dos logins del mismo usuario
+            // en el mismo segundo darían el mismo token y chocarían con sesiones.token_hash UNIQUE.
+            .withJWTId(UUID.randomUUID().toString())
             .sign(Algorithm.HMAC256(config.secret))
+        return IssuedToken(token, expiresAt)
     }
 }
