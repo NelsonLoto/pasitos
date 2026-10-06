@@ -7,7 +7,9 @@ import com.pasitos.backend.auth.ErrorResponse
 import com.pasitos.backend.auth.InvalidCredentialsException
 import com.pasitos.backend.auth.JwtConfig
 import com.pasitos.backend.auth.JwtService
+import com.pasitos.backend.auth.SessionStore
 import com.pasitos.backend.auth.authRoutes
+import com.pasitos.backend.auth.bearerToken
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.db.DatabaseFactory
 import io.github.cdimascio.dotenv.dotenv
@@ -25,6 +27,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main(args: Array<String>) {
     // En desarrollo local carga backend/.env (no versionado) a system properties,
@@ -69,7 +74,16 @@ fun Application.module() {
                     .build()
             )
             validate { credential ->
-                if (credential.payload.subject != null) JWTPrincipal(credential.payload) else null
+                // Firma y vencimiento ya los verificó el verifier; acá se exige además una sesión
+                // vigente en la base — así revocar (borrar la fila) invalida el token al instante.
+                val token = request.bearerToken()
+                if (credential.payload.subject != null && token != null &&
+                    withContext(Dispatchers.IO) { transaction { SessionStore.isActive(token) } }
+                ) {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
+                }
             }
             challenge { _, _ ->
                 call.respond(HttpStatusCode.Unauthorized, ErrorResponse("unauthorized", "Token inválido o ausente"))
