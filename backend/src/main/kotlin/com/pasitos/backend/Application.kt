@@ -12,6 +12,8 @@ import com.pasitos.backend.auth.authRoutes
 import com.pasitos.backend.auth.bearerToken
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.db.DatabaseFactory
+import com.pasitos.backend.medicion.ChildNotFoundException
+import com.pasitos.backend.medicion.medicionRoutes
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -53,6 +55,9 @@ fun Application.module() {
         }
         exception<EmailAlreadyInUseException> { call, _ ->
             call.respond(HttpStatusCode.Conflict, ErrorResponse("email_already_in_use", "Ya existe una cuenta con este email"))
+        }
+        exception<ChildNotFoundException> { call, _ ->
+            call.respond(HttpStatusCode.NotFound, ErrorResponse("child_not_found", "No se encontró ese hijo/a"))
         }
         exception<Throwable> { call, _ ->
             call.respond(HttpStatusCode.InternalServerError, ErrorResponse("internal_error", "Ocurrió un error, intentá de nuevo"))
@@ -97,5 +102,6 @@ fun Application.module() {
         }
         authRoutes(jwtService)
         childRoutes()
+        medicionRoutes()
     }
 }
