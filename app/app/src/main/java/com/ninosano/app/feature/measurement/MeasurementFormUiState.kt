@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 data class MeasurementFormUiState(
     val date: LocalDate = LocalDate.now(),
+    val minDate: LocalDate? = null,
     val weightKg: String = "",
     val heightCm: String = "",
     val headCircumferenceCm: String = "",

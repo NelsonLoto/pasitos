@@ -1,6 +1,6 @@
 package com.ninosano.app.data.measurement.di
 
-import com.ninosano.app.data.measurement.FakeMeasurementRepository
+import com.ninosano.app.data.measurement.MeasurementApiRepository
 import com.ninosano.app.data.measurement.MeasurementRepository
 import dagger.Binds
 import dagger.Module
@@ -14,5 +14,5 @@ abstract class MeasurementModule {
 
     @Binds
     @Singleton
-    abstract fun bindMeasurementRepository(impl: FakeMeasurementRepository): MeasurementRepository
+    abstract fun bindMeasurementRepository(impl: MeasurementApiRepository): MeasurementRepository
 }

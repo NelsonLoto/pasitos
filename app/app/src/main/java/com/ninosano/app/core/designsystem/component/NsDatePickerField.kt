@@ -35,6 +35,7 @@ fun NsDatePickerField(
     errorText: String? = null,
     enabled: Boolean = true,
     maxDate: LocalDate = LocalDate.now(),
+    minDate: LocalDate? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -51,12 +52,15 @@ fun NsDatePickerField(
 
     if (showDialog) {
         val maxDateMillis = remember(maxDate) { maxDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() }
+        val minDateMillis = remember(minDate) { minDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli() }
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = selectedDate
                 ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
             selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= maxDateMillis
-                override fun isSelectableYear(year: Int): Boolean = year <= maxDate.year
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                    utcTimeMillis <= maxDateMillis && (minDateMillis == null || utcTimeMillis >= minDateMillis)
+                override fun isSelectableYear(year: Int): Boolean =
+                    year <= maxDate.year && (minDate == null || year >= minDate.year)
             },
         )
         DatePickerDialog(
