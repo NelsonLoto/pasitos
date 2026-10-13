@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ninosano.app.core.navigation.NsRoute
+import com.ninosano.app.data.child.ChildRepository
 import com.ninosano.app.data.measurement.MeasurementRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -13,6 +14,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +24,7 @@ import kotlinx.coroutines.launch
 class MeasurementFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val measurementRepository: MeasurementRepository,
+    childRepository: ChildRepository,
 ) : ViewModel() {
 
     private val childId: String = savedStateHandle.toRoute<NsRoute.MeasurementForm>().childId
@@ -30,6 +34,18 @@ class MeasurementFormViewModel @Inject constructor(
 
     private val _navigateBack = Channel<Unit>(Channel.BUFFERED)
     val navigateBack = _navigateBack.receiveAsFlow()
+
+    init {
+        // No debe poder cargarse una medición con fecha anterior al nacimiento del hijo.
+        // Se observa la lista (no se lee una sola vez) porque puede no estar cargada
+        // todavía cuando se abre esta pantalla justo después de loguearse.
+        childRepository.children
+            .onEach { children ->
+                val birthDate = children.firstOrNull { it.id == childId }?.birthDate
+                _uiState.update { it.copy(minDate = birthDate) }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun onDateSelected(date: LocalDate) {
         _uiState.update { it.copy(date = date) }

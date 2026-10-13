@@ -17,6 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,15 +39,20 @@ import com.ninosano.app.R
 import com.ninosano.app.core.designsystem.component.ChildSelectorChip
 import com.ninosano.app.core.designsystem.component.NsButton
 import com.ninosano.app.core.designsystem.component.NsButtonVariant
+import com.ninosano.app.core.designsystem.component.StatCard
 import com.ninosano.app.core.designsystem.component.childAvatarColor
 import com.ninosano.app.data.child.model.Child
 import com.ninosano.app.data.child.model.ChildSex
 import com.ninosano.app.data.child.model.ageAndSexLabel
 import com.ninosano.app.data.child.model.ageLabel
+import com.ninosano.app.data.measurement.model.Measurement
 import com.ninosano.app.ui.theme.NsColor
 import com.ninosano.app.ui.theme.NsTheme
 import com.ninosano.app.ui.theme.NsType
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+private val HomeDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 @Composable
 fun HomeScreen(
@@ -134,13 +141,26 @@ private fun HomeContent(
                     .fillMaxWidth()
                     .height(IntrinsicSize.Max),
             ) {
-                StatCardEmpty(
-                    label = "ÚLTIMO PESO",
-                    message = "Todavía no registraste mediciones.",
-                    actionLabel = "Registrar medición →",
-                    onClick = { state.activeChild?.let { onMeasurementClick(it.id) } },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
+                val lastMeasurement = state.lastMeasurement
+                if (lastMeasurement != null && lastMeasurement.weightKg != null) {
+                    StatCard(
+                        icon = Icons.Filled.Scale,
+                        label = "ÚLTIMO PESO",
+                        value = "${"%.1f".format(lastMeasurement.weightKg)} kg · ${lastMeasurement.date.format(HomeDateFormatter)}",
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable { state.activeChild?.let { onMeasurementClick(it.id) } },
+                    )
+                } else {
+                    StatCardEmpty(
+                        label = "ÚLTIMO PESO",
+                        message = "Todavía no registraste mediciones.",
+                        actionLabel = "Registrar medición →",
+                        onClick = { state.activeChild?.let { onMeasurementClick(it.id) } },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                }
                 StatCardEmpty(
                     label = "VACUNAS",
                     message = "Sin calendario cargado.",
