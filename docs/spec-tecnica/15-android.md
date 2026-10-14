@@ -32,8 +32,11 @@ necesitar cambios grandes.
 
 ## 2. Guía: agregar una pantalla con datos
 
-1. Entidad y DAO en `data/x/local/` y registro en `PasitosDatabase` (con migración de Room si la
-   base ya existía).
+1. Entidad y DAO en `data/x/local/` y registro en `PasitosDatabase`, subiendo su versión. **Hasta
+   el piloto**, la base local se recrea al cambiar de versión (`fallbackToDestructiveMigration`):
+   es una copia de datos del servidor y se vuelve a descargar, así que dos tareas en paralelo no
+   necesitan coordinar migraciones. **Desde el piloto**, cada cambio lleva su migración de Room
+   para no perder cambios pendientes de sincronizar.
 2. DTOs en `shared/api` y llamadas en `data/x/remote/`.
 3. Implementación del repositorio y su `@Binds` en `data/x/di/`.
 4. `UiState`, ViewModel y pantalla en `feature/x/`.

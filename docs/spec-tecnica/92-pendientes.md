@@ -7,7 +7,7 @@
 | P-01 | Elegir el proveedor de hosting del piloto según los requisitos de [30](30-infraestructura.md#requisitos-para-elegir-el-proveedor-p-01) | Equipo | Antes de I6 | ADR-05 |
 | P-02 | ✅ **Resuelto 14/10/2026.** Repositorio renombrado a `NelsonLoto/pasitos`. GitHub redirige las URLs viejas; igual, cada integrante actualiza su remoto: `git remote set-url origin https://github.com/NelsonLoto/pasitos.git` | — | — | ADR-12 |
 | P-03 | Registrar un dominio (por ejemplo, `.ar` en NIC Argentina o `.app`), necesario para HTTPS del piloto y para el email con SPF y DKIM | Equipo | Antes de I6 | ADR-07 |
-| P-04 | Crear la cuenta del proveedor de email en región UE | Equipo | I1 (verificación de email) | ADR-07 |
+| P-04 | Crear la cuenta del proveedor de email en región UE. En desarrollo alcanza con Mailpit | Equipo | Antes de I6 | ADR-07 |
 | P-05 | Crear el proyecto de Firebase con una cuenta de Google del equipo (no personal) y registrar `com.pasitos.app` | Equipo | I1 (Google Sign-In) | ADR-06, ADR-13 |
 | P-06 | Cuenta de desarrollador de Google Play | Nelson | Antes del piloto | ADR-13 |
 | P-07 | Crear la organización de Sentry en región UE | Equipo | I0 | ADR-08 |
