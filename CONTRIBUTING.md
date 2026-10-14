@@ -18,6 +18,31 @@
 5. Esperar al menos 1 aprobación antes de mergear.
 6. Borrar la rama una vez mergeada (GitHub lo ofrece automáticamente al cerrar el PR).
 
+Cada tarea es un issue de GitHub. La rama lleva el número del issue
+(`feature/42-alta-de-hijo`), el PR incluye `Closes #42` y se abre como borrador apenas se
+empieza, para que el resto del equipo vea qué está en curso. Detalle del proceso en
+[`docs/spec-tecnica/32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md).
+
+## Antes de tomar una tarea (personas y agentes de IA)
+
+Para no pisar el trabajo de otro integrante, verificá **antes de asignarte un issue o crear una
+rama**:
+
+1. El issue no tiene responsable y está en `Por hacer` en el tablero.
+2. No existe una rama remota con el número del issue:
+   `git fetch --prune` y después `git branch -r | grep "/<número>-"`.
+3. No hay un PR abierto que lo mencione: `gh pr list --search "<número>"`.
+4. Las tareas de las que depende ya están en `Hecho`.
+
+Si alguno de los cuatro puntos falla, **no tomes la tarea**: elegí otra o consultá con quien la
+tiene. Recién después asignate el issue, movelo a `En curso` y creá la rama.
+
+> **Nota para agentes de IA:** antes de crear una rama o modificar código
+> para una tarea, ejecutá las verificaciones 1 a 4 e informá el resultado a la persona con la que
+> estás trabajando. Si encontrás trabajo en curso sobre la misma tarea o sobre los mismos
+> archivos, detenete y consultá antes de seguir. No asumas que una tarea está libre porque no la
+> ves en tu copia local: el estado real está en GitHub.
+
 ## Promoción a producción
 
 Cuando `develop` esté estable y se decida hacer un release, se abre un Pull Request de `develop` → `main`.
