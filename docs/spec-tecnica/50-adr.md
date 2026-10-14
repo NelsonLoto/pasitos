@@ -2,8 +2,8 @@
 
 Cada decisión registra su contexto, la decisión, las alternativas descartadas y sus
 consecuencias. Las ADR-01 a ADR-22 se tomaron con el equipo en las rondas técnicas 1 y 2 del
-14/10/2026 y la ADR-25 se aceptó después. Las ADR-23, 24 y 26 a 28 son decisiones de detalle de
-esta SPEC, en revisión por el equipo.
+14/10/2026. Las ADR-23 a ADR-28 surgieron al redactar esta SPEC y el equipo las aprobó el mismo
+día, después de revisar su detalle.
 
 | ID | Decisión | Estado |
 |---|---|---|
@@ -29,12 +29,12 @@ esta SPEC, en revisión por el equipo.
 | ADR-20 | Percentiles y estados calculados al leer | Aceptada |
 | ADR-21 | Inglés en código, API y base de datos | Aceptada |
 | ADR-22 | Tareas en GitHub Issues y Projects con reglas de trabajo en paralelo | Aceptada |
-| ADR-23 | Migraciones versionadas por fecha y hora | Propuesta |
-| ADR-24 | Eventos automáticos derivados, no guardados | Propuesta |
+| ADR-23 | Migraciones versionadas por fecha y hora | Aceptada |
+| ADR-24 | Eventos automáticos derivados, no guardados | Aceptada |
 | ADR-25 | Incremento I0 de fundaciones técnicas | Aceptada |
-| ADR-26 | Fechas del calendario como `date` en hora argentina | Propuesta |
-| ADR-27 | Páginas web del backend para los links de email | Propuesta |
-| ADR-28 | Escrituras sincronizables solo por `/sync/push` | Propuesta |
+| ADR-26 | Fechas del calendario como `date` en hora argentina | Aceptada |
+| ADR-27 | Páginas web del backend para los links de email | Aceptada |
+| ADR-28 | Escrituras sincronizables solo por `/sync/push` | Aceptada |
 
 ---
 
@@ -189,7 +189,7 @@ esta SPEC, en revisión por el equipo.
 - **Decisión:** GitHub Issues y Projects; verificación de trabajo en curso antes de tomar una
   tarea, también para agentes de IA ([32](32-proceso-de-desarrollo.md#4-trabajo-en-paralelo)).
 
-### ADR-23 · Migraciones versionadas por fecha y hora (propuesta)
+### ADR-23 · Migraciones versionadas por fecha y hora
 
 - **Contexto:** Flyway aplica las migraciones en orden de versión (`V1`, `V2`, `V3`…) y exige
   que cada versión sea única. Con 4 personas trabajando en paralelo, es normal que dos ramas
@@ -213,7 +213,7 @@ esta SPEC, en revisión por el equipo.
   - En el entorno del piloto, las migraciones pueden aplicarse en un orden levemente distinto al
     de las fechas; no hay problema si son independientes.
 
-### ADR-24 · Eventos automáticos derivados, no guardados (propuesta)
+### ADR-24 · Eventos automáticos derivados, no guardados
 
 - **Contexto:** la línea de tiempo muestra eventos automáticos ("Medición", "Vacuna aplicada",
   "Control con la Dra. Pérez", "Cambio de pediatra", "Hito logrado") junto con los manuales.
@@ -247,7 +247,7 @@ Aceptada el 14/10/2026 e incorporada al plan de incrementos de la SPEC funcional
   verde, app renombrada que inicia sesión y la conserva, cálculo de prueba del motor) en lugar de
   funcionalidad nueva.
 
-### ADR-26 · Manejo de fechas y zona horaria (propuesta)
+### ADR-26 · Manejo de fechas y zona horaria
 
 - **Contexto:** Argentina está en UTC−3, y el servidor del piloto probablemente esté en Europa,
   con su reloj en UTC. Dos ejemplos de errores típicos si no se define una regla:
@@ -270,7 +270,7 @@ Aceptada el 14/10/2026 e incorporada al plan de incrementos de la SPEC funcional
 - **Consecuencias:** en Kotlin se usa `LocalDate` para fechas e `Instant` para momentos; una
   función única `ArgentinaClock.today()` en app y backend.
 
-### ADR-27 · Páginas web del backend para los links de email (propuesta)
+### ADR-27 · Páginas web del backend para los links de email
 
 - **Contexto:** los emails de verificación de cuenta, recuperación de contraseña y cambio de
   email llevan un link. Hay que decidir qué abre ese link. Además, Google Play exige que la
@@ -287,7 +287,7 @@ Aceptada el 14/10/2026 e incorporada al plan de incrementos de la SPEC funcional
   administración. Funcionan desde cualquier dispositivo y navegador, y la de eliminación de
   cuenta cumple el requisito de Google Play.
 
-### ADR-28 · Un solo camino de escritura para lo sincronizable (propuesta)
+### ADR-28 · Un solo camino de escritura para lo sincronizable
 
 - **Contexto:** mediciones, hábitos, eventos manuales e hitos logrados pueden cargarse sin
   conexión (RNF-OFF-02), así que la app ya necesita enviarlos por `POST /sync/push`. Si además
