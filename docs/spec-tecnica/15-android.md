@@ -91,7 +91,7 @@ documentos del sistema (`ACTION_CREATE_DOCUMENT`), sin pedir permisos de almacen
 | Variante | URL del backend | Tráfico HTTP sin cifrar |
 |---|---|---|
 | `debug` | `http://localhost:8080` con `adb reverse tcp:8080 tcp:8080` (práctica actual del proyecto) | Permitido solo para `localhost` (configuración de seguridad de red de `debug`) |
-| `pilot` | URL HTTPS del servidor del piloto | No |
+| `pilot` | URL HTTPS del servidor del piloto. Muestra en todas las pantallas el aviso "Versión de prueba: no cargues datos de niños reales" (RNF-PRI-08) | No |
 | `release` | URL HTTPS de producción | No |
 
 La URL se define con `buildConfigField` por variante.

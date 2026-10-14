@@ -13,7 +13,8 @@ consultorio. Los tutores no tienen una forma simple de seguir la evolución entr
 pediatra recibe datos incompletos cuando la familia cambia de profesional o mide al niño en casa.
 
 Pasitos se desarrolla como **tesis** por un equipo de 4 personas, con encuentros quincenales de
-seguimiento con el profesor a cargo. Se prevé una **prueba piloto con datos reales**.
+seguimiento con el profesor a cargo. Se prevé una **prueba piloto con datos ficticios**: los
+participantes usan la app con niños inventados, que no corresponden a ninguna persona real (D-65).
 
 ## 2. Objetivo
 
@@ -129,7 +130,7 @@ en I0 e I1; en I5 se completa la experiencia sin conexión y sus pruebas.
 | R-01 | Errores al transcribir las tablas SAP | Percentiles y estados incorrectos para mayores de 5 años | Doble transcripción independiente y comparación; pruebas con casos de control tomados del libro |
 | R-02 | La validación médica llega tarde | Reglas clínicas implementadas con valores provisorios | Parámetros configurables (P5); marcas ⚕️ PVM visibles; validación planificada antes del piloto |
 | R-03 | Perfiles duplicados de un mismo niño (sin DNI) | Historial partido entre dos perfiles | Reclamo y unificación por invitación del pediatra (RF-PED-12, RF-PED-13). Riesgo aceptado (D-24) |
-| R-04 | Piloto con datos reales de menores | Exposición legal y ética | Cumplir RNF-PRI desde I1; confirmar requisitos institucionales (SUP-14) antes del piloto |
+| R-04 | Un participante del piloto carga datos reales por error | Datos de salud reales en un entorno de prueba | Aviso permanente en la app del piloto y borrado de todos los datos al terminar (RNF-PRI-08) |
 | R-05 | Alcance amplio para 4 personas | Incrementos incompletos | Incrementos con dependencias claras; revisión del avance en cada encuentro quincenal |
 | R-06 | Discontinuidad de percentiles a los 5 años por el cambio OMS → SAP | Falsas alertas o confusión del tutor | Marca visual en curvas y exclusión de ese salto en el cruce de percentiles (RN-CRE-08); PVM-03 |
 | R-07 | Conflictos de sincronización sin conexión | Datos perdidos o duplicados | Registros editables solo por su autor; sincronización idempotente (RNF-OFF) |

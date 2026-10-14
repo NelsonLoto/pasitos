@@ -27,7 +27,7 @@ Aplican desde I0 salvo que se indique otro incremento.
 | RNF-PRI-05 | Las notificaciones push no incluyen datos clínicos (RN-NOT-04). |
 | RNF-PRI-06 | El administrador no accede a datos de salud de los niños (RN-ADM-01). |
 | RNF-PRI-07 | Antes de salir a producción, la base de datos debe inscribirse en el Registro Nacional de Bases de Datos de la AAIP. Queda fuera del alcance de la tesis. |
-| RNF-PRI-08 | **Prueba piloto.** Antes de cargar datos reales: consentimiento informado específico de cada participante del piloto y cumplimiento de los requisitos de la institución (SUP-14). Al terminar el piloto, los datos se eliminan salvo que el participante elija conservar su cuenta (SUP-22). |
+| RNF-PRI-08 | **Prueba piloto.** Se realiza con datos ficticios que no corresponden a personas reales (D-65). La app del piloto muestra un aviso permanente: "Versión de prueba: no cargues datos de niños reales". Los únicos datos personales reales son el nombre y el email de las cuentas de los participantes, que se rigen por los términos y la política de privacidad. Al terminar el piloto se eliminan todas las cuentas y datos de ese entorno (SUP-22). |
 | RNF-PRI-09 | Si los datos se alojan fuera de Argentina, el país de destino debe tener un nivel de protección adecuado o deben existir garantías contractuales (art. 12 de la Ley 25.326). Se decide en el diseño técnico (SUP-23). |
 | RNF-PRI-10 | Los datos no se comparten con terceros ni se usan con fines comerciales o publicitarios. Cualquier uso para investigación requiere anonimización y consentimiento específico. La app es gratuita y sin publicidad (D-63). |
 

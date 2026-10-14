@@ -4,7 +4,7 @@
 |---|---|
 | **Versión** | 1.0.0 |
 | **Fecha** | 14/10/2026 |
-| **Basado en** | [SPEC funcional 1.1.0](../spec/README.md) y [SPEC técnica 1.1.0](../spec-tecnica/README.md) |
+| **Basado en** | [SPEC funcional 1.2.0](../spec/README.md) y [SPEC técnica 1.1.0](../spec-tecnica/README.md) |
 
 ## Cómo se usa este plan
 
@@ -43,7 +43,7 @@
 | 04/01 – 17/01/2027 | **I4** · Consulta guiada | Demo de I4 |
 | 18/01 – 31/01/2027 | **I5** · Seguimiento y sin conexión | Demo de I5 |
 | 01/02 – 14/02/2027 | **I6** · Cierre | Demo de I6 |
-| 15/02 – 07/03/2027 | **Piloto** con usuarios reales | Resultados del piloto |
+| 15/02 – 07/03/2027 | **Piloto** con usuarios y datos ficticios | Resultados del piloto |
 | 08/03 – 14/03/2027 | Ajustes finales y documentación de la tesis | — |
 | 15/03 – 26/03/2027 | Presentación de la tesis | — |
 

@@ -45,7 +45,7 @@ relevamiento. Si no se objetan, quedan confirmadas al aprobarse el PR de esta ve
 | SUP-11 | Antes de unificar, el tutor ve un resumen de lo que se suma. | RF-PED-13 |
 | SUP-12 | El avatar del niño se elige entre ilustraciones predefinidas. | RN-HIJ-11 |
 | SUP-13 | Tamaño de la prueba piloto (cantidad de familias y pediatras), para dimensionar la infraestructura. | RNF-REN-05 |
-| SUP-14 | Requisitos de la institución para un piloto con datos de salud de menores (aval de un comité de ética, modelo de consentimiento informado). A confirmar con el profesor. | RNF-PRI-08 |
+| SUP-14 | ✅ **No aplica (14/10/2026).** El piloto usa datos ficticios, así que no requiere aval de un comité de ética ni consentimiento informado específico (D-65). | RNF-PRI-08 |
 | SUP-15 | Si el tutor no conoce las semanas de gestación, se asume un nacimiento a término (40 semanas). | RN-HIJ-03 |
 | SUP-16 | La fecha de una consulta puede ser anterior a hoy, para cargarla después de atender. | Paso 1 de la consulta |
 | SUP-17 | Si un pediatra validado cambia su nombre, apellido o matrícula, pasa a revalidación sin perder sus vínculos. | RN-PED-02 |
@@ -53,7 +53,7 @@ relevamiento. Si no se objetan, quedan confirmadas al aprobarse el PR de esta ve
 | SUP-19 | Las dosis cuya fecha indicada está a más de 7 días se muestran como "Programada", como dato informativo además de los cuatro estados. | RN-VAC-01 |
 | SUP-20 | Las solicitudes de vínculo a pediatras registrados también vencen a los 15 días sin respuesta. | RN-PED-06 |
 | SUP-21 | Del examen físico y de las pesquisas, el tutor ve el resultado pero no la descripción ni las notas del pediatra. | RN-CON-02 |
-| SUP-22 | Al terminar el piloto, los datos se eliminan salvo que el participante elija conservar su cuenta. | RNF-PRI-08 |
+| SUP-22 | Al terminar el piloto se eliminan todas las cuentas y datos de ese entorno. | RNF-PRI-08 |
 | SUP-23 | El país donde se alojan los datos se decide en el diseño técnico, cumpliendo el art. 12 de la Ley 25.326. | RNF-PRI-09 |
 | SUP-24 | Valores propuestos menores: alergias y antecedentes hasta 280 caracteres; indicaciones y observaciones hasta 2.000; bloqueo de la app tras 5 minutos en segundo plano; sesión del panel de 30 minutos; registro de accesos conservado 2 años; 20 búsquedas por matrícula por hora. | RN-HIJ-10, RN-CON-06, RF-CTA-08, RF-ADM-01, RNF-SEG-06, RNF-SEG-07 |
 

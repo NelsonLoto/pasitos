@@ -15,7 +15,7 @@ Prefijos de las tareas: **S** shared · **B** backend · **A** app · **W** pane
 ## I2 · Motor de crecimiento (16/11 – 29/11/2026)
 
 **Requerimientos:** RF-CRE-04 a 09, RF-ADM-04 y 05 (carga inicial por importación).
-**Requisitos previos:** T-01, T-02 y T-03 de [transversales](transversales.md).
+**Requisitos previos:** T-01, T-02 y T-03 de [transversales](transversales.md); T-18 para la demo.
 
 | Tarea | Contenido | Depende de |
 |---|---|---|
@@ -106,7 +106,7 @@ funcionamiento sin conexión: cuatro personas en paralelo desde el inicio.
 ## I6 · Cierre (01/02 – 14/02/2027)
 
 **Requerimientos:** RF-INF-01 a 04, RF-NOT-01 a 03, RF-CJO-04, RF-CON-13, RF-ADM-06 a 12,
-RF-CTA-08, RF-CTA-10, RF-HIJ-10, RF-VAC-06. **Requisitos previos:** T-10 a T-15.
+RF-CTA-08, RF-CTA-10, RF-HIJ-10, RF-VAC-06. **Requisitos previos:** T-10 a T-14 y T-18.
 
 | Tarea | Contenido | Depende de |
 |---|---|---|
@@ -120,7 +120,7 @@ RF-CTA-08, RF-CTA-10, RF-HIJ-10, RF-VAC-06. **Requisitos previos:** T-10 a T-15.
 | I6-A3 | Bloqueo con huella o PIN y protección de pantalla | — |
 | I6-A4 | Eliminación de cuenta, perfil finalizado y campañas en la app | I6-B3, I6-B4 |
 | I6-I1 | Despliegue del entorno del piloto: servidor, TLS, copias de seguridad y prueba de restauración | T-11, T-12 |
-| I6-I2 | Publicación en prueba cerrada de Google Play | T-13, I6-I1 |
+| I6-I2 | Variante `pilot` de la app con el aviso permanente de datos ficticios y publicación en prueba cerrada de Google Play | T-13, T-14, I6-I1 |
 | I6-Q1 | Aceptación final y preparación del piloto | Todas |
 
 **Paralelismo:** backend (B1 a B4), panel (W1) e infraestructura (I1) son independientes entre sí;
