@@ -64,6 +64,10 @@ quien la tiene. Recién después se asigna el issue, se mueve a `En curso` y se 
 > consultá a la persona con la que estás trabajando. No asumas que una tarea está libre porque
 > no la ves en tu copia local.
 
+Estas verificaciones y la nota para agentes están también en
+[`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia),
+que es lo primero que leen tanto las personas como los agentes al trabajar en el repositorio.
+
 ### Puntos de conflicto y cómo evitarlos
 
 | Punto de conflicto | Regla |
