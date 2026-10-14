@@ -81,6 +81,7 @@ private fun MeasurementFormContent(
                 selectedDate = state.date,
                 onDateSelected = onDateSelected,
                 enabled = !state.isLoading,
+                minDate = state.minDate,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
