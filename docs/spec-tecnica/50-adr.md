@@ -2,8 +2,8 @@
 
 Cada decisión registra su contexto, la decisión, las alternativas descartadas y sus
 consecuencias. Las ADR-01 a ADR-22 se tomaron con el equipo en las rondas técnicas 1 y 2 del
-14/10/2026; las ADR-23 a ADR-28 son decisiones de detalle de esta SPEC, que quedan confirmadas al
-aprobarse su PR si no se objetan.
+14/10/2026 y la ADR-25 se aceptó después. Las ADR-23, 24 y 26 a 28 son decisiones de detalle de
+esta SPEC, en revisión por el equipo.
 
 | ID | Decisión | Estado |
 |---|---|---|
@@ -18,7 +18,7 @@ aprobarse su PR si no se objetan.
 | ADR-09 | Panel de administración con Ktor, Thymeleaf y HTMX | Aceptada |
 | ADR-10 | Informes PDF generados en el servidor | Aceptada |
 | ADR-11 | Tokens de acceso de 15 min y de renovación rotativos de 30 días | Aceptada |
-| ADR-12 | Renombre completo a Pasitos | Aceptada (renombre del repositorio pendiente) |
+| ADR-12 | Renombre completo a Pasitos | Aceptada (repositorio ya renombrado) |
 | ADR-13 | Prueba cerrada de Google Play para el piloto | Aceptada |
 | ADR-14 | Integración continua con GitHub Actions | Aceptada |
 | ADR-15 | Sincronización por versión global, lápidas y bandeja de salida | Aceptada |
@@ -31,7 +31,7 @@ aprobarse su PR si no se objetan.
 | ADR-22 | Tareas en GitHub Issues y Projects con reglas de trabajo en paralelo | Aceptada |
 | ADR-23 | Migraciones versionadas por fecha y hora | Propuesta |
 | ADR-24 | Eventos automáticos derivados, no guardados | Propuesta |
-| ADR-25 | Incremento I0 de fundaciones técnicas | Propuesta |
+| ADR-25 | Incremento I0 de fundaciones técnicas | Aceptada |
 | ADR-26 | Fechas del calendario como `date` en hora argentina | Propuesta |
 | ADR-27 | Páginas web del backend para los links de email | Propuesta |
 | ADR-28 | Escrituras sincronizables solo por `/sync/push` | Propuesta |
@@ -130,8 +130,11 @@ aprobarse su PR si no se objetan.
 
 - **Decisión:** en I0, un único PR cambia `applicationId`, `namespace`, paquetes
   (`com.ninosano.app` → `com.pasitos.app`), nombre del proyecto de Gradle, README y textos. El
-  renombre del repositorio en GitHub queda pendiente de confirmar (P-02).
-- **Consecuencias:** se hace sin ramas abiertas (confirmado el 14/10/2026).
+  repositorio se renombró en GitHub el 14/10/2026: `NelsonLoto/control-nino-sano-app` →
+  `NelsonLoto/pasitos` (P-02).
+- **Consecuencias:** el renombre de paquetes se hace sin ramas abiertas (confirmado el
+  14/10/2026). GitHub redirige las URLs viejas del repositorio, pero cada integrante actualiza
+  su remoto. La carpeta local puede seguir llamándose como antes.
 
 ### ADR-13 · Distribución
 
@@ -186,38 +189,124 @@ aprobarse su PR si no se objetan.
 - **Decisión:** GitHub Issues y Projects; verificación de trabajo en curso antes de tomar una
   tarea, también para agentes de IA ([32](32-proceso-de-desarrollo.md#4-trabajo-en-paralelo)).
 
-### ADR-23 · Migraciones por fecha y hora (propuesta)
+### ADR-23 · Migraciones versionadas por fecha y hora (propuesta)
 
-- **Contexto:** con varias ramas en paralelo, dos PRs pueden crear la misma `V3`.
-- **Decisión:** versiones con fecha y hora (`V2026_10_20_1530__…`) y `outOfOrder = true`.
+- **Contexto:** Flyway aplica las migraciones en orden de versión (`V1`, `V2`, `V3`…) y exige
+  que cada versión sea única. Con 4 personas trabajando en paralelo, es normal que dos ramas
+  necesiten cambiar la base al mismo tiempo. Si las dos crean `V3__….sql`, al mergear la segunda
+  hay dos migraciones con la misma versión y el backend **no arranca** ("Found more than one
+  migration with version 3"). Renumerar a mano antes de mergear es posible, pero si alguien ya
+  aplicó su `V3` en su base local, Flyway detecta la diferencia y también falla.
+- **Decisión:** la versión es la fecha y hora en que se crea la migración:
+  `V2026_10_20_1530__create_children.sql` (Flyway la lee como `2026.10.20.1530`). Dos personas
+  tendrían que crear una migración en el mismo minuto para chocar. Se activa
+  `outOfOrder = true`: si una rama creó su migración el lunes pero se mergea después de otra
+  creada el martes, Flyway igual la aplica en las bases que ya tenían la del martes.
+- **Alternativas:**
+  - Números correlativos con la regla "una sola PR con migración abierta a la vez": genera
+    esperas entre integrantes, justo lo que el plan de trabajo en paralelo quiere evitar.
+  - Renumerar antes de cada merge: trabajo manual y propenso a errores.
+- **Consecuencias:**
+  - Cada migración debe ser **independiente** de las de otras ramas en curso. Si una migración
+    necesita una tabla que crea otra rama, se espera a que esa rama se mergee (ya es así por
+    las dependencias del plan).
+  - En el entorno del piloto, las migraciones pueden aplicarse en un orden levemente distinto al
+    de las fechas; no hay problema si son independientes.
 
-### ADR-24 · Eventos automáticos derivados (propuesta)
+### ADR-24 · Eventos automáticos derivados, no guardados (propuesta)
 
-- **Contexto:** RN-EVT-02 dice que los eventos automáticos reflejan su registro de origen.
-- **Decisión:** la línea de tiempo se arma uniendo mediciones, dosis, consultas, vínculos e hitos
-  con los eventos manuales; los automáticos no se guardan.
-- **Consecuencias:** sin riesgo de que un evento quede desactualizado respecto de su origen.
+- **Contexto:** la línea de tiempo muestra eventos automáticos ("Medición", "Vacuna aplicada",
+  "Control con la Dra. Pérez", "Cambio de pediatra", "Hito logrado") junto con los manuales.
+  Una forma de hacerlo es guardar una fila en `events` cada vez que ocurre algo. Pero ese dato
+  ya existe en su tabla de origen, y la copia hay que mantenerla igual: si el tutor corrige la
+  fecha de una medición, hay que corregir también su evento; si la borra, borrar el evento. Un
+  olvido en cualquiera de esos caminos deja eventos "fantasma" o con datos viejos, y RN-EVT-02
+  dice justamente que el evento automático refleja su registro de origen.
+- **Decisión:** la tabla `events` guarda **solo los eventos manuales**. La línea de tiempo se
+  arma en el momento de mostrarla, juntando en una sola lista ordenada por fecha: mediciones,
+  dosis aplicadas, consultas cerradas, inicios y fines de vínculos, hitos logrados y eventos
+  manuales. En la app es una consulta a Room sobre datos que ya están en el teléfono.
+- **Alternativas:** guardar los eventos automáticos con triggers de base de datos o desde cada
+  servicio (más código, más puntos de falla, datos duplicados).
+- **Consecuencias:**
+  - Imposible que un evento quede desactualizado: si cambia el origen, cambia lo que se ve.
+  - La consulta de la línea de tiempo combina seis fuentes. Con los volúmenes de un niño
+    (cientos de registros) es inmediata.
+  - Los hábitos no entran en la línea de tiempo (RN-HAB-03).
 
-### ADR-25 · Incremento I0 (propuesta)
+### ADR-25 · Incremento I0 de fundaciones técnicas
 
-- **Decisión:** antes de I1, un incremento de fundaciones con las tareas de
-  [00](00-arquitectura.md#5-fundaciones-técnicas-incremento-i0).
+Aceptada el 14/10/2026 e incorporada al plan de incrementos de la SPEC funcional (v1.1.0).
 
-### ADR-26 · Manejo de fechas (propuesta)
+- **Contexto:** varias decisiones (módulo compartido, nuevo esquema, Room y sincronización,
+  sesión persistente, renombre) cambian la base de todo el código. Si se hacen dentro de I1 o
+  más tarde, obligan a rehacer lo construido.
+- **Decisión:** antes de I1, un incremento sin requerimientos funcionales propios con las tareas
+  de [00](00-arquitectura.md#5-fundaciones-técnicas-incremento-i0).
+- **Consecuencias:** la primera demo quincenal muestra fundaciones (integración continua en
+  verde, app renombrada que inicia sesión y la conserva, cálculo de prueba del motor) en lugar de
+  funcionalidad nueva.
 
-- **Decisión:** fechas del calendario (nacimiento, medición, aplicación, consulta) como `date`;
-  momentos (hábitos, auditoría, sesiones) como `timestamptz` en UTC. "Hoy" siempre en
-  `America/Argentina/Buenos_Aires`.
+### ADR-26 · Manejo de fechas y zona horaria (propuesta)
 
-### ADR-27 · Páginas web para links de email (propuesta)
+- **Contexto:** Argentina está en UTC−3, y el servidor del piloto probablemente esté en Europa,
+  con su reloj en UTC. Dos ejemplos de errores típicos si no se define una regla:
+  - Un tutor carga a las 22:00 una medición "de hoy, 14/10". Si se guarda como momento en UTC,
+    queda registrada el **15/10** a la 01:00. La edad en la medición, el percentil y el orden en
+    la línea de tiempo salen corridos un día.
+  - Entre las 21:00 y la medianoche de Argentina, en un servidor en UTC ya es el día siguiente.
+    La validación "la fecha no puede ser futura" aceptaría mañana como fecha válida, y una dosis
+    pasaría a "Atrasada" o un niño cumpliría 15 años un día antes.
+- **Decisión:** dos tipos de dato, nunca mezclados.
+  - **Fechas del calendario** (nacimiento, medición, aplicación de vacuna, consulta, evento):
+    tipo `date`, sin hora ni zona. "14/10/2026" es lo que dijo el usuario y nada más.
+  - **Momentos** (hora de un hábito, accesos, sesiones, notificaciones): `timestamptz` guardado
+    en UTC y mostrado en hora argentina.
+  - **"Hoy"** siempre se calcula en `America/Argentina/Buenos_Aires`, en la app y en el
+    servidor, sin depender del reloj del sistema. Las tareas programadas usan la misma zona
+    (por ejemplo, avisos a las 09:00 de Argentina aunque el servidor esté en Europa).
+- **Alternativas:** guardar todo como momento en UTC (genera los errores de arriba) o confiar en
+  la zona del servidor (cambia según dónde se aloje).
+- **Consecuencias:** en Kotlin se usa `LocalDate` para fechas e `Instant` para momentos; una
+  función única `ArgentinaClock.today()` en app y backend.
 
-- **Decisión:** verificación, recuperación, cambio de email y eliminación de cuenta en páginas
-  del backend, no en la app.
-- **Alternativas:** App Links (requieren dominio verificado y no funcionan si el email se abre en
-  una computadora).
+### ADR-27 · Páginas web del backend para los links de email (propuesta)
+
+- **Contexto:** los emails de verificación de cuenta, recuperación de contraseña y cambio de
+  email llevan un link. Hay que decidir qué abre ese link. Además, Google Play exige que la
+  cuenta se pueda eliminar también desde una página web (RNF-LEG-03).
+- **Decisión:** el link abre una página simple servida por el backend (`/web/verify-email`,
+  `/web/reset-password`, etc.) que hace la acción y muestra el resultado, por ejemplo "Tu email
+  quedó verificado. Volvé a la app para continuar". La app detecta el cambio al consultar
+  `GET /me` (botón "Ya verifiqué" o al volver a primer plano).
+- **Alternativas:** *App Links*, que abren la app directamente desde el link. Requieren un
+  dominio propio verificado y que la app esté instalada **en el mismo dispositivo** donde se lee
+  el email: si el tutor abre el email en la computadora, el link no sirve. Para recuperar una
+  contraseña desde la computadora no habría forma.
+- **Consecuencias:** cuatro páginas HTML con Thymeleaf, la misma tecnología del panel de
+  administración. Funcionan desde cualquier dispositivo y navegador, y la de eliminación de
+  cuenta cumple el requisito de Google Play.
 
 ### ADR-28 · Un solo camino de escritura para lo sincronizable (propuesta)
 
-- **Decisión:** mediciones, hábitos, eventos e hitos logrados se escriben siempre por
-  `/sync/push`, con o sin conexión.
-- **Consecuencias:** una sola validación y un solo flujo para probar.
+- **Contexto:** mediciones, hábitos, eventos manuales e hitos logrados pueden cargarse sin
+  conexión (RNF-OFF-02), así que la app ya necesita enviarlos por `POST /sync/push`. Si además
+  existieran endpoints REST tradicionales para cargarlos con conexión (`POST /measurements`),
+  habría **dos caminos** para crear lo mismo: dos implementaciones de validación que pueden
+  divergir (una verifica "una medición por autor y por fecha" y la otra se olvida), el doble de
+  pruebas, y casos ambiguos como una medición creada por REST que también quedó en la bandeja de
+  salida.
+- **Decisión:** esas cuatro entidades se escriben **siempre** por `/sync/push`, con o sin
+  conexión. La app guarda en Room y en la bandeja de salida y, si hay conexión, el trabajo de
+  sincronización la envía en segundos. En el servidor hay una única función de validación por
+  entidad.
+- **Alternativas:** REST con conexión y sincronización solo sin conexión (los problemas de
+  arriba).
+- **Consecuencias:**
+  - El usuario ve su dato guardado al instante, pero un eventual rechazo del servidor llega unos
+    segundos después y se muestra sobre el registro (RNF-OFF-05), no en el momento de tocar
+    "Guardar". Para que sea raro, la app aplica antes las mismas validaciones con el módulo
+    compartido.
+  - El pediatra usa el mismo endpoint, pero la app solo se lo permite con conexión.
+  - Las demás entidades (hijos, vacunas, vínculos, consultas) siguen con endpoints REST porque
+    siempre requieren conexión (RNF-OFF-06).

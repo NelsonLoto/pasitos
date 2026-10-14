@@ -3,7 +3,7 @@
 ## Carpetas
 
 ```
-control-nino-sano-app/        ← renombre del repositorio a "pasitos" pendiente (P-02)
+pasitos/                      ← github.com/NelsonLoto/pasitos (antes control-nino-sano-app)
 ├── app/                      ← proyecto Android: se abre esta carpeta en Android Studio
 │   ├── settings.gradle.kts   ← includeBuild("../shared")
 │   ├── gradle/libs.versions.toml

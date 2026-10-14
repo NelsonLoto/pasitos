@@ -5,7 +5,7 @@
 | ID | Pendiente | Responsable | Fecha límite | Referencia |
 |---|---|---|---|---|
 | P-01 | Elegir el proveedor de hosting del piloto según los requisitos de [30](30-infraestructura.md#requisitos-para-elegir-el-proveedor-p-01) | Equipo | Antes de I6 | ADR-05 |
-| P-02 | Confirmar si se renombra el repositorio en GitHub (`control-nino-sano-app` → `pasitos`). Si se hace, cada integrante actualiza su remoto con `git remote set-url` | Equipo | I0 | ADR-12 |
+| P-02 | ✅ **Resuelto 14/10/2026.** Repositorio renombrado a `NelsonLoto/pasitos`. GitHub redirige las URLs viejas; igual, cada integrante actualiza su remoto: `git remote set-url origin https://github.com/NelsonLoto/pasitos.git` | — | — | ADR-12 |
 | P-03 | Registrar un dominio (por ejemplo, `.ar` en NIC Argentina o `.app`), necesario para HTTPS del piloto y para el email con SPF y DKIM | Equipo | Antes de I6 | ADR-07 |
 | P-04 | Crear la cuenta del proveedor de email en región UE | Equipo | I1 (verificación de email) | ADR-07 |
 | P-05 | Crear el proyecto de Firebase con una cuenta de Google del equipo (no personal) y registrar `com.pasitos.app` | Equipo | I1 (Google Sign-In) | ADR-06, ADR-13 |
@@ -14,7 +14,7 @@
 | P-08 | Definir dónde se guarda la clave de subida de la app (gestor de contraseñas compartido) | Equipo | Antes de la primera subida a Play | [30](30-infraestructura.md#publicación-de-la-app) |
 | P-09 | Descargar las tablas expandidas de la OMS (L, M, S por día y por longitud o talla) y convertirlas al formato de importación | Equipo | I2 | [10](10-modulo-compartido.md#datos-de-referencia) |
 | P-10 | Confirmar si el libro de la SAP publica L, M y S o solo percentiles (define si el puntaje Z de 5 a 15 años es exacto o aproximado) | Equipo con pediatras | I2 | PVM-14 |
-| P-11 | Elegir dónde dejar la nota para agentes de IA de [32](32-proceso-de-desarrollo.md#4-trabajo-en-paralelo): `CONTRIBUTING.md` (recomendado, lo leen personas y agentes) u otro archivo de instrucciones para agentes | Equipo | I0 | ADR-22 |
+| P-11 | ✅ **Resuelto 14/10/2026.** La nota para agentes de IA y las verificaciones previas a tomar una tarea están en [`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia) | — | — | ADR-22 |
 | P-12 | Alinear la versión de Ktor Server (3.2.0) con la del cliente (3.6.x) | Equipo | I0 | [01](01-stack.md) |
 
 ## Supuestos técnicos

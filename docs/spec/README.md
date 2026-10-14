@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.0.0 |
+| **Versión** | 1.1.0 |
 | **Fecha** | 14/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Reemplaza a** | `docs/Documento_Funcional_App_Nino_Sano.docx` (v1.0, 17/08/2026) como documento de referencia funcional |
@@ -65,7 +65,7 @@ en el registro de cambios.
 ### Redacción
 
 - **Debe**: obligatorio. **Puede**: permitido u opcional.
-- Cada requerimiento funcional indica actores, incremento (`I1`–`I6`, ver
+- Cada requerimiento funcional indica actores, incremento (`I1`–`I6`; `I0` es técnico y no tiene RF, ver
   [00 · Visión y alcance](00-vision-y-alcance.md#6-plan-de-incrementos)) y si funciona sin conexión.
 - Los criterios de aceptación se escriben como *Dado / Cuando / Entonces* y son la base de las
   pruebas de aceptación.
@@ -91,4 +91,5 @@ en el registro de cambios.
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.1.0 | 14/10/2026 | Se agrega el incremento I0 de fundaciones técnicas antes de I1; los RNF aplican desde I0 | Decisión del relevamiento técnico (ADR-25 de la SPEC técnica) |
 | 1.0.0 | 14/10/2026 | Versión inicial | Relevamiento funcional en 4 rondas (13 y 14/10/2026). Amplía el alcance del documento v1.0: pediatra como usuario, rango 0–15 años, consulta guiada, línea de tiempo, estado del niño, administración |
