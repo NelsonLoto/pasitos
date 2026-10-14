@@ -22,10 +22,11 @@ tomarlas, y también se cargan como issues (etiqueta `datos`, `infra` o `docs`).
 | T-11 | Registrar el dominio y configurar SPF, DKIM y DMARC | 31/01/2027 | I6-I1 | P-03 |
 | T-12 | Elegir el proveedor de hosting del piloto | 31/01/2027 | I6-I1 | P-01 |
 | T-13 | Cuenta de desarrollador de Google Play (Nelson) y resguardo de la clave de subida | 31/01/2027 | I6-I2 | P-06, P-08 |
-| T-14 | Textos legales: términos y condiciones, política de privacidad y consentimiento informado del piloto. En desarrollo se usa una versión provisoria `0` de los términos | 31/01/2027 | Piloto | RNF-LEG-01, RNF-PRI-08 |
-| T-15 | **Consultar con el profesor los requisitos institucionales del piloto** (aval de un comité de ética, modelo de consentimiento). Hacerlo cuanto antes: si hace falta un comité, puede demorar semanas | 15/11/2026 | Piloto | SUP-14 |
-| T-16 | Reclutar a las familias y pediatras del piloto | 14/02/2027 | Piloto | — |
-| T-17 | Cada integrante actualiza el remoto de su copia local al repositorio renombrado: `git remote set-url origin https://github.com/NelsonLoto/pasitos.git` | Inmediato | — | P-02 |
+| T-14 | Textos legales: términos y condiciones y política de privacidad (Google Play exige la política para publicar). En desarrollo se usa una versión provisoria `0` de los términos | 31/01/2027 | I6-I2, piloto | RNF-LEG-01 |
+| T-15 | ✅ **No aplica (14/10/2026).** El piloto usa datos ficticios, así que no hace falta consultar requisitos institucionales ni comité de ética | — | — | D-65, SUP-14 |
+| T-16 | Convocar a los participantes del piloto (tutores y pediatras que prueben la app con datos ficticios) y preparar la guía que reciben | 14/02/2027 | Piloto | RNF-PRI-08 |
+| T-17 | ✅ **Hecho (14/10/2026).** Se avisó al equipo y se envió el comando para actualizar el remoto al repositorio renombrado | — | — | P-02 |
+| T-18 | **Diseñar los datos ficticios** para demos y piloto: niños de distintas edades (incluido un prematuro y uno mayor de 5 años), con trayectorias de crecimiento que muestren cada nivel de estado y un cruce de percentiles, vacunas al día, atrasadas y con carga retroactiva, y varios tutores. Se cargan con un script en `backend/seed/demo/` | 25/11/2026 (para la demo de I2); completo antes del piloto | Demos de I2 en adelante, piloto | D-65 |
 
 Las tareas en **negrita** son las que más riesgo tienen de atrasar el proyecto si se dejan para
 último momento.

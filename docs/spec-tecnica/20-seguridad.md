@@ -26,7 +26,7 @@ Medidas técnicas que implementan los requerimientos de seguridad (`RNF-SEG`) y 
 | RNF-PRI-04 | Acceso: el tutor ve todo en la app y en el PDF. Supresión: `DELETE /me`, `DELETE /children/{id}` y `/web/delete-account`, que aplican RN-CTA-08 y RN-HIJ-08 en una transacción |
 | RNF-PRI-05 | Push sin datos ([17](17-notificaciones-y-emails.md#1-push-sin-datos-personales-adr-06)) |
 | RNF-PRI-06 | El panel no consulta tablas de salud y una prueba lo verifica ([16](16-panel-admin.md)) |
-| RNF-PRI-08 | Entorno `pilot` separado, con su propia base. Al terminar, se borran las cuentas que no pidieron conservarse (script documentado) |
+| RNF-PRI-08 | Entorno `pilot` separado, con su propia base. La variante `pilot` de la app muestra un aviso permanente de datos ficticios. Al terminar, un script documentado borra todas las cuentas y datos del entorno |
 | RNF-PRI-09 | Hosting en Argentina o en un país con nivel adecuado (ADR-05). Proveedores externos sin datos de salud: FCM recibe solo un UUID; email y Sentry en región UE |
 | RNF-PRI-10 | Sin SDKs de publicidad ni de analítica de terceros en la app |
 

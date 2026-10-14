@@ -79,7 +79,7 @@ alternativas; aquí se registran la decisión y su motivo para que puedan revisa
 | D-54 | El registro de accesos solo lo consulta el administrador; el tutor ve el historial de vínculos. | Trazabilidad ante reclamos. |
 | D-55 | El administrador no accede a datos de los niños; valida matrículas en REFEPS/SISA sin que el pediatra suba documentos. | Mínimo privilegio y minimización. |
 | D-56 | Sin conexión: lectura de lo descargado y carga de mediciones, hábitos y eventos con sincronización. | Uso real de los padres, con riesgo de conflictos bajo. |
-| D-57 | Objetivos de rendimiento de RNF-REN; se prevé una prueba piloto con datos reales. | Experiencia fluida; validar el producto con usuarios. |
+| D-57 | Objetivos de rendimiento de RNF-REN; se prevé una prueba piloto con usuarios (con datos ficticios, según D-65). | Experiencia fluida; validar el producto con usuarios. |
 | D-58 | Android 8.0 o superior; teléfonos en vertical. | Cubre casi todos los dispositivos en uso; es la base actual del proyecto. |
 | D-59 | Panel de administración web; tablas SAP cargadas por importación. | Las tareas del administrador son de escritorio. |
 | D-60 | Requerimientos de accesibilidad de RNF-ACC. | Usuarios diversos, incluidos padres con baja visión. |
@@ -87,3 +87,9 @@ alternativas; aquí se registran la decisión y su motivo para que puedan revisa
 | D-62 | A los 15 años el perfil pasa a finalizado; el acceso del adolescente queda fuera de alcance. | Fin del rango de la app. |
 | D-63 | Gratuita y sin publicidad. | La publicidad en una app de salud infantil es éticamente cuestionable y complica la privacidad. |
 | D-64 | La SPEC se escribe en Markdown en `docs/spec/`, un archivo por módulo, versionada con ramas y Pull Requests. | Revisión por PR y referencia directa desde cada incremento. |
+
+## Posteriores al relevamiento
+
+| ID | Decisión | Motivo |
+|---|---|---|
+| D-65 | La prueba piloto se hace con **datos ficticios**: niños inventados que no corresponden a ninguna persona real (14/10/2026). Reemplaza la idea de un piloto con datos reales de D-57. | Evita exponer datos de salud de menores, y con ello el aval de un comité de ética y el consentimiento informado específico (SUP-14 deja de aplicar). |

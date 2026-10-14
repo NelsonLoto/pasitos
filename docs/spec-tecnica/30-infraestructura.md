@@ -6,7 +6,7 @@
 |---|---|---|---|
 | `local` | Desarrollo y demos quincenales | La computadora de cada integrante, con Docker | Ficticios |
 | `ci` | Pruebas automáticas en cada PR | GitHub Actions | Ficticios, creados por las pruebas |
-| `pilot` | Prueba piloto con usuarios reales | Proveedor a definir (ADR-05, P-01) | **Reales** |
+| `pilot` | Prueba piloto con usuarios | Proveedor a definir (ADR-05, P-01) | Ficticios, cargados por los participantes. Solo el nombre y el email de sus cuentas son reales (RNF-PRI-08) |
 
 No se define un entorno de producción para la tesis: el piloto cumple ese rol.
 
@@ -41,7 +41,7 @@ misma imagen corre en cualquier proveedor que ejecute contenedores (ADR-05).
 
 | Requisito | Motivo |
 |---|---|
-| Servidores en Argentina o en un país con nivel adecuado de protección según la AAIP (Unión Europea, Reino Unido, Uruguay, entre otros) | Art. 12 de la Ley 25.326 (RNF-PRI-09) |
+| Servidores en Argentina o en un país con nivel adecuado de protección según la AAIP (Unión Europea, Reino Unido, Uruguay, entre otros) | Art. 12 de la Ley 25.326 (RNF-PRI-09). Con datos ficticios no es obligatorio para el piloto (solo viajan nombre y email de los participantes), pero se recomienda: el mismo despliegue serviría para producción sin mudarse |
 | Ejecuta contenedores Docker | Imagen del backend |
 | Disco cifrado | RNF-SEG-02 |
 | Costo total hasta USD 30 por mes | Presupuesto del equipo |
