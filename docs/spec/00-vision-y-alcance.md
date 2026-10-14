@@ -86,10 +86,12 @@ Guían las decisiones de diseño y la resolución de ambigüedades en esta SPEC.
 
 El desarrollo se organiza en incrementos de alrededor de 2 semanas, alineados con los encuentros
 quincenales: en cada encuentro se muestra el incremento terminado y funcionando. El orden respeta
-las dependencias entre módulos.
+las dependencias entre módulos. Antes de I1 hay un incremento técnico, **I0**, que no implementa
+requerimientos funcionales propios: deja la base sobre la que se construyen todos los demás.
 
 | Incremento | Contenido | Requerimientos |
 |---|---|---|
+| **I0 · Fundaciones técnicas** | Renombre a Pasitos, módulo compartido entre app y backend, nuevo esquema de base de datos, sesión persistente, base local cifrada con sincronización, integración continua e imagen Docker del backend | Sin RF propios. Detalle en la [SPEC técnica](../spec-tecnica/00-arquitectura.md#5-fundaciones-técnicas-incremento-i0) |
 | **I1 · Base de tutores** | Cuentas, hijos, varios tutores por niño, mediciones y vacunas conectadas al backend | RF-CTA-01 a 07, RF-CTA-09, RF-CTA-11, RF-HIJ-01 a 09, RF-CRE-01 a 03, RF-CRE-10, RF-VAC-01 a 05, RF-VAC-07 |
 | **I2 · Motor de crecimiento** | Tablas de referencia, percentiles, puntaje Z, IMC, curvas y estado | RF-CRE-04 a 09, RF-ADM-04, RF-ADM-05 (carga inicial por importación) |
 | **I3 · Pediatras** | Perfil profesional, validación mínima por el administrador, vínculos, pacientes propios, reclamo y unificación | RF-PED-01 a 15, RF-ADM-01 a 03 |
@@ -98,8 +100,8 @@ las dependencias entre módulos.
 | **I6 · Cierre** | Informes PDF, notificaciones, panel de administración completo, bloqueo con huella o PIN, eliminación de cuenta, perfil finalizado | RF-INF-01 a 04, RF-NOT-01 a 03, RF-CJO-04, RF-CON-13, RF-ADM-06 a 12, RF-CTA-08, RF-CTA-10, RF-HIJ-10, RF-VAC-06 |
 
 Los requerimientos no funcionales de seguridad, privacidad, accesibilidad y localización aplican
-desde I1. La arquitectura de I1 debe prever el funcionamiento sin conexión de I5, aunque se
-implemente después.
+desde I0. El mecanismo de sincronización que necesita el funcionamiento sin conexión se construye
+en I0 e I1; en I5 se completa la experiencia sin conexión y sus pruebas.
 
 ## 7. Supuestos
 

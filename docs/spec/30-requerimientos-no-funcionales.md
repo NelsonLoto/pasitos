@@ -1,6 +1,6 @@
 # 30 · Requerimientos no funcionales
 
-Aplican desde I1 salvo que se indique otro incremento.
+Aplican desde I0 salvo que se indique otro incremento.
 
 ## Seguridad (`SEG`)
 
@@ -33,7 +33,8 @@ Aplican desde I1 salvo que se indique otro incremento.
 
 ## Funcionamiento sin conexión (`OFF`) — Incremento I5
 
-La arquitectura de I1 debe preverlo aunque se implemente en I5.
+El mecanismo de sincronización se construye en I0 e I1; en I5 se completan la experiencia sin
+conexión y sus pruebas (ver [SPEC técnica](../spec-tecnica/14-sincronizacion.md)).
 
 | ID | Requerimiento |
 |---|---|
