@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Versión** | 1.0.0 |
+| **Versión** | 1.0.1 |
 | **Fecha** | 14/10/2026 |
-| **Basado en** | [SPEC funcional 1.2.0](../spec/README.md) y [SPEC técnica 1.1.0](../spec-tecnica/README.md) |
+| **Basado en** | [SPEC funcional 1.2.0](../spec/README.md) y [SPEC técnica 1.2.0](../spec-tecnica/README.md) |
 
 ## Cómo se usa este plan
 
@@ -80,5 +80,7 @@ las tareas marcadas como "puede pasar al incremento siguiente" antes de mover fe
    y `Hecho`.
 2. Crear un issue por tarea con la plantilla `Tarea`, copiando la ficha del plan. Etiquetas: el
    incremento (`I0`…) y el componente (`app`, `backend`, `shared`, `infra`, `docs`, `datos`).
-3. Marcar las dependencias en el cuerpo del issue ("Depende de #12").
+3. Marcar las dependencias en el cuerpo del issue ("Depende de #12") y cargar las obligatorias
+   como dependencias nativas de GitHub, según
+   [32 · Proceso de desarrollo](../spec-tecnica/32-proceso-de-desarrollo.md#dependencias).
 4. Al cerrar cada incremento, revisar y detallar las tareas del siguiente.
