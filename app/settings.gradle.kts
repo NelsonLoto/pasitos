@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "control-nino-sano-app"
+rootProject.name = "pasitos"
 include(":app")
