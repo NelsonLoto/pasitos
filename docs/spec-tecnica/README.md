@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.1.0 |
+| **Versión** | 1.2.0 |
 | **Fecha** | 14/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.0.0](../spec/README.md) |
@@ -60,5 +60,6 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.0 | 14/10/2026 | Tablero: qué movimientos son automáticos y cómo están configuradas las automatizaciones del proyecto; dependencias entre tareas cargadas como dependencias nativas de GitHub y verificación 4 basada en ellas ([32](32-proceso-de-desarrollo.md)) | Revisión del tablero antes de empezar I0 (#71) |
 | 1.1.0 | 14/10/2026 | Base de Room recreada al cambiar de versión hasta el piloto; P-04 (email real) pasa a antes de I6; entorno `pilot` con datos ficticios y aviso permanente en la app | Ajustes surgidos al armar el plan de implementación; piloto con datos ficticios (D-65 de la SPEC funcional) |
 | 1.0.0 | 14/10/2026 | Versión inicial | Relevamiento técnico en 2 rondas (14/10/2026) sobre la SPEC funcional v1.0.0 |
