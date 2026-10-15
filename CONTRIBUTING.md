@@ -23,6 +23,15 @@ Cada tarea es un issue de GitHub. La rama lleva el número del issue
 empieza, para que el resto del equipo vea qué está en curso. Detalle del proceso en
 [`docs/spec-tecnica/32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md).
 
+## Tablero
+
+El [tablero de Pasitos](https://github.com/users/NelsonLoto/projects/1) mueve solo la mayoría de
+las tarjetas: un issue nuevo entra en `Por hacer`, abrir el PR con `Closes #42` lo pasa a
+`En curso` y mergearlo lo pasa a `Hecho`. Lo único manual es mover la tarjeta a `En revisión`
+cuando marcás el PR como listo para revisar. No muevas a `Hecho` una tarjeta con PR antes del
+merge: eso cierra el issue. Detalle de cada automatización en
+[`32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md#tablero).
+
 ## Antes de tomar una tarea (personas y agentes de IA)
 
 Para no pisar el trabajo de otro integrante, verificá **antes de asignarte un issue o crear una
@@ -32,7 +41,10 @@ rama**:
 2. No existe una rama remota con el número del issue:
    `git fetch --prune` y después `git branch -r | grep "/<número>-"`.
 3. No hay un PR abierto que lo mencione: `gh pr list --search "<número>"`.
-4. Las tareas de las que depende ya están en `Hecho`.
+4. Las tareas de las que depende ya están en `Hecho`: el issue no figura como bloqueado
+   (*Blocked by*). Las dependencias están cargadas como dependencias nativas de GitHub, así que
+   alcanza con mirar el issue o con que este comando no devuelva nada:
+   `gh api repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by --jq '.[] | select(.state=="open") | .number'`.
 
 Si alguno de los cuatro puntos falla, **no tomes la tarea**: elegí otra o consultá con quien la
 tiene. Recién después asignate el issue, movelo a `En curso` y creá la rama.

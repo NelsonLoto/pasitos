@@ -33,14 +33,67 @@ Cada tarea es un **issue de GitHub** dentro del tablero de GitHub Projects (ADR-
 Los issues los crea el plan de cada incremento, con las dependencias marcadas para saber qué se
 puede hacer en paralelo.
 
+### Tablero
+
+El tablero es el proyecto [Pasitos](https://github.com/users/NelsonLoto/projects/1) de GitHub
+Projects. Las tarjetas son solo issues: el PR de cada tarea se ve dentro de su tarjeta, en
+"Linked pull requests".
+
+| Movimiento | Cuándo | Cómo |
+|---|---|---|
+| → `Por hacer` | Se crea o se reabre el issue | Automático |
+| `Por hacer` → `En curso` | Se toma la tarea | A mano al asignarse; si se olvida, automático al abrir el PR en borrador con `Closes #N` |
+| `En curso` → `En revisión` | El PR se marca como listo para revisar | **A mano**: GitHub no tiene una automatización para este paso |
+| `En revisión` → `Hecho` | Se mergea el PR con `Closes #N` | Automático: el merge cierra el issue y el cierre lo pasa a `Hecho` |
+| → `Hecho` en tareas sin PR | Tareas transversales (`T-xx`) terminadas | A mano: mover la tarjeta a `Hecho` cierra el issue |
+
+Automatizaciones configuradas en el proyecto (menú `⋯` → *Workflows*):
+
+| Automatización | Configuración |
+|---|---|
+| Auto-add to project | Repositorio `pasitos`, filtro `is:issue is:open` |
+| Item added to project | Issues → `Por hacer` |
+| Item reopened | Issues → `Por hacer` |
+| Pull request linked to issue | → `En curso`. No `En revisión`: el PR se abre en borrador apenas se toma la tarea |
+| Item closed | Issues → `Hecho` |
+| Auto-close issue | Al pasar a `Hecho`, se cierra el issue |
+| Pull request merged | → `Hecho`. Sin efecto en la práctica, porque los PRs no son tarjetas |
+| Auto-add sub-issues to project | Encendida |
+| Code changes requested, Code review approved, Auto-archive items | Apagadas |
+
+- `Closes #N` cierra el issue al mergear porque `develop` es la rama por defecto del
+  repositorio. Si la rama por defecto cambia, los issues dejan de cerrarse solos.
+- Una tarjeta con PR no se mueve a mano a `Hecho` antes del merge: la automatización cerraría el
+  issue.
+
+### Dependencias
+
+Las dependencias obligatorias entre tareas se escriben en el cuerpo del issue y además se cargan
+como **dependencias nativas** de GitHub (*Blocked by*). Mientras alguna siga abierta, GitHub
+marca el issue como bloqueado. Las dependencias blandas del plan, las que van entre paréntesis,
+solo se escriben en el cuerpo.
+
+- Se cargan al crear los issues de cada incremento, desde la barra lateral del issue
+  (*Relationships* → *Mark as blocked by*) o por consola:
+  `gh api -X POST repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by -F issue_id=<id>`,
+  donde `<id>` es el identificador interno de la tarea que bloquea
+  (`gh api repos/NelsonLoto/pasitos/issues/<número-que-bloquea> --jq .id`).
+- Un pendiente técnico (`P-xx`) se carga como la tarea transversal que lo resuelve. Por ejemplo,
+  I0-10 depende de P-07, que se carga como T-09.
+- Si el plan escribe una dependencia solo en la columna "Bloquea" de la otra tarea, también se
+  carga.
+
 ## 3. Ramas y PRs
 
 Se mantiene el flujo de [`CONTRIBUTING.md`](../../CONTRIBUTING.md) y se agrega:
 
 - Nombre de rama con el número de issue: `feature/42-alta-de-hijo`.
-- El PR menciona `Closes #42` para cerrar el issue al mergear.
+- El PR menciona `Closes #42` para cerrar el issue al mergear. Esa mención es también la que
+  vincula el PR con la tarjeta y la mueve sola en el [tablero](#tablero).
 - **PR en borrador temprano:** apenas se empieza una tarea, se pushea la rama y se abre el PR como
   *draft*. Así el resto del equipo ve qué está en curso y qué archivos se están tocando.
+- Al marcar el PR como listo para revisar (*Ready for review*), se mueve la tarjeta a
+  `En revisión` a mano.
 
 ## 4. Trabajo en paralelo
 
@@ -53,7 +106,9 @@ tarea no esté en curso:
 2. No existe una rama remota con el número del issue: `git fetch --prune` y
    `git branch -r | grep "/<número>-"`.
 3. No hay un PR abierto que la mencione: `gh pr list --search "<número>"`.
-4. Las tareas de las que depende ya están en `Hecho`.
+4. Las tareas de las que depende ya están en `Hecho`: el issue no figura como bloqueado
+   (*Blocked by*). Por consola, este comando no debe devolver nada:
+   `gh api repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by --jq '.[] | select(.state=="open") | .number'`.
 
 Si cualquiera de los cuatro puntos falla, **no se toma la tarea**: se elige otra o se consulta con
 quien la tiene. Recién después se asigna el issue, se mueve a `En curso` y se crea la rama.
