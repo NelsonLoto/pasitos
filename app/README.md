@@ -1,6 +1,6 @@
 # app
 
-Proyecto Android nativo (Kotlin + Jetpack Compose) de la app "Niño Sano".
+Proyecto Android nativo (Kotlin + Jetpack Compose) de la app Pasitos.
 
 ## Stack y versiones
 
