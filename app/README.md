@@ -14,6 +14,9 @@ Proyecto Android nativo (Kotlin + Jetpack Compose) de la app Pasitos.
 | minSdk | 26 (Android 8.0) |
 | DI | Hilt 2.59.2 + KSP 2.2.10-2.0.2 |
 | Navegación | Navigation Compose 2.9.8 (rutas type-safe) |
+| Base local | Room 2.8.5 + SQLCipher 4.19.1, clave protegida con Tink 1.23.0 y el Android Keystore |
+| Sincronización | WorkManager 2.12.0 + Hilt Work 1.4.0 |
+| Preferencias y secretos | DataStore 1.2.1 |
 
 ## Compilar y correr
 
@@ -34,6 +37,35 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 > tipo `AccessDeniedException` / "not a regular file". Es un lock transitorio
 > de OneDrive, no un error del proyecto — reintentar el build (o excluir
 > `app/build/` y `app/app/build/` de la sincronización) lo resuelve.
+
+## Pruebas
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+Corren en la JVM, también en la integración continua. Las de Room y WorkManager usan
+Robolectric, que la primera vez descarga una imagen de Android (unos minutos).
+
+```bash
+./gradlew connectedDebugAndroidTest
+```
+
+Necesitan un emulador o un teléfono conectado. Prueban el cifrado de la base con SQLCipher y el
+Android Keystore reales, que no existen en la JVM. Al terminar, Gradle desinstala la app.
+
+## Base local y sincronización
+
+- `core/database`: base Room cifrada con SQLCipher. Los repositorios piden el DAO a
+  `LocalDatabase` en cada uso (`localDatabase.get().xDao()`), porque al cerrar sesión la base se
+  borra y se crea otra.
+- `core/security`: clave de la base cifrada con Tink y el Android Keystore.
+- `core/sync`: `SyncWorker` con WorkManager. Corre al abrir la app o volver a ella, después de
+  cada escritura local y cada 15 minutos con red. En I0 solo registra la ejecución en Logcat
+  (etiqueta `SyncWorker`).
+
+Detalle en [15 · App Android](../docs/spec-tecnica/15-android.md#3-base-local-cifrada-adr-17) y
+[14 · Sincronización](../docs/spec-tecnica/14-sincronizacion.md#6-en-la-app).
 
 ## Autenticación
 
@@ -63,4 +95,5 @@ de Windows).
   (`core/navigation`): solo **Login** está implementada a fondo; el resto
   son placeholders navegables (`PlaceholderScreen`) a completar pantalla
   por pantalla, en el orden del documento funcional.
-- Sin persistencia real ni backend: toda la capa de datos es mock/local.
+- Cuentas, hijos y mediciones van contra el backend; el resto de la capa de datos sigue siendo
+  mock. Desde I1 los repositorios leen de la base local en lugar de la red (ADR-02).
