@@ -53,13 +53,31 @@ class AgeTest {
     }
 
     @Test
-    fun `RN-HIJ-05 antes de llegar al término no se informa edad corregida`() {
-        // 30 semanas: el término es 10 semanas después del nacimiento.
+    fun `RN-HIJ-05 antes de su fecha de término se informa cuánto falta, no la edad corregida`() {
+        // 30 semanas: la fecha de término es 10 semanas después del nacimiento, el 10/12/2026.
         val beforeTerm = formatAge(LocalDate.parse("2026-10-01"), LocalDate.parse("2026-10-15"), gestationalWeeks = 30)
 
-        assertEquals("14 días", beforeTerm.text)
+        assertEquals("14 días · faltan 8 semanas para su fecha de término", beforeTerm.text)
         assertNull(beforeTerm.corrected)
-        assertEquals("0 días corregidos", formatAge(LocalDate.parse("2026-10-01"), LocalDate.parse("2026-12-10"), 30).corrected)
+    }
+
+    @Test
+    fun `RN-HIJ-05 lo que falta para el término va en semanas y días, en singular o plural`() {
+        val birth = LocalDate.parse("2026-10-01")
+
+        assertEquals("faltan 7 semanas y 6 días para su fecha de término", untilTerm(birth, "2026-10-16"))
+        assertEquals("faltan 1 semana y 1 día para su fecha de término", untilTerm(birth, "2026-12-02"))
+        assertEquals("falta 1 semana para su fecha de término", untilTerm(birth, "2026-12-03"))
+        assertEquals("faltan 3 días para su fecha de término", untilTerm(birth, "2026-12-07"))
+        assertEquals("falta 1 día para su fecha de término", untilTerm(birth, "2026-12-09"))
+    }
+
+    @Test
+    fun `RN-HIJ-05 desde su fecha de término se informa la edad corregida`() {
+        val onTerm = formatAge(LocalDate.parse("2026-10-01"), LocalDate.parse("2026-12-10"), gestationalWeeks = 30)
+
+        assertEquals("0 días corregidos", onTerm.corrected)
+        assertNull(onTerm.untilTerm)
     }
 
     @Test
@@ -75,8 +93,8 @@ class AgeTest {
         val birth = LocalDate.parse("2026-06-01")
         val date = LocalDate.parse("2026-10-27")
 
-        assertNull(formatAge(birth, date, gestationalWeeks = 37).corrected)
-        assertNull(formatAge(birth, date, gestationalWeeks = null).corrected)
+        assertEquals("4 meses y 26 días", formatAge(birth, date, gestationalWeeks = 37).text)
+        assertEquals("4 meses y 26 días", formatAge(birth, date, gestationalWeeks = null).text)
     }
 
     @Test
@@ -89,4 +107,7 @@ class AgeTest {
     }
 
     private fun age(birthDate: String, date: String) = formatAge(LocalDate.parse(birthDate), LocalDate.parse(date)).text
+
+    private fun untilTerm(birthDate: LocalDate, date: String) =
+        formatAge(birthDate, LocalDate.parse(date), gestationalWeeks = 30).untilTerm
 }
