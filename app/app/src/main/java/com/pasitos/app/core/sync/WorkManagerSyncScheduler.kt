@@ -52,6 +52,11 @@ class WorkManagerSyncScheduler @Inject constructor(
         workManager.enqueueUniqueWork(IMMEDIATE_WORK, ExistingWorkPolicy.REPLACE, request)
     }
 
+    override fun cancelAll() {
+        workManager.cancelUniqueWork(PERIODIC_WORK)
+        workManager.cancelUniqueWork(IMMEDIATE_WORK)
+    }
+
     companion object {
         const val PERIODIC_WORK = "sync-periodic"
         const val IMMEDIATE_WORK = "sync-now"
