@@ -20,13 +20,14 @@ fun `RF-CRE-01 CA2 rechaza una fecha anterior al nacimiento`() { … }
 
 ## 2. Integración continua (ADR-14)
 
-`.github/workflows/ci.yml`, en cada PR contra `develop` y en cada push a `develop`:
+`.github/workflows/ci.yml`, en cada PR (contra cualquier rama, así también el de release a `main`
+y los PRs encadenados) y en cada push a `develop`:
 
 | Job | Se ejecuta si cambia | Pasos |
 |---|---|---|
 | `shared` | `shared/**` | `./gradlew test` |
-| `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega cuando exista el archivo |
-| `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use `LocalDate.now()` y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
+| `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
+| `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
 | `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
 - Un cambio en `ci.yml` corre todos los jobs, para probar el cambio. Un PR que solo toca
@@ -39,9 +40,12 @@ fun `RF-CRE-01 CA2 rechaza una fecha anterior al nacimiento`() { … }
 - **Seguridad del workflow:** permisos de solo lectura y acciones fijadas por SHA del commit, con
   la versión en un comentario, para que una etiqueta movida no cambie el código que corre.
   Dependabot las actualiza.
-- **`LocalDate.now()` prohibido en la app (ADR-26):** `.github/scripts/check-local-date-now.sh`
-  falla si aparece en `app/app/src/main` fuera de `core/time`. "Hoy" se calcula con
-  `ArgentinaClock.today()`. Los archivos anteriores a I0-07 que todavía lo usan están en
+- **Zona horaria del teléfono prohibida en la app (ADR-26):**
+  `.github/scripts/check-local-date-now.sh` falla si en `app/app/src/main`, fuera de `core/time`,
+  aparece `LocalDate.now()`, `LocalDateTime.now()`, `LocalTime.now()`, `ZonedDateTime.now()`,
+  `OffsetDateTime.now()`, `ZoneId.systemDefault()` o `TimeZone.getDefault()`. "Hoy" se calcula
+  con `ArgentinaClock.today()`; `LocalDate.now(clock)` con un reloj explícito se permite. Los
+  archivos anteriores a I0-07 que todavía usan `LocalDate.now()` están en
   `.github/scripts/local-date-now-allowlist.txt`, una lista que solo puede achicarse: el script
   también falla si un archivo de la lista ya no lo usa, así la tarea de I1 que lo reescribe tiene
   que sacarlo. Son diez:
@@ -63,10 +67,15 @@ equipo, igual que la regla de no pushear directo a `develop`.
 `.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle y de
 las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
 
-- Los tres builds de Gradle (app, backend y `shared`) van en el mismo PR, porque Kotlin y
-  kotlinx.serialization tienen que tener la misma versión en los tres ([01](01-stack.md)).
-- Las versiones menores y los parches van agrupados. Cada versión mayor llega en su propio PR,
-  porque se evalúa aparte.
+- Los tres builds de Gradle (app, backend y `shared`) se actualizan en los mismos PRs, porque
+  Kotlin y kotlinx.serialization tienen que tener la misma versión en los tres
+  ([01](01-stack.md)).
+- Kotlin y KSP van en un PR propio: antes de subirlos hay que verificar KSP, Hilt, Room y AGP, y
+  si se traban no frenan al resto.
+- Las demás versiones menores y parches van agrupados en otro PR. Cada versión mayor llega en su
+  propio PR, porque se evalúa aparte.
+- Una versión se propone recién 14 días después de publicada (`cooldown`), para dar tiempo a que
+  se detecte una versión maliciosa o rota. Las actualizaciones de seguridad no esperan.
 
 ## 3. Definición de terminado
 
