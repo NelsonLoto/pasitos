@@ -79,8 +79,8 @@ contraseña de al menos 8 caracteres con letras y números. "Continuar con Googl
 - El cliente de la API (`core/network/NetworkModule`) agrega el token a cada pedido y lo renueva
   solo cuando vence (a los 15 minutos). Los repositorios no manejan tokens.
 - Si la sesión vence (30 días sin uso) o el servidor la revoca, la app vuelve al login.
-- Cerrar sesión (Perfil) necesita conexión: revoca la sesión, borra tokens y base local, y
-  reinicia la app.
+- Cerrar sesión (Perfil) revoca la sesión, borra tokens y base local, y reinicia la app. Sin
+  conexión cierra igual y `RevokeSessionsWorker` revoca la sesión cuando vuelve la red.
 
 Detalle en [15 · App Android, sesión](../docs/spec-tecnica/15-android.md#4-sesión).
 
