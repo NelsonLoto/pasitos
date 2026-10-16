@@ -70,11 +70,19 @@ Detalle en [15 · App Android](../docs/spec-tecnica/15-android.md#3-base-local-c
 
 ## Autenticación
 
-Login y registro son reales contra el backend (`../backend/`, ver su propio
-README para levantarlo) — `AuthApiRepository` llama a `POST /auth/login` y
-`POST /auth/register`. Hace falta registrar una cuenta nueva primero (ya no
-hay credenciales de demo hardcodeadas). `loginWithGoogle()` sigue siendo un
-mock (Google Sign-In real es Etapa 4).
+Login y registro van contra el backend (`../backend/`, ver su propio README para levantarlo):
+`AuthApiRepository` usa `/api/v1/auth`. Hace falta registrar una cuenta primero, con una
+contraseña de al menos 8 caracteres con letras y números. "Continuar con Google" llega con I1-A2.
+
+- La sesión se guarda cifrada (`data/auth/local/SessionStore`) y se restaura al abrir la app:
+  después de iniciar sesión, cerrar la app no obliga a volver a ingresar.
+- El cliente de la API (`core/network/NetworkModule`) agrega el token a cada pedido y lo renueva
+  solo cuando vence (a los 15 minutos). Los repositorios no manejan tokens.
+- Si la sesión vence (30 días sin uso) o el servidor la revoca, la app vuelve al login.
+- Cerrar sesión (Perfil) revoca la sesión, borra tokens y base local, y reinicia la app. Sin
+  conexión cierra igual y `RevokeSessionsWorker` revoca la sesión cuando vuelve la red.
+
+Detalle en [15 · App Android, sesión](../docs/spec-tecnica/15-android.md#4-sesión).
 
 La app apunta a `http://localhost:8080` (`core/network/NetworkConfig.kt`). Para que
 funcione (emulador o dispositivo físico, da igual) hay que correr una vez por sesión

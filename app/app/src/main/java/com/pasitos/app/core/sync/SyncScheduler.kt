@@ -23,4 +23,7 @@ interface SyncScheduler {
 
     /** Sincroniza apenas haya red. Si ya había una pendiente, la reemplaza. */
     fun requestSync(trigger: SyncTrigger)
+
+    /** Cancela la periódica y la pendiente, y detiene la que esté corriendo. Sin sesión no se sincroniza. */
+    fun cancelAll()
 }

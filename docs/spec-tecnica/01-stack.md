@@ -56,7 +56,7 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Navigation Compose | 2.9.8 | Navegación con rutas tipadas |
 | Hilt | 2.59.2 | Inyección de dependencias |
 | KSP | 2.2.10-2.0.2 | Procesamiento de anotaciones (Hilt, Room) |
-| Ktor Client (OkHttp) | 3.6.0 | Cliente de la API |
+| Ktor Client (OkHttp) | 3.6.0 | Cliente de la API, con el plugin `Auth` para el token de acceso y su renovación |
 | Room | 2.8.5 | Base local (ADR-02) |
 | SQLCipher for Android | 4.19.1 | Cifrado de la base local (ADR-17) |
 | WorkManager (con Hilt Work 1.4.0) | 2.12.0 | Sincronización en segundo plano |
@@ -67,6 +67,7 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Biometric | Nueva | Bloqueo con huella o PIN (RF-CTA-08) |
 | Sentry Android | Nueva | Errores |
 | JUnit 4, kotlinx-coroutines-test, Turbine, Compose UI Test | Nueva/actual | Pruebas |
+| Ktor Client Mock | 3.6.0 | Backend falso para probar el cliente de la API y la renovación de tokens |
 | Robolectric | 4.17 | Pruebas de Room y WorkManager en la JVM, sin emulador |
 
 ## Herramientas

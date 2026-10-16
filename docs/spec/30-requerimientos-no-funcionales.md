@@ -43,7 +43,7 @@ conexión y sus pruebas (ver [SPEC técnica](../spec-tecnica/14-sincronizacion.m
 | RNF-OFF-03 | **Sincronización.** Al recuperar la conexión, los cambios pendientes se sincronizan en segundo plano y sin intervención del usuario. También hay una acción "Sincronizar ahora". Reintentar una sincronización nunca duplica registros. |
 | RNF-OFF-04 | **Visibilidad.** Los registros pendientes de sincronizar se marcan como tales y la app muestra la hora de la última sincronización. |
 | RNF-OFF-05 | **Conflictos.** Como cada registro solo lo edita su autor, los conflictos solo pueden darse entre dispositivos del mismo usuario: prevalece el último cambio. Si al sincronizar el usuario ya no tiene acceso al niño (fue quitado como tutor o el perfil se eliminó), los cambios pendientes se descartan y se le informa. |
-| RNF-OFF-06 | Requieren conexión, con un mensaje claro si no la hay: cuentas, alta y edición de hijos, tutores, vacunas, vínculos e invitaciones, consulta guiada, informes, preferencias y todo el panel de administración. |
+| RNF-OFF-06 | Requieren conexión, con un mensaje claro si no la hay: cuentas (salvo cerrar sesión, RF-CTA-07), alta y edición de hijos, tutores, vacunas, vínculos e invitaciones, consulta guiada, informes, preferencias y todo el panel de administración. |
 
 ## Rendimiento (`REN`)
 

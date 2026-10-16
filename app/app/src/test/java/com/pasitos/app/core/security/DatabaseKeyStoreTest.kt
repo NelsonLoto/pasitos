@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import java.io.File
-import java.security.GeneralSecurityException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
@@ -90,24 +89,5 @@ class DatabaseKeyStoreTest {
         assertTrue(dataStore.data.first().asMap().isEmpty())
         assertTrue(cipher.wasReset)
         assertNull(keyStore.read())
-    }
-
-    /** Invierte los bytes y antepone el dato asociado; falla como Tink si la clave ya no existe. */
-    private class FakeCipher : LocalCipher {
-        var keystoreKeyLost = false
-        var wasReset = false
-
-        override fun encrypt(plaintext: ByteArray, associatedData: ByteArray): ByteArray =
-            associatedData + plaintext.reversedArray()
-
-        override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray): ByteArray {
-            if (keystoreKeyLost) throw GeneralSecurityException("decryption failed")
-            return ciphertext.copyOfRange(associatedData.size, ciphertext.size).reversedArray()
-        }
-
-        override fun reset() {
-            wasReset = true
-            keystoreKeyLost = false
-        }
     }
 }

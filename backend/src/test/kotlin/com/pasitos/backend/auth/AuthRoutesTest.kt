@@ -234,14 +234,30 @@ class AuthRoutesTest {
     }
 
     @Test
-    fun `un token de los endpoints viejos sirve en api v1 y viceversa durante la transición`() = apiTest { client ->
-        val legacy = client.postJson("/auth/register", LegacyRegisterRequest("Beto", "beto@example.com", "secreta123"))
-            .body<LegacyAuthResponse>()
+    fun `RNF-SEG-04 una sesión vencida no sirve aunque el token de acceso siga vigente`() = apiTest { client ->
+        val session = client.registerV1()
+        TestDatabase.connect().use { it.createStatement().execute("UPDATE sessions SET expires_at = now() - interval '1 minute'") }
 
-        val me = client.get("/api/v1/me") { bearerAuth(legacy.token) }
+        val response = client.get("/api/v1/me") { bearerAuth(session.tokens.accessToken) }
 
-        assertEquals(HttpStatusCode.OK, me.status)
-        assertEquals("Beto", me.body<MeResponse>().account.firstName)
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `las rutas protegidas sin token o con un token inválido responden 401`() = apiTest { client ->
+        val withoutToken = client.get("/api/v1/me")
+        val invalidToken = client.get("/api/v1/me") { bearerAuth("no-es-un-jwt") }
+
+        assertEquals(HttpStatusCode.Unauthorized, withoutToken.status)
+        assertEquals(ErrorCode.UNAUTHORIZED, withoutToken.body<ErrorResponse>().code)
+        assertEquals(HttpStatusCode.Unauthorized, invalidToken.status)
+    }
+
+    @Test
+    fun `los endpoints viejos de auth ya no existen`() = apiTest { client ->
+        val login = client.postJson("/auth/login", LoginRequest("ana@example.com", PASSWORD))
+
+        assertEquals(HttpStatusCode.NotFound, login.status)
     }
 
     private fun registerRequest(

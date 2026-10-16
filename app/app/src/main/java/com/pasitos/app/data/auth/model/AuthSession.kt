@@ -1,11 +1,22 @@
 package com.pasitos.app.data.auth.model
 
+/** Cuenta con sesión iniciada. Los tokens no salen de `SessionRepository` y el cliente de la API. */
 data class AuthSession(
     val userId: String,
     val email: String,
-    val displayName: String,
-    val token: String,
-)
+    val firstName: String,
+    val lastName: String,
+) {
+    val displayName: String get() = "$firstName $lastName".trim()
+}
 
-class InvalidCredentialsException(message: String) : Exception(message)
-class EmailAlreadyInUseException(message: String) : Exception(message)
+sealed interface SessionState {
+
+    /** Al abrir la app, mientras se lee la sesión guardada. */
+    data object Restoring : SessionState
+
+    data class SignedIn(val session: AuthSession) : SessionState
+
+    /** [expired]: la sesión venció o el servidor la revocó, y hay que volver a iniciarla (RF-CTA-06, CA2). */
+    data class SignedOut(val expired: Boolean = false) : SessionState
+}

@@ -25,7 +25,7 @@ class ChildRoutesTest {
 
     @Test
     fun `RF-HIJ-01 quien da de alta al hijo queda como su tutor principal`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
 
         val child = client.createChild(token, name = "Sofi", birthDate = "2026-06-15", sex = "F")
 
@@ -39,8 +39,8 @@ class ChildRoutesTest {
 
     @Test
     fun `cada tutor ve solo sus hijos, en orden de alta`() = apiTest { client ->
-        val ana = client.register(email = "ana@example.com").token
-        val beto = client.register(email = "beto@example.com").token
+        val ana = client.register(email = "ana@example.com").tokens.accessToken
+        val beto = client.register(email = "beto@example.com").tokens.accessToken
         client.createChild(ana, name = "Sofi")
         client.createChild(beto, name = "Tomi", sex = "M")
         client.createChild(ana, name = "Juli", sex = "M")
@@ -53,7 +53,7 @@ class ChildRoutesTest {
 
     @Test
     fun `el alta con nombre vacío, fecha futura o inválida, o sexo desconocido responde 400`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val tomorrow = ArgentinaClock().today().plusDays(1).toString()
 
         val invalid = listOf(
@@ -73,7 +73,7 @@ class ChildRoutesTest {
 
     @Test
     fun `un pedido con JSON mal formado responde 400`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
 
         val response = client.post("/children") {
             bearerAuth(token)

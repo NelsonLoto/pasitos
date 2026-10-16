@@ -13,15 +13,12 @@ data class JwtConfig(
     val secret: String,
     val issuer: String,
     val audience: String,
-    /** Duración del token de los endpoints viejos de /auth, que se borran en I0-06. */
-    val legacyExpirationMinutes: Long,
 ) {
     companion object {
         fun from(config: ApplicationConfig): JwtConfig = JwtConfig(
             secret = config.property("jwt.secret").getString(),
             issuer = config.property("jwt.issuer").getString(),
             audience = config.property("jwt.audience").getString(),
-            legacyExpirationMinutes = config.property("jwt.expirationMinutes").getString().toLong(),
         )
     }
 }
@@ -38,8 +35,6 @@ class JwtService(private val config: JwtConfig, private val clock: Clock) {
     private val algorithm = Algorithm.HMAC256(config.secret)
 
     val issuer: String get() = config.issuer
-
-    val legacyLifetime: Duration get() = Duration.ofMinutes(config.legacyExpirationMinutes)
 
     fun generateToken(accountId: UUID, sessionId: UUID, issuedAt: Instant, lifetime: Duration): IssuedToken {
         val expiresAt = issuedAt.plus(lifetime)
