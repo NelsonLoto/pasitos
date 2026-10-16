@@ -119,9 +119,10 @@ fun doseStatuses(
 - La zona horaria es `America/Argentina/Buenos_Aires`. `ArgentinaClock.today()` existe solo en
   la app y el backend; `shared` recibe la fecha como parámetro.
 - `formatAge(birthDate, date, gestationalWeeks)` aplica RN-HIJ-04 ("12 días", "4 meses y 1 día",
-  "3 años y 2 meses") y, en prematuros hasta los 24 meses, devuelve también la edad corregida de
-  RN-HIJ-05 ("4 meses · 2 meses corregidos", RF-CRE-03, CA2). Antes de llegar al término la edad
-  corregida sería negativa y no se informa.
+  "3 años y 2 meses"). En prematuros agrega lo que pide RN-HIJ-05: antes de la fecha de término,
+  cuánto falta para esa fecha ("14 días · faltan 8 semanas para su fecha de término"); desde
+  entonces y hasta los 24 meses, la edad corregida ("4 meses · 2 meses corregidos", RF-CRE-03,
+  CA2). La fecha de término se calcula con la fecha de nacimiento y las semanas de gestación.
 - `nextControlDate(birthDate, schedule, lastFixedDate, today)` aplica RN-NOT-02.
 
 ## 5. Contratos de la API

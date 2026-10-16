@@ -28,6 +28,5 @@ revisión, quedan confirmados al mergear:
 | Hasta 50 pacientes con detalle guardado en el teléfono del pediatra | [14](14-sincronizacion.md#4-alcance-por-rol-adr-16) |
 | Páginas de hasta 500 filas en la sincronización | [14](14-sincronizacion.md#2-traer-cambios) |
 | Copias de seguridad: 14 diarias y 8 semanales | [30](30-infraestructura.md#copias-de-seguridad) |
-| Antes de llegar al término, un prematuro no muestra edad corregida (sería negativa), solo la cronológica | [10](10-modulo-compartido.md#4-tiempo) |
 | PRs de hasta unas 400 líneas como referencia | [31](31-calidad-y-ci.md#4-revisión-de-código) |
 | Sin entorno de producción para la tesis: el piloto cumple ese rol | [30](30-infraestructura.md#entornos) |
