@@ -47,6 +47,16 @@ class DatabaseKeyStore @Inject constructor(
         dataStore.edit { it.remove(ENCRYPTED_KEY) }
     }
 
+    /**
+     * Para cuando el cifrado dejó de funcionar, por ejemplo porque el sistema invalidó la clave
+     * maestra del Keystore: borra todo el DataStore `secrets` (también los tokens, que tampoco se
+     * pueden descifrar) y las claves de [LocalCipher]. La próxima clave se cifra con claves nuevas.
+     */
+    suspend fun resetEncryption() {
+        dataStore.edit { it.clear() }
+        cipher.reset()
+    }
+
     companion object {
         const val KEY_SIZE_BYTES = 32
         private val ENCRYPTED_KEY = byteArrayPreferencesKey("database_key")
