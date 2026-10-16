@@ -16,6 +16,7 @@
 | P-10 | Confirmar si el libro de la SAP publica L, M y S o solo percentiles (define si el puntaje Z de 5 a 15 años es exacto o aproximado) | Equipo con pediatras | I2 | PVM-14 |
 | P-11 | ✅ **Resuelto 14/10/2026.** La nota para agentes de IA y las verificaciones previas a tomar una tarea están en [`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia) | — | — | ADR-22 |
 | P-12 | ✅ **Resuelto 16/10/2026.** Ktor Server pasó de 3.2.0 a 3.6.0, la misma versión que el cliente de la app (I0-02) | — | — | [01](01-stack.md) |
+| P-13 | Límite general de 120 requests por minuto por cuenta (RNF-SEG-07). I0-05 implementó solo los de `/auth`; falta asignarlo a una tarea, por ejemplo con el primer dominio de I1 | Equipo | I1 | [20](20-seguridad.md) |
 
 ## Supuestos técnicos
 
@@ -25,6 +26,7 @@ revisión, quedan confirmados al mergear:
 | Supuesto | Dónde |
 |---|---|
 | Límite de 120 requests por minuto por cuenta y 10 por minuto por IP en `/auth/login` | [20](20-seguridad.md) |
+| `/auth/register` también limitado a 10 por minuto por IP; `/auth/refresh` sin límite propio, porque exige un token de renovación imposible de adivinar | [20](20-seguridad.md) |
 | Hasta 50 pacientes con detalle guardado en el teléfono del pediatra | [14](14-sincronizacion.md#4-alcance-por-rol-adr-16) |
 | Páginas de hasta 500 filas en la sincronización | [14](14-sincronizacion.md#2-traer-cambios) |
 | Copias de seguridad: 14 diarias y 8 semanales | [30](30-infraestructura.md#copias-de-seguridad) |
