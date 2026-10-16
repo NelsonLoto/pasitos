@@ -1,0 +1,32 @@
+package com.pasitos.app.core.sync.local
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface PendingMutationDao {
+
+    @Insert
+    suspend fun insert(mutation: PendingMutationEntity)
+
+    /** Los cambios más antiguos primero: el servidor los aplica en el orden en que llegan. */
+    @Query("SELECT * FROM pending_mutations ORDER BY sequence LIMIT :limit")
+    suspend fun oldest(limit: Int): List<PendingMutationEntity>
+
+    /** Saca de la bandeja los cambios que el servidor ya respondió, aplicados o rechazados. */
+    @Query("DELETE FROM pending_mutations WHERE mutation_id IN (:mutationIds)")
+    suspend fun delete(mutationIds: List<String>)
+
+    /** Descarta los cambios de un niño al que el usuario perdió el acceso (RNF-OFF-05). */
+    @Query("DELETE FROM pending_mutations WHERE child_id = :childId")
+    suspend fun deleteForChild(childId: String)
+
+    @Query("SELECT COUNT(*) FROM pending_mutations")
+    suspend fun count(): Int
+
+    /** Para advertir antes de cerrar sesión que hay cambios sin sincronizar (RF-CTA-07, CA2). */
+    @Query("SELECT COUNT(*) FROM pending_mutations")
+    fun observeCount(): Flow<Int>
+}
