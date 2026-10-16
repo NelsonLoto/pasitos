@@ -2,7 +2,6 @@ package com.pasitos.backend
 
 import com.pasitos.backend.auth.authRoutes
 import com.pasitos.backend.auth.configureAuthentication
-import com.pasitos.backend.auth.legacyAuthRoutes
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
@@ -51,7 +50,6 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         get("/health") {
             call.respondText("OK")
         }
-        legacyAuthRoutes(dependencies.authService)
         childRoutes(dependencies.childService)
         measurementRoutes(dependencies.measurementService)
 

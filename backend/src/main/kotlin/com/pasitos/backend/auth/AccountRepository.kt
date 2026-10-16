@@ -21,9 +21,7 @@ data class Account(
     val lastMode: AccountMode? = null,
     val failedLoginCount: Int = 0,
     val lockedUntil: Instant? = null,
-) {
-    val fullName: String get() = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
-}
+)
 
 /** Todas las funciones asumen una transacción abierta. */
 class AccountRepository {

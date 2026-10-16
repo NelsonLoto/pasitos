@@ -26,7 +26,7 @@ class MeasurementRoutesTest {
 
     @Test
     fun `la carga de una medición devuelve lo guardado, sin percentiles`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val child = client.createChild(token, birthDate = "2026-06-15")
 
         val response = client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-10-01", 6.4, 62.55, 40.8))
@@ -47,7 +47,7 @@ class MeasurementRoutesTest {
 
     @Test
     fun `RN-CRE-03 la talla de un niño de 24 meses o más se guarda como medida de pie`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val child = client.createChild(token, birthDate = "2023-01-10")
 
         val body = client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-10-01", lengthCm = 98.0))
@@ -61,7 +61,7 @@ class MeasurementRoutesTest {
 
     @Test
     fun `el historial devuelve las mediciones ordenadas por fecha`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val child = client.createChild(token)
         client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-09-15", weightKg = 6.1))
         client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-07-15", weightKg = 4.2))
@@ -78,7 +78,7 @@ class MeasurementRoutesTest {
 
     @Test
     fun `RN-CRE-12 una segunda medición del mismo autor en la misma fecha responde 422`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val child = client.createChild(token)
         client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-10-01", weightKg = 6.4))
 
@@ -92,8 +92,8 @@ class MeasurementRoutesTest {
 
     @Test
     fun `el hijo de otro tutor responde 404 como si no existiera`() = apiTest { client ->
-        val ana = client.register(email = "ana@example.com").token
-        val beto = client.register(email = "beto@example.com").token
+        val ana = client.register(email = "ana@example.com").tokens.accessToken
+        val beto = client.register(email = "beto@example.com").tokens.accessToken
         val child = client.createChild(ana)
 
         val post = client.postMeasurement(beto, child.id, CreateMeasurementRequest("2026-10-01", weightKg = 6.4))
@@ -108,7 +108,7 @@ class MeasurementRoutesTest {
 
     @Test
     fun `sin valores, con fecha futura, con valores fuera de rango o con un id inválido responde 400`() = apiTest { client ->
-        val token = client.register().token
+        val token = client.register().tokens.accessToken
         val child = client.createChild(token)
         val tomorrow = ArgentinaClock().today().plusDays(1).toString()
 

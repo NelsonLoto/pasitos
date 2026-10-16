@@ -62,8 +62,8 @@ class AuthService(
     }
 
     suspend fun login(request: LoginRequest): AuthResponse =
-        when (val result = checkCredentials(request.email, request.password) { account -> openSession(account.id) }) {
-            is LoginResult.Success -> AuthResponse(result.account.toDto(), result.session)
+        when (val result = checkCredentials(request.email, request.password)) {
+            is LoginResult.Success -> AuthResponse(result.account.toDto(), result.tokens)
             LoginResult.InvalidCredentials -> throw InvalidCredentialsException()
             is LoginResult.Locked -> throw AccountLockedException(result.minutesLeft)
         }
@@ -111,49 +111,19 @@ class AuthService(
     suspend fun isSessionActive(sessionId: UUID): Boolean =
         tx { sessions.isActive(sessionId, clock.now()) }
 
-    // ---------------------------------------------------------------------------------------------
-    // Endpoints viejos de /auth que usa la app actual. Se borran en I0-06.
-    // ---------------------------------------------------------------------------------------------
-
-    suspend fun legacyRegister(request: LegacyRegisterRequest): LegacyAuthResponse {
-        val name = request.name.trim()
-        val email = request.email.trim().lowercase()
-        if (name.isBlank() || email.isBlank() || request.password.length < 6) {
-            throw InvalidInputException("Completá nombre, email y una contraseña de al menos 6 caracteres")
-        }
-        val passwordHash = PasswordHasher.hash(request.password)
-
-        return tx {
-            if (accounts.findByEmail(email) != null) throw EmailAlreadyInUseException()
-            // La app actual pide un solo campo de nombre: va entero a first_name.
-            val account = accounts.insertGuardian(email, firstName = name, lastName = "", passwordHash)
-            openLegacySession(account)
-        }
-    }
-
-    /** Comparte con [login] el bloqueo por intentos fallidos. */
-    suspend fun legacyLogin(request: LegacyLoginRequest): LegacyAuthResponse =
-        when (val result = checkCredentials(request.email, request.password) { account -> openLegacySession(account) }) {
-            is LoginResult.Success -> result.session
-            LoginResult.InvalidCredentials -> throw InvalidCredentialsException()
-            is LoginResult.Locked -> throw AccountLockedException(result.minutesLeft)
-        }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private sealed interface LoginResult<out T> {
-        data class Success<T>(val account: Account, val session: T) : LoginResult<T>
-        data object InvalidCredentials : LoginResult<Nothing>
-        data class Locked(val minutesLeft: Long) : LoginResult<Nothing>
+    private sealed interface LoginResult {
+        data class Success(val account: Account, val tokens: TokenPair) : LoginResult
+        data object InvalidCredentials : LoginResult
+        data class Locked(val minutesLeft: Long) : LoginResult
     }
 
     /**
      * Verifica email y contraseña con el bloqueo de RN-CTA-05: el quinto intento fallido seguido
      * bloquea el inicio con contraseña por 15 minutos. Los intentos fallidos se guardan aunque el
      * login falle, por eso el resultado se devuelve en vez de lanzar la excepción dentro de la
-     * transacción. Con las credenciales correctas abre la sesión con [open].
+     * transacción. Con las credenciales correctas abre la sesión.
      */
-    private suspend fun <T> checkCredentials(rawEmail: String, password: String, open: (Account) -> T): LoginResult<T> {
+    private suspend fun checkCredentials(rawEmail: String, password: String): LoginResult {
         val email = rawEmail.trim().lowercase()
         val now = clock.now()
         return tx {
@@ -167,7 +137,7 @@ class AuthService(
                 if (account.failedLoginCount > 0 || lockedUntil != null) {
                     accounts.updateLoginFailures(account.id, failedLoginCount = 0, lockedUntil = null)
                 }
-                return@tx LoginResult.Success(account, open(account))
+                return@tx LoginResult.Success(account, openSession(account.id))
             }
             val failures = account.failedLoginCount + 1
             if (failures >= MAX_FAILED_LOGINS) {
@@ -191,23 +161,6 @@ class AuthService(
     private fun tokenPair(accountId: UUID, sessionId: UUID, refreshToken: String, now: Instant): TokenPair {
         val access = jwt.generateToken(accountId, sessionId, now, ACCESS_TOKEN_LIFETIME)
         return TokenPair(access.token, access.expiresAt, refreshToken)
-    }
-
-    /**
-     * Asume una transacción abierta. La app actual no conoce los tokens de renovación: la sesión
-     * vence junto con su token, como antes de I0-05.
-     */
-    private fun openLegacySession(account: Account): LegacyAuthResponse {
-        val now = clock.now()
-        val sessionId = UUID.randomUUID()
-        val issued = jwt.generateToken(account.id, sessionId, now, jwt.legacyLifetime)
-        sessions.insert(sessionId, account.id, OpaqueToken.hash(OpaqueToken.generate()), issued.expiresAt, now)
-        return LegacyAuthResponse(
-            userId = account.id.toString(),
-            email = account.email,
-            name = account.fullName,
-            token = issued.token,
-        )
     }
 
     private fun validatePassword(password: String) {

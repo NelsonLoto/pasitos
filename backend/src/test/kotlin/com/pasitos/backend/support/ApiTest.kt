@@ -1,10 +1,10 @@
 package com.pasitos.backend.support
 
-import com.pasitos.backend.auth.LegacyAuthResponse
-import com.pasitos.backend.auth.LegacyRegisterRequest
 import com.pasitos.backend.child.ChildResponse
 import com.pasitos.backend.child.CreateChildRequest
 import com.pasitos.backend.module
+import com.pasitos.shared.api.auth.AuthResponse
+import com.pasitos.shared.api.auth.RegisterRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -55,15 +55,14 @@ class TestClock(private var now: Instant = Instant.parse("2026-10-16T15:00:00Z")
     override fun withZone(zone: ZoneId): Clock = this
 }
 
-/** Registro por el endpoint viejo de /auth, que usa la app actual hasta I0-06. */
+/** Registra una cuenta de tutor; su sesión queda abierta. */
 suspend fun HttpClient.register(
     email: String = "ana@example.com",
     password: String = "secreta123",
-    name: String = "Ana Pérez",
-): LegacyAuthResponse {
-    val response = post("/auth/register") {
+): AuthResponse {
+    val response = post("/api/v1/auth/register") {
         contentType(ContentType.Application.Json)
-        setBody(LegacyRegisterRequest(name = name, email = email, password = password))
+        setBody(RegisterRequest(firstName = "Ana", lastName = "Pérez", email = email, password = password, acceptTerms = true))
     }
     assertEquals(HttpStatusCode.Created, response.status)
     return response.body()
