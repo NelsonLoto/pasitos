@@ -1,6 +1,7 @@
-# Archivos de la app que todavía usan LocalDate.now() (anteriores a I0-07).
-# Esta lista solo puede achicarse: la tarea de I1 que reescribe uno de estos archivos lo pasa a
-# ArgentinaClock.today() y lo saca de acá (ADR-26, 31 · Calidad e integración continua).
+# Archivos de la app que todavía usan la zona horaria del teléfono, todos con LocalDate.now()
+# (anteriores a I0-07). Esta lista solo puede achicarse: la tarea de I1 que reescribe uno de estos
+# archivos lo pasa a ArgentinaClock.today() y lo saca de acá (ADR-26, 31 · Calidad e integración
+# continua).
 
 # Con lógica
 app/app/src/main/java/com/pasitos/app/core/designsystem/component/PsDatePickerField.kt

@@ -1,5 +1,8 @@
 # Actualizaciones de dependencias (01 · Stack, política de versiones). Dependabot abre los PRs
 # contra develop; se aplican en PRs propios, nunca mezcladas con funcionalidad.
+#
+# cooldown: propone una versión recién 14 días después de publicada, para que haya tiempo de
+# detectar una versión maliciosa o rota. No demora las actualizaciones de seguridad.
 version: 2
 updates:
   # Los tres builds de Gradle juntos: Kotlin y kotlinx.serialization tienen que tener la misma
@@ -14,11 +17,21 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
     commit-message:
       prefix: chore
+    # Un grupo toma una dependencia si es el primero cuyo patrón coincide
     groups:
-      # Menores y parches en un solo PR por semana. Cada versión mayor llega en su propio PR,
-      # porque se evalúa aparte (por ejemplo, Exposed 1.x)
+      # Kotlin y KSP en su propio PR: piden verificar KSP, Hilt, Room y AGP antes de subir, y si
+      # se traban no frenan al resto
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin:*"
+          - "org.jetbrains.kotlin.*"
+          - "com.google.devtools.ksp*"
+      # Menores y parches de todo lo demás en un solo PR por semana. Cada versión mayor llega en
+      # su propio PR, porque se evalúa aparte (por ejemplo, Exposed 1.x)
       gradle:
         patterns: ["*"]
         update-types: [minor, patch]
@@ -30,6 +43,8 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
     commit-message:
       prefix: chore
     groups:
