@@ -56,10 +56,11 @@ Android Keystore reales, que no existen en la JVM. Al terminar, Gradle desinstal
 
 ## Base local y sincronización
 
-- `core/database`: base Room cifrada con SQLCipher. Los repositorios piden el DAO a
-  `LocalDatabase` en cada uso (`localDatabase.get().xDao()`), porque al cerrar sesión la base se
-  borra y se crea otra.
+- `core/database`: base Room cifrada con SQLCipher, una por proceso. Hilt inyecta los DAOs; cada
+  dominio provee los suyos en `data/x/di/`. Al cerrar sesión se borran la base y su clave, y la
+  app se reinicia.
 - `core/security`: clave de la base cifrada con Tink y el Android Keystore.
+- `core/time`: `ArgentinaClock.today()` para "hoy". No usar `LocalDate.now()`.
 - `core/sync`: `SyncWorker` con WorkManager. Corre al abrir la app o volver a ella, después de
   cada escritura local y cada 15 minutos con red. En I0 solo registra la ejecución en Logcat
   (etiqueta `SyncWorker`).

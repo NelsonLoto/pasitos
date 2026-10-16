@@ -26,10 +26,20 @@ fun `RF-CRE-01 CA2 rechaza una fecha anterior al nacimiento`() { … }
 |---|---|---|
 | `shared` | `shared/**` | `./gradlew test` |
 | `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers) y validación de `openapi.yaml` |
-| `android` | `app/**` o `shared/**` | `./gradlew assembleDebug testDebugUnitTest lint` |
+| `android` | `app/**` o `shared/**` | `./gradlew assembleDebug testDebugUnitTest lint` y verificación de que no se use `LocalDate.now()` |
 | `docs` | `docs/**` | Verificación de links internos entre archivos Markdown |
 
 - Gradle con caché (`gradle/actions/setup-gradle`) para que cada ejecución tarde lo menos posible.
+  El job `android` también guarda en caché las imágenes de Android que descarga Robolectric
+  (`~/.m2/repository/org/robolectric`).
+- **`LocalDate.now()` prohibido en la app (ADR-26):** el job `android` falla si aparece en
+  `app/app/src/main` fuera de `core/time`. "Hoy" se calcula con `ArgentinaClock.today()`. Los
+  archivos anteriores a I0-07 que todavía lo usan quedan en una lista de excepciones que solo
+  puede achicarse: cada tarea de I1 que reescribe uno lo saca de la lista. Son diez:
+  - con lógica: `PsDatePickerField.kt`, `Child.kt`, `DoseStatusResolver.kt`,
+    `ChildOnboardingViewModel.kt`, `MeasurementFormUiState.kt` y `VaccineDetailViewModel.kt`;
+  - vistas previas de diseño, que conviene pasar a fechas fijas: `ChildSelectorScreen.kt`,
+    `GrowthChartScreen.kt`, `HomeScreen.kt` y `VaccineDetailScreen.kt`.
 - Un PR que solo toca documentación no compila la app ni el backend.
 - Duración estimada: entre 8 y 12 minutos cuando corren todos los jobs. El plan gratuito incluye
   2.000 minutos por mes.

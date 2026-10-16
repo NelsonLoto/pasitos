@@ -137,6 +137,12 @@ sequenceDiagram
   una notificación. Por eso ahí el inmediato se encola como trabajo normal, que con la app abierta
   igual corre en segundos.
 - La app abre o vuelve al frente: `ProcessLifecycleOwner` pide una sincronización inmediata.
+- La inmediata y la periódica son trabajos distintos y pueden coincidir. Si dos sincronizaciones
+  se pisan, un registro puede volver a una versión vieja. El motor de sincronización
+  (I0-08 e I1) cumple dos reglas:
+  - **Una sola a la vez:** usa un `Mutex`; la que llega segunda espera a que termine la primera.
+  - **Nunca pisar con algo más viejo:** al aplicar un cambio del servidor, se ignora si la fila
+    local ya tiene una `sync_version` mayor.
 
 - Cada fila local tiene `syncState`: `SYNCED`, `PENDING` o `ERROR` (RNF-OFF-04).
 - La app guarda la fecha de la última sincronización exitosa y la muestra en Perfil.
