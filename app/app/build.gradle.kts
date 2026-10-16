@@ -39,6 +39,12 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.all {
+            // Robolectric con Android 17 accede a una clase interna del JDK al preparar cada prueba
+            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+        }
+    }
 }
 
 dependencies {
