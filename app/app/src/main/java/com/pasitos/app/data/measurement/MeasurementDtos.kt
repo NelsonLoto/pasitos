@@ -12,7 +12,7 @@ internal data class CreateMeasurementRequestDto(
 
 @Serializable
 internal data class MeasurementResponseDto(
-    val id: Int,
+    val id: String,
     val fechaMedicion: String,
     val pesoKg: Double?,
     val tallaCm: Double?,
