@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
-/** Estado compartido a nivel de la Activity: la sesión y el hijo activo, para armar la ruta del tab "Crecimiento". */
+/** (Prueba de CI, no mergear.) Estado compartido a nivel de la Activity: la sesión y el hijo activo, para armar la ruta del tab "Crecimiento". */
 @HiltViewModel
 class AppViewModel @Inject constructor(
     authRepository: AuthRepository,
