@@ -13,7 +13,7 @@ esquema actual (`personas`, `usuarios`, `sesiones`, …) con una nueva línea ba
 | Fechas | `date` para fechas del calendario (nacimiento, medición, aplicación); `timestamptz` en UTC para momentos (ADR-26) |
 | Números | `numeric(6,3)` para kg, `numeric(5,1)` para cm |
 | Enums | `text` con `CHECK` (más fácil de migrar que los enums de PostgreSQL) |
-| Autoría | Tablas con registros cargados por usuarios: `author_account_id uuid not null`, `author_role text check (author_role in ('GUARDIAN','PEDIATRICIAN'))` |
+| Autoría | Tablas con registros cargados por usuarios: `author_account_id uuid not null`, `author_role text check (author_role in ('GUARDIAN','PEDIATRICIAN'))`. `author_account_id` no tiene FK a `accounts`: lo que cargó un pediatra queda en el historial del niño aunque su cuenta se elimine (RN-CTA-08) |
 | Sincronización | Tablas sincronizables: `sync_version bigint not null` y `deleted_at timestamptz` (ADR-15) |
 | Borrado | Las tablas sincronizables usan borrado lógico (`deleted_at`) para propagar el borrado. El resto, borrado físico con `ON DELETE` explícito |
 | Datos derivados | No se guardan percentiles, estados ni eventos automáticos (ADR-20, ADR-24) |
@@ -129,6 +129,9 @@ guardan en sus tablas con `consultation_id` y se hacen visibles al cerrar (RN-CO
 - **Versionado por fecha y hora** para evitar choques entre ramas en paralelo (ADR-23):
   `V2026_10_20_1530__create_children.sql`. Flyway se configura con `outOfOrder = true`.
 - Una migración ya mergeada **nunca se edita**: se corrige con una nueva.
+- Una columna que apunta a una tabla de un incremento posterior se crea sin FK, y la FK se agrega
+  en la migración que crea esa tabla. En la línea base: `consultation_id` en `measurements` y
+  `applied_doses` (I4) y `campaign_id` en `applied_doses` (I6).
 - Las migraciones son aditivas cuando sea posible. Si se elimina una columna, en el mismo PR se
   actualiza el objeto `Table` de Exposed (lección del proyecto: `selectAll()` falla si la tabla
   declara columnas que ya no existen).
