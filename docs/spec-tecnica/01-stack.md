@@ -88,3 +88,6 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
   proyecto: Hilt 2.57 no funcionaba con AGP 9).
 - Las versiones mayores (por ejemplo, Exposed 1.x) se evalúan con un PR exploratorio antes de
   adoptarlas.
+- Al cambiar el `targetSdk` de la app, actualizar `sdk` en
+  `app/app/src/test/resources/robolectric.properties`, para que las pruebas simulen la misma
+  versión de Android.

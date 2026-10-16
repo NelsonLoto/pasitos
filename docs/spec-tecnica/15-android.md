@@ -38,11 +38,11 @@ necesitar cambios grandes.
    necesitan coordinar migraciones. **Desde el piloto**, cada cambio lleva su migración de Room
    para no perder cambios pendientes de sincronizar.
 2. DTOs en `shared/api` y llamadas en `data/x/remote/`.
-3. Implementación del repositorio y su `@Binds` en `data/x/di/`. El repositorio recibe
-   `LocalDatabase` y pide el DAO en cada uso (`localDatabase.get().xDao()`), sin guardarlo en una
-   propiedad: al cerrar sesión la base se borra y se crea otra (sección 3). Después de cada
-   escritura sincronizable llama a `SyncScheduler.requestSync(LOCAL_CHANGE)`.
-4. `UiState`, ViewModel y pantalla en `feature/x/`.
+3. Implementación del repositorio en `data/x/`. En `data/x/di/` van su `@Binds` y el `@Provides`
+   de su DAO a partir de `PasitosDatabase`; el repositorio recibe el DAO inyectado. Después de
+   cada escritura sincronizable llama a `SyncScheduler.requestSync(LOCAL_CHANGE)`.
+4. `UiState`, ViewModel y pantalla en `feature/x/`. Para "hoy" se usa `ArgentinaClock.today()`,
+   nunca `LocalDate.now()`, que depende de la zona horaria del teléfono (ADR-26).
 5. Ruta en `core/navigation`.
 6. Pruebas del ViewModel con un repositorio falso.
 7. **Ejecutar la app** en emulador o dispositivo antes de abrir el PR (lección del proyecto: Hilt
@@ -62,12 +62,30 @@ necesitar cambios grandes.
     derivarla con PBKDF2 en cada apertura.
   - La clave se lee recién cuando Room abre el archivo, que siempre ocurre fuera del hilo
     principal.
-- `LocalDatabase` contiene la instancia de `PasitosDatabase`. Al cerrar sesión, `wipe()` cierra la
-  base y borra el archivo y la clave (RF-CTA-07). La próxima llamada a `get()` crea una base vacía
-  con una clave nueva.
-- Si la clave guardada ya no se puede descifrar (por ejemplo, porque el sistema borró la clave
-  del Keystore), el archivo tampoco se puede abrir. Entonces se borra y se empieza con una base
-  vacía; los datos vuelven del servidor.
+- Hay una sola `PasitosDatabase` por proceso, creada por `LocalDatabase`. Hilt la inyecta, y
+  también sus DAOs.
+- **Cierre de sesión (RF-CTA-07):** no debe quedar nada de la sesión anterior, ni en el teléfono
+  ni en memoria. Lo implementa I0-06, en este orden:
+  1. Si hay cambios pendientes, advertirlo y pedir confirmación (CA2).
+  2. Revocar la sesión en el servidor.
+  3. Cancelar los trabajos de sincronización.
+  4. Borrar los tokens y llamar a `LocalDatabase.wipe()`, que cierra la base y borra el archivo
+     y su clave (CA1).
+  5. Reiniciar el proceso de la app. Así desaparece todo lo que estaba en memoria: tokens en
+     caché, datos en repositorios y pantallas, la clave de la base en claro. Ningún componente
+     tiene que acordarse de limpiarse.
+- **Si la clave no se puede leer**, el archivo tampoco se puede abrir. Entonces se borra y se
+  empieza con una base vacía; los datos vuelven del servidor. Lo cargado sin conexión y no enviado
+  se pierde, porque sin la clave no se puede recuperar. Hay dos casos:
+  - El valor guardado no se puede descifrar: se crea una clave nueva.
+  - El cifrado mismo dejó de funcionar, por ejemplo porque el sistema invalidó la clave maestra
+    del Keystore (pasa en algunos teléfonos después de actualizaciones del sistema): se borra el
+    DataStore `secrets` completo, el keyset y la clave maestra, y se regeneran. Los tokens
+    también se pierden, así que el usuario vuelve a iniciar sesión.
+- **Riesgo aceptado:** si el Keystore no funciona en un teléfono desde el primer uso, Tink guarda
+  el keyset sin cifrar dentro del almacenamiento privado de la app. Otras apps no lo pueden leer y
+  Android cifra ese almacenamiento, pero falta la protección del Keystore. La app no se bloquea:
+  lo registra en el log (y en Sentry desde I0-10) para saber cuántos teléfonos caen en este caso.
 - La base, el DataStore `secrets` y el keyset quedan fuera de las copias de seguridad y del
   traspaso a otro teléfono (`backup_rules.xml` y `data_extraction_rules.xml`). Sin la clave del
   Keystore de origen, no se podrían descifrar en otro teléfono.
