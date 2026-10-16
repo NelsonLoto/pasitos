@@ -19,17 +19,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsBadge
-import com.pasitos.app.core.designsystem.component.NsBadgeTone
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsCard
-import com.pasitos.app.core.designsystem.component.NsDatePickerField
-import com.pasitos.app.core.designsystem.component.NsInputField
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsBadge
+import com.pasitos.app.core.designsystem.component.PsBadgeTone
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsCard
+import com.pasitos.app.core.designsystem.component.PsDatePickerField
+import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 
 @Composable
@@ -66,7 +66,7 @@ private fun VaccineDetailContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = state.vaccineDisplayName, showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = state.vaccineDisplayName, showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -75,20 +75,20 @@ private fun VaccineDetailContent(
                 .padding(horizontal = 20.dp)
                 .padding(top = 16.dp, bottom = 24.dp),
         ) {
-            NsBadge(text = state.statusText, tone = state.statusTone)
+            PsBadge(text = state.statusText, tone = state.statusTone)
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsCard(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Edad recomendada: ${state.recommendedAgeLabel}", style = NsType.BodySmall)
+            PsCard(modifier = Modifier.fillMaxWidth()) {
+                Text(text = "Edad recomendada: ${state.recommendedAgeLabel}", style = PsType.BodySmall)
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = state.description, style = NsType.Caption, color = NsColor.TextSecondary)
+                Text(text = state.description, style = PsType.Caption, color = PsColor.TextSecondary)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Registrar aplicación", style = NsType.BodySmall)
+            Text(text = "Registrar aplicación", style = PsType.BodySmall)
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsDatePickerField(
+            PsDatePickerField(
                 label = "Fecha de aplicación",
                 selectedDate = state.date,
                 onDateSelected = onDateSelected,
@@ -97,7 +97,7 @@ private fun VaccineDetailContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Lote (opcional)",
                 value = state.lot,
                 onValueChange = onLotChange,
@@ -107,14 +107,14 @@ private fun VaccineDetailContent(
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            NsButton(
+            PsButton(
                 text = "Guardar aplicación",
                 onClick = onSubmit,
-                variant = NsButtonVariant.Primary,
+                variant = PsButtonVariant.Primary,
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
@@ -126,12 +126,12 @@ private fun VaccineDetailContent(
 @Preview(showBackground = true)
 @Composable
 private fun VaccineDetailScreenPreview() {
-    NsTheme {
+    PsTheme {
         VaccineDetailContent(
             state = VaccineDetailUiState(
                 vaccineDisplayName = "Pentavalente (3ª dosis)",
                 statusText = "Atrasada · Correspondía a los 6 meses",
-                statusTone = NsBadgeTone.Error,
+                statusTone = PsBadgeTone.Error,
                 recommendedAgeLabel = "6 meses",
                 description = "Protege contra difteria, tétanos, tos convulsa, hepatitis B y Haemophilus " +
                     "influenzae tipo b (5 en 1). Tercera dosis del esquema primario.",

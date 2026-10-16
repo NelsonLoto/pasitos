@@ -16,12 +16,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pasitos.app.R
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Equivalente al componente "Top App Bar" (1:54), variantes Back=True/False. */
 @Composable
-fun NsTopAppBar(
+fun PsTopAppBar(
     title: String,
     showBack: Boolean,
     onBackClick: () -> Unit = {},
@@ -43,14 +43,14 @@ fun NsTopAppBar(
             }
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(12.dp))
         }
-        Text(text = title, style = NsType.H3)
+        Text(text = title, style = PsType.H3)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun NsTopAppBarPreview() {
-    NsTheme {
-        NsTopAppBar(title = "Crear cuenta", showBack = true)
+private fun PsTopAppBarPreview() {
+    PsTheme {
+        PsTopAppBar(title = "Crear cuenta", showBack = true)
     }
 }

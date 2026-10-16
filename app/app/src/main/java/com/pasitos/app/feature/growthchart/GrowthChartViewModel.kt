@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.pasitos.app.core.navigation.NsRoute
+import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.measurement.MeasurementRepository
 import com.pasitos.app.data.measurement.model.Measurement
@@ -23,7 +23,7 @@ class GrowthChartViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
 ) : ViewModel() {
 
-    val childId: String = savedStateHandle.toRoute<NsRoute.GrowthChart>().childId
+    val childId: String = savedStateHandle.toRoute<PsRoute.GrowthChart>().childId
 
     private val _selectedMetric = MutableStateFlow(MeasurementMetric.Weight)
 

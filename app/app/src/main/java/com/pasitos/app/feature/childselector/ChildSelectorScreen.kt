@@ -28,16 +28,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
 import com.pasitos.app.core.designsystem.component.ChildAvatar
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.core.designsystem.component.childAvatarColor
 import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ChildSex
 import com.pasitos.app.data.child.model.ageAndSexLabel
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 
 @Composable
@@ -75,7 +75,7 @@ private fun ChildSelectorContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Mis hijos", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Mis hijos", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -92,10 +92,10 @@ private fun ChildSelectorContent(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
-            NsButton(
+            PsButton(
                 text = "+ Agregar otro hijo/a",
                 onClick = onAddChildClick,
-                variant = NsButtonVariant.Secondary,
+                variant = PsButtonVariant.Secondary,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -121,8 +121,8 @@ private fun ChildRow(child: Child, selected: Boolean, onClick: () -> Unit) {
     ) {
         ChildAvatar(initial = child.name.take(1).uppercase(), color = childAvatarColor(child.id))
         Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
-            Text(text = child.name, style = NsType.BodyRegular)
-            Text(text = child.ageAndSexLabel(), style = NsType.BodySmall, color = NsColor.TextSecondary)
+            Text(text = child.name, style = PsType.BodyRegular)
+            Text(text = child.ageAndSexLabel(), style = PsType.BodySmall, color = PsColor.TextSecondary)
         }
         if (selected) {
             Icon(
@@ -137,7 +137,7 @@ private fun ChildRow(child: Child, selected: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun ChildSelectorScreenPreview() {
-    NsTheme {
+    PsTheme {
         ChildSelectorContent(
             state = ChildSelectorUiState(
                 children = listOf(

@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.pasitos.app.core.navigation.NsRoute
+import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.measurement.MeasurementRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,7 @@ class MeasurementHistoryViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
 ) : ViewModel() {
 
-    private val childId: String = savedStateHandle.toRoute<NsRoute.MeasurementHistory>().childId
+    private val childId: String = savedStateHandle.toRoute<PsRoute.MeasurementHistory>().childId
 
     val uiState: StateFlow<MeasurementHistoryUiState> = combine(
         childRepository.children,

@@ -10,37 +10,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import com.pasitos.app.ui.theme.extendedColors
 
-enum class NsBadgeTone { Success, Warning, Error, Info }
+enum class PsBadgeTone { Success, Warning, Error, Info }
 
 @Composable
-fun NsBadge(text: String, tone: NsBadgeTone, modifier: Modifier = Modifier) {
+fun PsBadge(text: String, tone: PsBadgeTone, modifier: Modifier = Modifier) {
     val color = when (tone) {
-        NsBadgeTone.Success -> MaterialTheme.extendedColors.success
-        NsBadgeTone.Warning -> MaterialTheme.extendedColors.warning
-        NsBadgeTone.Error -> MaterialTheme.colorScheme.error
-        NsBadgeTone.Info -> MaterialTheme.colorScheme.primary
+        PsBadgeTone.Success -> MaterialTheme.extendedColors.success
+        PsBadgeTone.Warning -> MaterialTheme.extendedColors.warning
+        PsBadgeTone.Error -> MaterialTheme.colorScheme.error
+        PsBadgeTone.Info -> MaterialTheme.colorScheme.primary
     }
     Row(
         modifier = modifier
             .background(color = color.copy(alpha = 0.15f), shape = RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
-        Text(text = text, style = NsType.Caption, color = color)
+        Text(text = text, style = PsType.Caption, color = color)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun NsBadgePreview() {
-    NsTheme {
+private fun PsBadgePreview() {
+    PsTheme {
         Row(modifier = Modifier.padding(16.dp)) {
-            NsBadge(text = "Aplicada", tone = NsBadgeTone.Success)
-            NsBadge(text = "Pendiente", tone = NsBadgeTone.Warning, modifier = Modifier.padding(start = 8.dp))
-            NsBadge(text = "Atrasada", tone = NsBadgeTone.Error, modifier = Modifier.padding(start = 8.dp))
+            PsBadge(text = "Aplicada", tone = PsBadgeTone.Success)
+            PsBadge(text = "Pendiente", tone = PsBadgeTone.Warning, modifier = Modifier.padding(start = 8.dp))
+            PsBadge(text = "Atrasada", tone = PsBadgeTone.Error, modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

@@ -21,12 +21,12 @@ import java.time.format.DateTimeFormatter
 private val DateDisplayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 /**
- * Campo de fecha: se ve como un [NsInputField] normal (mismo aspecto, solo lectura) pero al
+ * Campo de fecha: se ve como un [PsInputField] normal (mismo aspecto, solo lectura) pero al
  * tocarlo abre un `DatePickerDialog` nativo en vez de teclado libre — evita fechas mal formadas.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NsDatePickerField(
+fun PsDatePickerField(
     label: String,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
@@ -39,7 +39,7 @@ fun NsDatePickerField(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    NsInputField(
+    PsInputField(
         label = label,
         value = selectedDate?.format(DateDisplayFormatter).orEmpty(),
         onValueChange = {},

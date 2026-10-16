@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
-import com.pasitos.app.core.designsystem.component.NsCard
-import com.pasitos.app.core.designsystem.component.NsLineChart
-import com.pasitos.app.core.designsystem.component.NsSegmentedControl
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsCard
+import com.pasitos.app.core.designsystem.component.PsLineChart
+import com.pasitos.app.core.designsystem.component.PsSegmentedControl
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -77,17 +77,17 @@ private fun GrowthChartContent(
                 .padding(horizontal = 20.dp)
                 .padding(top = 30.dp, bottom = 14.dp),
         ) {
-            Text(text = "Crecimiento", style = NsType.H3)
+            Text(text = "Crecimiento", style = PsType.H3)
             if (state.childName.isNotBlank()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable(onClick = onChildChipClick),
                 ) {
-                    Text(text = state.childName, style = NsType.BodySmall)
+                    Text(text = state.childName, style = PsType.BodySmall)
                     Icon(
                         painter = painterResource(R.drawable.ic_chevron_down),
                         contentDescription = null,
-                        tint = NsColor.TextPrimary,
+                        tint = PsColor.TextPrimary,
                         modifier = Modifier
                             .padding(start = 3.dp)
                             .size(14.dp),
@@ -97,7 +97,7 @@ private fun GrowthChartContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-            NsSegmentedControl(
+            PsSegmentedControl(
                 options = MeasurementMetric.entries.map { it.label },
                 selectedIndex = MeasurementMetric.entries.indexOf(state.selectedMetric),
                 onSelect = { onMetricSelected(MeasurementMetric.entries[it]) },
@@ -105,15 +105,15 @@ private fun GrowthChartContent(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            NsCard(modifier = Modifier.fillMaxWidth()) {
-                NsLineChart(values = state.points.map { it.value })
+            PsCard(modifier = Modifier.fillMaxWidth()) {
+                PsLineChart(values = state.points.map { it.value })
             }
 
             Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = "El cálculo de percentil está pendiente de validación médica (RN02/RN03) y todavía no se muestra.",
-                style = NsType.Caption,
-                color = NsColor.TextSecondary,
+                style = PsType.Caption,
+                color = PsColor.TextSecondary,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -122,12 +122,12 @@ private fun GrowthChartContent(
                 Row {
                     Text(
                         text = "Última medición: ${formatValue(lastPoint.value)} ${state.selectedMetric.unit} el ${lastPoint.date.format(DateFormatter)} · ",
-                        style = NsType.BodySmall,
-                        color = NsColor.TextSecondary,
+                        style = PsType.BodySmall,
+                        color = PsColor.TextSecondary,
                     )
                     Text(
                         text = "Ver historial →",
-                        style = NsType.BodySmall,
+                        style = PsType.BodySmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onViewHistoryClick(childId) },
@@ -137,12 +137,12 @@ private fun GrowthChartContent(
                 Row {
                     Text(
                         text = "Todavía no cargaste ${state.selectedMetric.label.lowercase()} · ",
-                        style = NsType.BodySmall,
-                        color = NsColor.TextSecondary,
+                        style = PsType.BodySmall,
+                        color = PsColor.TextSecondary,
                     )
                     Text(
                         text = "Registrar medición →",
-                        style = NsType.BodySmall,
+                        style = PsType.BodySmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onRegisterMeasurementClick(childId) },
@@ -156,7 +156,7 @@ private fun GrowthChartContent(
 @Preview(showBackground = true)
 @Composable
 private fun GrowthChartScreenPreview() {
-    NsTheme {
+    PsTheme {
         GrowthChartContent(
             childId = "child-1",
             state = GrowthChartUiState(

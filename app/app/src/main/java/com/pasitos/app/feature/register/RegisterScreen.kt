@@ -25,13 +25,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsInputField
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 @Composable
 fun RegisterScreen(
@@ -74,7 +74,7 @@ private fun RegisterContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Crear cuenta", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Crear cuenta", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -85,12 +85,12 @@ private fun RegisterContent(
         ) {
             Text(
                 text = "Completá tus datos para empezar a registrar el crecimiento de tu hijo/a.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Nombre completo",
                 value = state.fullName,
                 onValueChange = onFullNameChange,
@@ -100,7 +100,7 @@ private fun RegisterContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Email",
                 value = state.email,
                 onValueChange = onEmailChange,
@@ -111,7 +111,7 @@ private fun RegisterContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Contraseña",
                 value = state.password,
                 onValueChange = onPasswordChange,
@@ -121,7 +121,7 @@ private fun RegisterContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Confirmar contraseña",
                 value = state.confirmPassword,
                 onValueChange = onConfirmPasswordChange,
@@ -133,20 +133,20 @@ private fun RegisterContent(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Al continuar aceptás los Términos y Condiciones y la Política de Privacidad.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
             )
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsButton(
+            PsButton(
                 text = "Crear cuenta",
                 onClick = onSubmit,
-                variant = NsButtonVariant.Primary,
+                variant = PsButtonVariant.Primary,
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
@@ -159,10 +159,10 @@ private fun RegisterContent(
                     .fillMaxWidth()
                     .clickable(onClick = onLoginClick),
             ) {
-                Text(text = "¿Ya tenés cuenta? ", style = NsType.BodySmall, color = NsColor.TextSecondary)
+                Text(text = "¿Ya tenés cuenta? ", style = PsType.BodySmall, color = PsColor.TextSecondary)
                 Text(
                     text = "Iniciá sesión",
-                    style = NsType.BodySmall,
+                    style = PsType.BodySmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -174,7 +174,7 @@ private fun RegisterContent(
 @Preview(showBackground = true)
 @Composable
 private fun RegisterScreenPreview() {
-    NsTheme {
+    PsTheme {
         RegisterContent(
             state = RegisterUiState(),
             onBackClick = {},
@@ -191,7 +191,7 @@ private fun RegisterScreenPreview() {
 @Preview(showBackground = true, name = "Con error")
 @Composable
 private fun RegisterScreenErrorPreview() {
-    NsTheme {
+    PsTheme {
         RegisterContent(
             state = RegisterUiState(
                 fullName = "María Gómez",

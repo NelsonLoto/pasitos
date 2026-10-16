@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
-import com.pasitos.app.core.designsystem.component.NsCard
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsCard
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 @Composable
 fun AdviceListScreen(
@@ -64,17 +64,17 @@ private fun AdviceListContent(
                 .padding(horizontal = 20.dp)
                 .padding(top = 30.dp, bottom = 14.dp),
         ) {
-            Text(text = "Consejos", style = NsType.H3)
+            Text(text = "Consejos", style = PsType.H3)
             if (state.childName.isNotBlank()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable(onClick = onChildChipClick),
                 ) {
-                    Text(text = state.childName, style = NsType.BodySmall)
+                    Text(text = state.childName, style = PsType.BodySmall)
                     Icon(
                         painter = painterResource(R.drawable.ic_chevron_down),
                         contentDescription = null,
-                        tint = NsColor.TextPrimary,
+                        tint = PsColor.TextPrimary,
                         modifier = Modifier
                             .padding(start = 3.dp)
                             .size(14.dp),
@@ -91,7 +91,7 @@ private fun AdviceListContent(
                 .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(text = state.stageLabel, style = NsType.H3.copy(fontSize = 15.sp))
+            Text(text = state.stageLabel, style = PsType.H3.copy(fontSize = 15.sp))
 
             state.tips.forEachIndexed { index, tip ->
                 AdviceTipRow(tip = tip, useAccentTone = index % 2 == 1, onClick = { onAdviceClick(tip.id) })
@@ -103,7 +103,7 @@ private fun AdviceListContent(
 @Composable
 private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick: () -> Unit) {
     val squareColor = if (useAccentTone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-    NsCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+    PsCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Row(
                 modifier = Modifier
@@ -116,18 +116,18 @@ private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick:
             Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(
                     text = tip.category,
-                    style = NsType.Caption.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp, fontSize = 10.5.sp),
-                    color = NsColor.TextSecondary,
+                    style = PsType.Caption.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp, fontSize = 10.5.sp),
+                    color = PsColor.TextSecondary,
                 )
-                Text(text = tip.title, style = NsType.BodySmall, modifier = Modifier.padding(top = 1.dp))
+                Text(text = tip.title, style = PsType.BodySmall, modifier = Modifier.padding(top = 1.dp))
                 Text(
                     text = tip.summary,
-                    style = NsType.Caption,
-                    color = NsColor.TextSecondary,
+                    style = PsType.Caption,
+                    color = PsColor.TextSecondary,
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
-            Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = NsColor.TextSecondary)
+            Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = PsColor.TextSecondary)
         }
     }
 }
@@ -135,7 +135,7 @@ private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick:
 @Preview(showBackground = true)
 @Composable
 private fun AdviceListScreenPreview() {
-    NsTheme {
+    PsTheme {
         AdviceListContent(
             state = AdviceListUiState(
                 childName = "Lucía",

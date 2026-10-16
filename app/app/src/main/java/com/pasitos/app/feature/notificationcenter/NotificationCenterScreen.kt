@@ -28,12 +28,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
-import com.pasitos.app.core.designsystem.component.NsCard
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
+import com.pasitos.app.core.designsystem.component.PsCard
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.data.notification.model.NotificationType
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import com.pasitos.app.ui.theme.extendedColors
 
 @Composable
@@ -53,7 +53,7 @@ private fun NotificationCenterContent(state: NotificationCenterUiState, onBackCl
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Notificaciones", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Notificaciones", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -67,8 +67,8 @@ private fun NotificationCenterContent(state: NotificationCenterUiState, onBackCl
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
                         text = section.header,
-                        style = NsType.Caption.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp),
-                        color = NsColor.TextSecondary,
+                        style = PsType.Caption.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp),
+                        color = PsColor.TextSecondary,
                     )
                     section.items.forEach { item ->
                         NotificationRow(item = item)
@@ -81,7 +81,7 @@ private fun NotificationCenterContent(state: NotificationCenterUiState, onBackCl
 
 @Composable
 private fun NotificationRow(item: NotificationItemUiModel) {
-    NsCard(modifier = Modifier.fillMaxWidth()) {
+    PsCard(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.Top) {
             Box(
                 modifier = Modifier
@@ -92,22 +92,22 @@ private fun NotificationRow(item: NotificationItemUiModel) {
                 Icon(
                     painter = painterResource(iconRes(item.type)),
                     contentDescription = null,
-                    tint = NsColor.TextOnPrimary,
+                    tint = PsColor.TextOnPrimary,
                     modifier = Modifier.size(18.dp),
                 )
             }
             Column(modifier = Modifier.padding(start = 10.dp)) {
-                Text(text = item.title, style = NsType.BodySmall)
+                Text(text = item.title, style = PsType.BodySmall)
                 Text(
                     text = item.body,
-                    style = NsType.Caption,
-                    color = NsColor.TextSecondary,
+                    style = PsType.Caption,
+                    color = PsColor.TextSecondary,
                     modifier = Modifier.padding(top = 2.dp),
                 )
                 Text(
                     text = item.relativeTime,
-                    style = NsType.Caption,
-                    color = NsColor.TextSecondary,
+                    style = PsType.Caption,
+                    color = PsColor.TextSecondary,
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
@@ -131,7 +131,7 @@ private fun iconRes(type: NotificationType): Int = when (type) {
 @Preview(showBackground = true)
 @Composable
 private fun NotificationCenterScreenPreview() {
-    NsTheme {
+    PsTheme {
         NotificationCenterContent(
             state = NotificationCenterUiState(
                 sections = listOf(

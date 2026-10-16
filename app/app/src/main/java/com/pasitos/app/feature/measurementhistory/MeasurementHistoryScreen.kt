@@ -21,12 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsCard
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
+import com.pasitos.app.core.designsystem.component.PsCard
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.data.measurement.model.Measurement
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 
 @Composable
@@ -46,14 +46,14 @@ private fun MeasurementHistoryContent(state: MeasurementHistoryUiState, onBackCl
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Historial de mediciones", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Historial de mediciones", showBack = true, onBackClick = onBackClick)
 
         if (state.measurements.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                 Text(
                     text = "Todavía no hay mediciones registradas.",
-                    style = NsType.BodySmall,
-                    color = NsColor.TextSecondary,
+                    style = PsType.BodySmall,
+                    color = PsColor.TextSecondary,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -76,24 +76,24 @@ private fun MeasurementHistoryContent(state: MeasurementHistoryUiState, onBackCl
 
 @Composable
 private fun MeasurementRow(measurement: Measurement) {
-    NsCard(modifier = Modifier.fillMaxWidth()) {
+    PsCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(text = formatDate(measurement.date), style = NsType.BodySmall)
+            Text(text = formatDate(measurement.date), style = PsType.BodySmall)
 
             Column(horizontalAlignment = Alignment.End) {
                 measurement.weightKg?.let {
-                    Text(text = "${formatDecimal(it)} kg", style = NsType.H3, color = NsColor.TextPrimary)
+                    Text(text = "${formatDecimal(it)} kg", style = PsType.H3, color = PsColor.TextPrimary)
                 }
                 val secondaryLine = buildList {
                     measurement.heightCm?.let { add("${formatDecimal(it)} cm") }
                     measurement.headCircumferenceCm?.let { add("PC ${formatDecimal(it)} cm") }
                 }.joinToString(" · ")
                 if (secondaryLine.isNotBlank()) {
-                    Text(text = secondaryLine, style = NsType.Caption, color = NsColor.TextSecondary)
+                    Text(text = secondaryLine, style = PsType.Caption, color = PsColor.TextSecondary)
                 }
             }
         }
@@ -111,7 +111,7 @@ private fun formatDecimal(value: Double): String = "%.1f".format(value).replace(
 @Preview(showBackground = true)
 @Composable
 private fun MeasurementHistoryScreenPreview() {
-    NsTheme {
+    PsTheme {
         MeasurementHistoryContent(
             state = MeasurementHistoryUiState(
                 childName = "Lucía",

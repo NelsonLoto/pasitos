@@ -17,17 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
-enum class NsButtonVariant { Primary, Secondary }
+enum class PsButtonVariant { Primary, Secondary }
 
 @Composable
-fun NsButton(
+fun PsButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    variant: NsButtonVariant = NsButtonVariant.Primary,
+    variant: PsButtonVariant = PsButtonVariant.Primary,
     enabled: Boolean = true,
     isLoading: Boolean = false,
     leadingIcon: (@Composable () -> Unit)? = null,
@@ -45,12 +45,12 @@ fun NsButton(
                 )
             } else {
                 leadingIcon?.invoke()
-                Text(text = text, style = NsType.ButtonLabel)
+                Text(text = text, style = PsType.ButtonLabel)
             }
         }
     }
     when (variant) {
-        NsButtonVariant.Primary -> Button(
+        PsButtonVariant.Primary -> Button(
             onClick = onClick,
             enabled = enabled && !isLoading,
             shape = shape,
@@ -61,7 +61,7 @@ fun NsButton(
             modifier = modifier.height(52.dp),
         ) { content() }
 
-        NsButtonVariant.Secondary -> OutlinedButton(
+        PsButtonVariant.Secondary -> OutlinedButton(
             onClick = onClick,
             enabled = enabled && !isLoading,
             shape = shape,
@@ -76,12 +76,12 @@ fun NsButton(
 
 @Preview(showBackground = true)
 @Composable
-private fun NsButtonPreview() {
-    NsTheme {
+private fun PsButtonPreview() {
+    PsTheme {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NsButton(text = "Iniciar sesión", onClick = {}, variant = NsButtonVariant.Primary)
-            NsButton(text = "Cancelar", onClick = {}, variant = NsButtonVariant.Secondary)
-            NsButton(text = "Cargando", onClick = {}, isLoading = true)
+            PsButton(text = "Iniciar sesión", onClick = {}, variant = PsButtonVariant.Primary)
+            PsButton(text = "Cancelar", onClick = {}, variant = PsButtonVariant.Secondary)
+            PsButton(text = "Cargando", onClick = {}, isLoading = true)
         }
     }
 }

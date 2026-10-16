@@ -11,13 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Fila de dato + badge, usada en historiales (RF04/RF06) y calendario de vacunación (RF10). */
 @Composable
-fun NsListRow(
+fun PsListRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
@@ -31,9 +31,9 @@ fun NsListRow(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
     ) {
-        Text(text = label, style = NsType.BodyRegular)
+        Text(text = label, style = PsType.BodyRegular)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = value, style = NsType.BodyMedium, color = NsColor.TextSecondary)
+            Text(text = value, style = PsType.BodyMedium, color = PsColor.TextSecondary)
             trailing?.let {
                 androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(start = 8.dp))
                 it()
@@ -41,18 +41,18 @@ fun NsListRow(
         }
     }
     if (showDivider) {
-        HorizontalDivider(color = NsColor.Border)
+        HorizontalDivider(color = PsColor.Border)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun NsListRowPreview() {
-    NsTheme {
-        NsListRow(
+private fun PsListRowPreview() {
+    PsTheme {
+        PsListRow(
             label = "15/07/2026",
             value = "12.4 kg",
-            trailing = { NsBadge(text = "P50", tone = NsBadgeTone.Success) },
+            trailing = { PsBadge(text = "P50", tone = PsBadgeTone.Success) },
             modifier = Modifier.padding(16.dp),
         )
     }

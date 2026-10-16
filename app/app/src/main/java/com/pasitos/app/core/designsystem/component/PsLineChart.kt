@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsType
 
 /**
  * Gráfico de línea simple: conecta [values] (ya ordenados cronológicamente) espaciados
@@ -22,7 +22,7 @@ import com.pasitos.app.ui.theme.NsType
  * de referencia — sirve para mostrar la evolución propia de una medición en el tiempo.
  */
 @Composable
-fun NsLineChart(values: List<Double>, modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 170.dp) {
+fun PsLineChart(values: List<Double>, modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 170.dp) {
     when {
         values.isEmpty() -> Box(
             modifier = modifier.fillMaxWidth().height(height),
@@ -30,8 +30,8 @@ fun NsLineChart(values: List<Double>, modifier: Modifier = Modifier, height: and
         ) {
             Text(
                 text = "Todavía no hay mediciones cargadas para mostrar la curva.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
             )
         }
 
@@ -41,8 +41,8 @@ fun NsLineChart(values: List<Double>, modifier: Modifier = Modifier, height: and
         ) {
             Text(
                 text = "Con una sola medición todavía no se puede trazar una curva.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
             )
         }
 

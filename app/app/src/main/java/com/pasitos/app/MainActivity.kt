@@ -13,11 +13,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.pasitos.app.core.designsystem.component.NsTabBar
-import com.pasitos.app.core.navigation.NsNavGraph
+import com.pasitos.app.core.designsystem.component.PsTabBar
+import com.pasitos.app.core.navigation.PsNavGraph
 import com.pasitos.app.core.navigation.currentTabItemOrNull
 import com.pasitos.app.core.navigation.toRoute
-import com.pasitos.app.ui.theme.NsTheme
+import com.pasitos.app.ui.theme.PsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,15 +26,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            NsTheme {
-                NsApp()
+            PsTheme {
+                PsApp()
             }
         }
     }
 }
 
 @Composable
-private fun NsApp(appViewModel: AppViewModel = hiltViewModel()) {
+private fun PsApp(appViewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val currentTab = currentTabItemOrNull(currentDestination)
@@ -43,7 +43,7 @@ private fun NsApp(appViewModel: AppViewModel = hiltViewModel()) {
     Scaffold(
         bottomBar = {
             if (currentTab != null) {
-                NsTabBar(
+                PsTabBar(
                     selected = currentTab,
                     onSelect = { tab ->
                         navController.navigate(tab.toRoute(activeChildId)) { launchSingleTop = true }
@@ -52,7 +52,7 @@ private fun NsApp(appViewModel: AppViewModel = hiltViewModel()) {
             }
         },
     ) { innerPadding ->
-        NsNavGraph(
+        PsNavGraph(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
         )
