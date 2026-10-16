@@ -18,6 +18,7 @@ import com.pasitos.shared.api.auth.TokenPair
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import org.slf4j.LoggerFactory
 
 class InvalidCredentialsException : UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, "Email o contraseña incorrectos")
 
@@ -39,6 +40,8 @@ class AuthService(
     private val clock: ArgentinaClock,
     private val termsVersion: String,
 ) {
+
+    private val logger = LoggerFactory.getLogger(AuthService::class.java)
 
     suspend fun register(request: RegisterRequest): AuthResponse {
         val firstName = request.firstName.trim()
@@ -80,7 +83,12 @@ class AuthService(
         val tokens = tx {
             val session = sessions.findByRefreshTokenForUpdate(tokenHash)
             if (session == null) {
-                sessions.findByPreviousRefreshToken(tokenHash)?.let { reused -> sessions.delete(reused.id) }
+                sessions.findByPreviousRefreshToken(tokenHash)?.let { reused ->
+                    sessions.delete(reused.id)
+                    // Puede ser un robo o una renovación cuya respuesta se perdió: se registra para
+                    // medir cuánto pasa (15 · App Android §4). Solo el ID, sin datos personales.
+                    logger.warn("Sesión {} revocada: llegó un token de renovación ya rotado", reused.id)
+                }
                 return@tx null
             }
             if (!session.expiresAt.isAfter(now)) {
