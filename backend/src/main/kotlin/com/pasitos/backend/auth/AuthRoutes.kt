@@ -94,25 +94,3 @@ fun Route.authRoutes(authService: AuthService) {
         }
     }
 }
-
-/** Endpoints viejos de `/auth` (sin `/api/v1`) que usa la app actual. Se borran en I0-06. */
-fun Route.legacyAuthRoutes(authService: AuthService) {
-    rateLimit(REGISTER_LIMIT) {
-        post("/auth/register") {
-            call.respond(HttpStatusCode.Created, authService.legacyRegister(call.receive()))
-        }
-    }
-
-    rateLimit(LOGIN_LIMIT) {
-        post("/auth/login") {
-            call.respond(HttpStatusCode.OK, authService.legacyLogin(call.receive()))
-        }
-    }
-
-    authenticate(AUTH_JWT) {
-        post("/auth/logout") {
-            authService.logout(call.caller())
-            call.respond(HttpStatusCode.NoContent)
-        }
-    }
-}
