@@ -36,9 +36,10 @@ que cambiaron. Detalle en
 - Si un job falla, el detalle está en la pestaña *Checks* del PR, y los informes de pruebas
   quedan como artefacto. Si falla por algo ajeno al PR (por ejemplo, una descarga que se cortó),
   primero probá *Re-run failed jobs*.
-- La app no puede usar `LocalDate.now()`: "hoy" es `ArgentinaClock.today()` (ADR-26). Si tu
-  tarea reescribe un archivo de `.github/scripts/local-date-now-allowlist.txt`, sacalo de la
-  lista. Lo podés verificar antes de pushear con `.github/scripts/check-local-date-now.sh`.
+- La app no puede usar la zona horaria del teléfono (`LocalDate.now()`,
+  `ZoneId.systemDefault()` y similares): "hoy" es `ArgentinaClock.today()` (ADR-26). Si tu tarea
+  reescribe un archivo de `.github/scripts/local-date-now-allowlist.txt`, sacalo de la lista. Lo
+  podés verificar antes de pushear con `.github/scripts/check-local-date-now.sh`.
 - Dependabot abre los lunes PRs con actualizaciones de dependencias. Se revisan y mergean como
   cualquier otro, siguiendo la
   [política de versiones](docs/spec-tecnica/01-stack.md#política-de-versiones).
