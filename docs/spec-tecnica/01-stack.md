@@ -57,16 +57,17 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Hilt | 2.59.2 | Inyección de dependencias |
 | KSP | 2.2.10-2.0.2 | Procesamiento de anotaciones (Hilt, Room) |
 | Ktor Client (OkHttp) | 3.6.0 | Cliente de la API |
-| Room | Nueva | Base local (ADR-02) |
-| SQLCipher for Android | Nueva | Cifrado de la base local (ADR-17) |
-| WorkManager | Nueva | Sincronización en segundo plano |
-| DataStore | Nueva | Preferencias y sesión |
-| Tink | Nueva | Cifrado de tokens y clave de la base con el Android Keystore |
+| Room | 2.8.5 | Base local (ADR-02) |
+| SQLCipher for Android | 4.19.1 | Cifrado de la base local (ADR-17) |
+| WorkManager (con Hilt Work 1.4.0) | 2.12.0 | Sincronización en segundo plano |
+| DataStore | 1.2.1 | Preferencias y sesión |
+| Tink | 1.23.0 | Cifrado de tokens y clave de la base con el Android Keystore |
 | Credential Manager + Google ID | Nueva | Inicio con Google (ADR-11) |
 | Firebase Cloud Messaging | Nueva | Recepción de avisos |
 | Biometric | Nueva | Bloqueo con huella o PIN (RF-CTA-08) |
 | Sentry Android | Nueva | Errores |
 | JUnit 4, kotlinx-coroutines-test, Turbine, Compose UI Test | Nueva/actual | Pruebas |
+| Robolectric | 4.17 | Pruebas de Room y WorkManager en la JVM, sin emulador |
 
 ## Herramientas
 
@@ -87,3 +88,6 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
   proyecto: Hilt 2.57 no funcionaba con AGP 9).
 - Las versiones mayores (por ejemplo, Exposed 1.x) se evalúan con un PR exploratorio antes de
   adoptarlas.
+- Al cambiar el `targetSdk` de la app, actualizar `sdk` en
+  `app/app/src/test/resources/robolectric.properties`, para que las pruebas simulen la misma
+  versión de Android.
