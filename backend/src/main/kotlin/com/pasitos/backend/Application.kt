@@ -2,6 +2,7 @@ package com.pasitos.backend
 
 import com.pasitos.backend.auth.authRoutes
 import com.pasitos.backend.auth.configureAuthentication
+import com.pasitos.backend.auth.legacyAuthRoutes
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
@@ -15,7 +16,9 @@ import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import java.time.Clock
 
 fun main(args: Array<String>) {
     // En desarrollo local carga backend/.env (no versionado) a system properties,
@@ -28,7 +31,11 @@ fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
-fun Application.module() {
+/**
+ * [clock] es el reloj de todo el backend. Las pruebas pasan uno propio para adelantar la hora
+ * (vencimiento de tokens y sesiones, bloqueo por intentos).
+ */
+fun Application.module(clock: Clock = Clock.systemUTC()) {
     install(ContentNegotiation) {
         json()
     }
@@ -37,15 +44,20 @@ fun Application.module() {
     val dataSource = DatabaseFactory.init(environment.config)
     monitor.subscribe(ApplicationStopped) { dataSource.close() }
 
-    val dependencies = Dependencies(environment.config)
+    val dependencies = Dependencies(environment.config, clock)
     configureAuthentication(dependencies.jwtService, dependencies.authService)
 
     routing {
         get("/health") {
             call.respondText("OK")
         }
-        authRoutes(dependencies.authService)
+        legacyAuthRoutes(dependencies.authService)
         childRoutes(dependencies.childService)
         measurementRoutes(dependencies.measurementService)
+
+        // API nueva (ADR-04). Los endpoints de arriba se mudan acá a medida que la app los adopta.
+        route("/api/v1") {
+            authRoutes(dependencies.authService)
+        }
     }
 }

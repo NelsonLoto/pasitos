@@ -14,6 +14,9 @@ import org.testcontainers.postgresql.PostgreSQLContainer
  */
 object TestDatabase {
 
+    /** Versión vigente de los términos en las pruebas. */
+    const val TERMS_VERSION = "2026-10"
+
     private val container = PostgreSQLContainer("postgres:16-alpine").apply { start() }
 
     init {
@@ -37,6 +40,7 @@ object TestDatabase {
         "jwt.issuer" to "pasitos-backend",
         "jwt.audience" to "pasitos-app",
         "jwt.expirationMinutes" to "480",
+        "terms.version" to TERMS_VERSION,
     )
 
     /** Vacía todas las tablas, salvo la historia de Flyway, para que cada prueba arranque limpia. */
