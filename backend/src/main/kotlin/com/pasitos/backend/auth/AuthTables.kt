@@ -35,3 +35,19 @@ object Sessions : Table("sessions") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+enum class ConsentType { TERMS, GUARDIAN_DECLARATION, CONFIDENTIALITY }
+
+/** Consentimientos con su versión y momento de aceptación (RN-CTA-02). */
+object Consents : Table("consents") {
+    val id = uuid("id")
+    val accountId = uuid("account_id")
+    val type = enumerationByName<ConsentType>("type", 32)
+    val version = text("version")
+    val childId = uuid("child_id").nullable()
+    val acceptedAt = timestampWithTimeZone("accepted_at")
+    val createdAt = timestampWithTimeZone("created_at").databaseGenerated()
+    val updatedAt = timestampWithTimeZone("updated_at").nullable()
+
+    override val primaryKey = PrimaryKey(id)
+}
