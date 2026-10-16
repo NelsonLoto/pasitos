@@ -10,11 +10,11 @@ plugins {
 tasks.register("prepareKotlinBuildScriptModel") {}
 
 android {
-    namespace = "com.ninosano.app"
+    namespace = "com.pasitos.app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.ninosano.app"
+        applicationId = "com.pasitos.app"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
