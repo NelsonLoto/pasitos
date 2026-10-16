@@ -22,8 +22,12 @@ import com.pasitos.app.feature.vaccination.VaccinationCalendarScreen
 import com.pasitos.app.feature.vaccinedetail.VaccineDetailScreen
 
 @Composable
-fun PsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController = navController, startDestination = PsRoute.Login, modifier = modifier) {
+fun PsNavGraph(
+    navController: NavHostController,
+    startDestination: PsRoute,
+    modifier: Modifier = Modifier,
+) {
+    NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         composable<PsRoute.Login> {
             LoginScreen(
                 onLoginSuccess = {
@@ -115,11 +119,6 @@ fun PsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
                 onMyChildrenClick = { navController.navigate(PsRoute.ChildSelector) },
                 onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
                 onExportReportsClick = { navController.navigate(PsRoute.ReportExport) },
-                onLogoutClick = {
-                    navController.navigate(PsRoute.Login) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                },
             )
         }
     }

@@ -4,6 +4,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pasitos.app.data.auth.AuthRepository
+import com.pasitos.app.data.auth.model.SessionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -19,7 +20,14 @@ class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = MutableStateFlow(
+        LoginUiState(
+            generalError = when (authRepository.sessionState.value) {
+                SessionState.SignedOut(expired = true) -> "Tu sesión venció. Iniciá sesión de nuevo."
+                else -> null
+            },
+        )
+    )
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     private val _navigateToHome = Channel<Unit>(Channel.BUFFERED)
