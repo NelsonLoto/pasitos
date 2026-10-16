@@ -21,12 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsBadge
-import com.pasitos.app.core.designsystem.component.NsBadgeTone
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsBadge
+import com.pasitos.app.core.designsystem.component.PsBadgeTone
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 private const val ADVICE_SOURCE_DISCLAIMER = "Fuente: Ministerio de Salud de Argentina · Sociedad Argentina de Pediatría (SAP). " +
     "Este contenido no reemplaza el criterio médico profesional."
@@ -48,7 +48,7 @@ private fun AdviceDetailContent(state: AdviceDetailUiState, onBackClick: () -> U
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Consejo", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Consejo", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -58,16 +58,16 @@ private fun AdviceDetailContent(state: AdviceDetailUiState, onBackClick: () -> U
                 .padding(top = 12.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            NsBadge(text = state.badgeText, tone = NsBadgeTone.Info)
-            Text(text = state.title, style = NsType.H2)
+            PsBadge(text = state.badgeText, tone = PsBadgeTone.Info)
+            Text(text = state.title, style = PsType.H2)
             Text(text = state.emoji, fontSize = 40.sp)
 
             state.body.forEach { paragraph ->
-                Text(text = paragraph, style = NsType.BodySmall)
+                Text(text = paragraph, style = PsType.BodySmall)
             }
 
-            HorizontalDivider(color = NsColor.Border)
-            Text(text = ADVICE_SOURCE_DISCLAIMER, style = NsType.Caption, color = NsColor.TextSecondary)
+            HorizontalDivider(color = PsColor.Border)
+            Text(text = ADVICE_SOURCE_DISCLAIMER, style = PsType.Caption, color = PsColor.TextSecondary)
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
@@ -76,7 +76,7 @@ private fun AdviceDetailContent(state: AdviceDetailUiState, onBackClick: () -> U
 @Preview(showBackground = true)
 @Composable
 private fun AdviceDetailScreenPreview() {
-    NsTheme {
+    PsTheme {
         AdviceDetailContent(
             state = AdviceDetailUiState(
                 badgeText = "ALIMENTACIÓN · 6 A 8 MESES",

@@ -3,7 +3,7 @@ package com.pasitos.app.feature.advicedetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
-import com.pasitos.app.core.navigation.NsRoute
+import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.data.advice.AdviceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,7 +17,7 @@ class AdviceDetailViewModel @Inject constructor(
     adviceRepository: AdviceRepository,
 ) : ViewModel() {
 
-    private val adviceId: String = savedStateHandle.toRoute<NsRoute.AdviceDetail>().adviceId
+    private val adviceId: String = savedStateHandle.toRoute<PsRoute.AdviceDetail>().adviceId
     private val tip = adviceRepository.tips.value.first { it.id == adviceId }
 
     private val _uiState = MutableStateFlow(

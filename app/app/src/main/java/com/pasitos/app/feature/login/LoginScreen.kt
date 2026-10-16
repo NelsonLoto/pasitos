@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsInputField
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 @Composable
 fun LoginScreen(
@@ -89,17 +89,17 @@ private fun LoginContent(
     ) {
         Text(text = "🌱", fontSize = 40.sp)
         Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "Pasitos", style = NsType.H1)
+        Text(text = "Pasitos", style = PsType.H1)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Seguimiento y control del niño sano",
-            style = NsType.BodySmall,
-            color = NsColor.TextSecondary,
+            style = PsType.BodySmall,
+            color = PsColor.TextSecondary,
             textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(36.dp))
-        NsInputField(
+        PsInputField(
             label = "Email",
             value = state.email,
             onValueChange = onEmailChange,
@@ -109,7 +109,7 @@ private fun LoginContent(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-        NsInputField(
+        PsInputField(
             label = "Contraseña",
             value = state.password,
             onValueChange = onPasswordChange,
@@ -129,13 +129,13 @@ private fun LoginContent(
 
         state.generalError?.let { error ->
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+            Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
         }
 
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "¿Olvidaste tu contraseña?",
-            style = NsType.BodySmall,
+            style = PsType.BodySmall,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.End,
@@ -145,10 +145,10 @@ private fun LoginContent(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-        NsButton(
+        PsButton(
             text = "Iniciar sesión",
             onClick = onSubmit,
-            variant = NsButtonVariant.Primary,
+            variant = PsButtonVariant.Primary,
             enabled = !state.isLoading,
             isLoading = state.isLoading,
             modifier = Modifier.fillMaxWidth(),
@@ -156,21 +156,21 @@ private fun LoginContent(
 
         Spacer(modifier = Modifier.height(20.dp))
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            HorizontalDivider(modifier = Modifier.weight(1f), color = NsColor.Border)
+            HorizontalDivider(modifier = Modifier.weight(1f), color = PsColor.Border)
             Text(
                 text = "o continuá con",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
                 modifier = Modifier.padding(horizontal = 10.dp),
             )
-            HorizontalDivider(modifier = Modifier.weight(1f), color = NsColor.Border)
+            HorizontalDivider(modifier = Modifier.weight(1f), color = PsColor.Border)
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        NsButton(
+        PsButton(
             text = "Continuar con Google",
             onClick = onGoogleSignInClick,
-            variant = NsButtonVariant.Secondary,
+            variant = PsButtonVariant.Secondary,
             enabled = !state.isLoading,
             leadingIcon = {
                 Icon(
@@ -185,10 +185,10 @@ private fun LoginContent(
 
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.clickable(onClick = onRegisterClick)) {
-            Text(text = "¿No tenés cuenta? ", style = NsType.BodySmall, color = NsColor.TextSecondary)
+            Text(text = "¿No tenés cuenta? ", style = PsType.BodySmall, color = PsColor.TextSecondary)
             Text(
                 text = "Registrate",
-                style = NsType.BodySmall,
+                style = PsType.BodySmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -199,7 +199,7 @@ private fun LoginContent(
 @Preview(showBackground = true)
 @Composable
 private fun LoginScreenPreview() {
-    NsTheme {
+    PsTheme {
         LoginContent(
             state = LoginUiState(email = "familia@ejemplo.com"),
             onEmailChange = {},
@@ -216,7 +216,7 @@ private fun LoginScreenPreview() {
 @Preview(showBackground = true, name = "Con error")
 @Composable
 private fun LoginScreenErrorPreview() {
-    NsTheme {
+    PsTheme {
         LoginContent(
             state = LoginUiState(
                 email = "familia@ejemplo.com",

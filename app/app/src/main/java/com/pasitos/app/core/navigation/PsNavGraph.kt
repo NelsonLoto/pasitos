@@ -22,101 +22,101 @@ import com.pasitos.app.feature.vaccination.VaccinationCalendarScreen
 import com.pasitos.app.feature.vaccinedetail.VaccineDetailScreen
 
 @Composable
-fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController = navController, startDestination = NsRoute.Login, modifier = modifier) {
-        composable<NsRoute.Login> {
+fun PsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(navController = navController, startDestination = PsRoute.Login, modifier = modifier) {
+        composable<PsRoute.Login> {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(NsRoute.Home) {
-                        popUpTo(NsRoute.Login) { inclusive = true }
+                    navController.navigate(PsRoute.Home) {
+                        popUpTo(PsRoute.Login) { inclusive = true }
                     }
                 },
-                onRegisterClick = { navController.navigate(NsRoute.Register) },
+                onRegisterClick = { navController.navigate(PsRoute.Register) },
             )
         }
-        composable<NsRoute.Register> {
+        composable<PsRoute.Register> {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
-                onRegisterSuccess = { navController.navigate(NsRoute.ChildOnboarding) },
+                onRegisterSuccess = { navController.navigate(PsRoute.ChildOnboarding) },
                 onLoginClick = { navController.popBackStack() },
             )
         }
-        composable<NsRoute.ChildOnboarding> {
+        composable<PsRoute.ChildOnboarding> {
             ChildOnboardingScreen(
                 onBackClick = { navController.popBackStack() },
                 onSaveSuccess = {
-                    navController.navigate(NsRoute.Home) {
-                        popUpTo(NsRoute.Login) { inclusive = true }
+                    navController.navigate(PsRoute.Home) {
+                        popUpTo(PsRoute.Login) { inclusive = true }
                     }
                 },
             )
         }
-        composable<NsRoute.ChildSelector> {
+        composable<PsRoute.ChildSelector> {
             ChildSelectorScreen(
                 onBackClick = { navController.popBackStack() },
-                onAddChildClick = { navController.navigate(NsRoute.ChildOnboarding) },
+                onAddChildClick = { navController.navigate(PsRoute.ChildOnboarding) },
             )
         }
-        composable<NsRoute.Home> {
+        composable<PsRoute.Home> {
             HomeScreen(
-                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
-                onNotificationsClick = { navController.navigate(NsRoute.NotificationCenter) },
-                onMeasurementClick = { childId -> navController.navigate(NsRoute.MeasurementForm(childId)) },
-                onVaccinesClick = { navController.navigate(NsRoute.VaccinationCalendar) },
-                onAdviceClick = { navController.navigate(NsRoute.AdviceList) },
-                onAddChildClick = { navController.navigate(NsRoute.ChildOnboarding) },
+                onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
+                onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
+                onMeasurementClick = { childId -> navController.navigate(PsRoute.MeasurementForm(childId)) },
+                onVaccinesClick = { navController.navigate(PsRoute.VaccinationCalendar) },
+                onAdviceClick = { navController.navigate(PsRoute.AdviceList) },
+                onAddChildClick = { navController.navigate(PsRoute.ChildOnboarding) },
             )
         }
-        composable<NsRoute.MeasurementForm> {
+        composable<PsRoute.MeasurementForm> {
             MeasurementFormScreen(
                 onBackClick = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() },
             )
         }
-        composable<NsRoute.GrowthChart> {
+        composable<PsRoute.GrowthChart> {
             GrowthChartScreen(
-                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
-                onViewHistoryClick = { childId -> navController.navigate(NsRoute.MeasurementHistory(childId)) },
-                onRegisterMeasurementClick = { childId -> navController.navigate(NsRoute.MeasurementForm(childId)) },
+                onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
+                onViewHistoryClick = { childId -> navController.navigate(PsRoute.MeasurementHistory(childId)) },
+                onRegisterMeasurementClick = { childId -> navController.navigate(PsRoute.MeasurementForm(childId)) },
             )
         }
-        composable<NsRoute.MeasurementHistory> {
+        composable<PsRoute.MeasurementHistory> {
             MeasurementHistoryScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.VaccinationCalendar> {
+        composable<PsRoute.VaccinationCalendar> {
             VaccinationCalendarScreen(
-                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
-                onDoseClick = { vaccineId -> navController.navigate(NsRoute.VaccineDetail(vaccineId)) },
+                onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
+                onDoseClick = { vaccineId -> navController.navigate(PsRoute.VaccineDetail(vaccineId)) },
             )
         }
-        composable<NsRoute.VaccineDetail> {
+        composable<PsRoute.VaccineDetail> {
             VaccineDetailScreen(
                 onBackClick = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() },
             )
         }
-        composable<NsRoute.NotificationCenter> {
+        composable<PsRoute.NotificationCenter> {
             NotificationCenterScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.AdviceList> {
+        composable<PsRoute.AdviceList> {
             AdviceListScreen(
-                onChildChipClick = { navController.navigate(NsRoute.ChildSelector) },
-                onAdviceClick = { adviceId -> navController.navigate(NsRoute.AdviceDetail(adviceId)) },
+                onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
+                onAdviceClick = { adviceId -> navController.navigate(PsRoute.AdviceDetail(adviceId)) },
             )
         }
-        composable<NsRoute.AdviceDetail> {
+        composable<PsRoute.AdviceDetail> {
             AdviceDetailScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.ReportExport> {
+        composable<PsRoute.ReportExport> {
             ReportExportScreen(onBackClick = { navController.popBackStack() })
         }
-        composable<NsRoute.Profile> {
+        composable<PsRoute.Profile> {
             ProfileScreen(
-                onMyChildrenClick = { navController.navigate(NsRoute.ChildSelector) },
-                onNotificationsClick = { navController.navigate(NsRoute.NotificationCenter) },
-                onExportReportsClick = { navController.navigate(NsRoute.ReportExport) },
+                onMyChildrenClick = { navController.navigate(PsRoute.ChildSelector) },
+                onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
+                onExportReportsClick = { navController.navigate(PsRoute.ReportExport) },
                 onLogoutClick = {
-                    navController.navigate(NsRoute.Login) {
+                    navController.navigate(PsRoute.Login) {
                         popUpTo(navController.graph.id) { inclusive = true }
                     }
                 },

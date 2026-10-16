@@ -15,11 +15,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pasitos.app.R
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
-enum class NsTabItem(val label: String, val iconRes: Int) {
+enum class PsTabItem(val label: String, val iconRes: Int) {
     Home("Inicio", R.drawable.ic_tab_home),
     Growth("Crecimiento", R.drawable.ic_tab_growth),
     Vaccines("Vacunas", R.drawable.ic_tab_vaccines),
@@ -29,12 +29,12 @@ enum class NsTabItem(val label: String, val iconRes: Int) {
 
 /** Tab bar inferior de 5 secciones (patrón de pantalla del Design System). */
 @Composable
-fun NsTabBar(selected: NsTabItem, onSelect: (NsTabItem) -> Unit) {
+fun PsTabBar(selected: PsTabItem, onSelect: (PsTabItem) -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.border(BorderStroke(1.dp, NsColor.Border)),
+        modifier = Modifier.border(BorderStroke(1.dp, PsColor.Border)),
     ) {
-        NsTabItem.entries.forEach { item ->
+        PsTabItem.entries.forEach { item ->
             NavigationBarItem(
                 selected = item == selected,
                 onClick = { onSelect(item) },
@@ -44,12 +44,12 @@ fun NsTabBar(selected: NsTabItem, onSelect: (NsTabItem) -> Unit) {
                         contentDescription = item.label,
                     )
                 },
-                label = { Text(item.label, style = NsType.Caption) },
+                label = { Text(item.label, style = PsType.Caption) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = NsColor.TextSecondary,
-                    unselectedTextColor = NsColor.TextSecondary,
+                    unselectedIconColor = PsColor.TextSecondary,
+                    unselectedTextColor = PsColor.TextSecondary,
                     indicatorColor = Color.Transparent,
                 ),
             )
@@ -59,8 +59,8 @@ fun NsTabBar(selected: NsTabItem, onSelect: (NsTabItem) -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun NsTabBarPreview() {
-    NsTheme {
-        NsTabBar(selected = NsTabItem.Home, onSelect = {})
+private fun PsTabBarPreview() {
+    PsTheme {
+        PsTabBar(selected = PsTabItem.Home, onSelect = {})
     }
 }

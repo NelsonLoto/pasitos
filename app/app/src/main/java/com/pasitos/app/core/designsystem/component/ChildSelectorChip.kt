@@ -21,9 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.pasitos.app.R
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Selector de hijo: chip/pill prominente en el header de Home (avatar + nombre + edad + chevron). */
 @Composable
@@ -44,13 +44,13 @@ fun ChildSelectorChip(
     ) {
         ChildAvatar(initial = name.take(1).uppercase(), color = avatarColor, size = 44.dp)
         Column(modifier = Modifier.padding(start = 12.dp).weight(1f, fill = false)) {
-            Text(text = name, style = NsType.H2)
-            Text(text = ageAndSex, style = NsType.Caption, color = NsColor.TextSecondary)
+            Text(text = name, style = PsType.H2)
+            Text(text = ageAndSex, style = PsType.Caption, color = PsColor.TextSecondary)
         }
         Icon(
             painter = painterResource(R.drawable.ic_chevron_down),
             contentDescription = null,
-            tint = NsColor.TextSecondary,
+            tint = PsColor.TextSecondary,
             modifier = Modifier.padding(start = 8.dp),
         )
     }
@@ -58,7 +58,7 @@ fun ChildSelectorChip(
 
 /** Color determinístico por hijo (misma paleta que usa Figma: primary/accent alternados). */
 fun childAvatarColor(childId: String): Color =
-    if (Math.floorMod(childId.hashCode(), 2) == 0) NsColor.Primary else NsColor.Accent
+    if (Math.floorMod(childId.hashCode(), 2) == 0) PsColor.Primary else PsColor.Accent
 
 @Composable
 fun ChildAvatar(initial: String, color: Color, size: androidx.compose.ui.unit.Dp = 46.dp) {
@@ -68,18 +68,18 @@ fun ChildAvatar(initial: String, color: Color, size: androidx.compose.ui.unit.Dp
             .background(color = color, shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = initial, style = NsType.H3, color = NsColor.TextOnPrimary)
+        Text(text = initial, style = PsType.H3, color = PsColor.TextOnPrimary)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ChildSelectorChipPreview() {
-    NsTheme {
+    PsTheme {
         ChildSelectorChip(
             name = "Lucía",
             ageAndSex = "8 meses · Niña",
-            avatarColor = NsColor.Primary,
+            avatarColor = PsColor.Primary,
             onClick = {},
             modifier = Modifier.padding(16.dp),
         )

@@ -14,16 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Control segmentado, usado por ejemplo para elegir la métrica de la curva de crecimiento. */
 @Composable
-fun NsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun PsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .background(color = NsColor.Border, shape = RoundedCornerShape(10.dp))
+            .background(color = PsColor.Border, shape = RoundedCornerShape(10.dp))
             .padding(3.dp),
     ) {
         options.forEachIndexed { index, option ->
@@ -41,9 +41,9 @@ fun NsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int
             ) {
                 Text(
                     text = option,
-                    style = NsType.Caption,
+                    style = PsType.Caption,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (selected) MaterialTheme.colorScheme.primary else NsColor.TextSecondary,
+                    color = if (selected) MaterialTheme.colorScheme.primary else PsColor.TextSecondary,
                 )
             }
         }
@@ -52,9 +52,9 @@ fun NsSegmentedControl(options: List<String>, selectedIndex: Int, onSelect: (Int
 
 @Preview(showBackground = true)
 @Composable
-private fun NsSegmentedControlPreview() {
-    NsTheme {
-        NsSegmentedControl(
+private fun PsSegmentedControlPreview() {
+    PsTheme {
+        PsSegmentedControl(
             options = listOf("Peso", "Talla", "P. cefálico"),
             selectedIndex = 0,
             onSelect = {},

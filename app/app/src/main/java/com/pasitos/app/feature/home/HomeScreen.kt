@@ -37,8 +37,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
 import com.pasitos.app.core.designsystem.component.ChildSelectorChip
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
 import com.pasitos.app.core.designsystem.component.StatCard
 import com.pasitos.app.core.designsystem.component.childAvatarColor
 import com.pasitos.app.data.child.model.Child
@@ -46,9 +46,9 @@ import com.pasitos.app.data.child.model.ChildSex
 import com.pasitos.app.data.child.model.ageAndSexLabel
 import com.pasitos.app.data.child.model.ageLabel
 import com.pasitos.app.data.measurement.model.Measurement
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -104,11 +104,11 @@ private fun HomeContent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(text = "Hola, ${state.greetingName}", style = NsType.Caption, color = NsColor.TextSecondary)
+                Text(text = "Hola, ${state.greetingName}", style = PsType.Caption, color = PsColor.TextSecondary)
                 Icon(
                     painter = painterResource(R.drawable.ic_bell),
                     contentDescription = "Notificaciones",
-                    tint = NsColor.TextSecondary,
+                    tint = PsColor.TextSecondary,
                     modifier = Modifier
                         .size(22.dp)
                         .clickable(onClick = onNotificationsClick),
@@ -180,17 +180,17 @@ private fun HomeContent(
                 val stageLabel = state.activeChild?.let { "Consejos para esta etapa · ${it.ageLabel()}" } ?: "Consejos por edad"
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "🌱", fontSize = 15.sp)
-                    Text(text = stageLabel, style = NsType.BodySmall, modifier = Modifier.padding(start = 6.dp))
+                    Text(text = stageLabel, style = PsType.BodySmall, modifier = Modifier.padding(start = 6.dp))
                 }
                 Text(
                     text = "Todavía no cargamos contenido de consejos para esta edad.",
-                    style = NsType.Caption,
-                    color = NsColor.TextSecondary,
+                    style = PsType.Caption,
+                    color = PsColor.TextSecondary,
                     modifier = Modifier.padding(top = 5.dp),
                 )
                 Text(
                     text = "Ver todos los consejos →",
-                    style = NsType.Caption,
+                    style = PsType.Caption,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 5.dp),
@@ -199,10 +199,10 @@ private fun HomeContent(
 
             if (state.activeChild == null) {
                 Spacer(modifier = Modifier.height(4.dp))
-                NsButton(
+                PsButton(
                     text = "+ Agregar hijo/a",
                     onClick = onAddChildClick,
-                    variant = NsButtonVariant.Secondary,
+                    variant = PsButtonVariant.Secondary,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -227,21 +227,21 @@ private fun StatCardEmpty(
             .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp))
             .padding(13.dp),
     ) {
-        Text(text = label, style = NsType.Caption, color = NsColor.TextSecondary)
+        Text(text = label, style = PsType.Caption, color = PsColor.TextSecondary)
         Text(
             text = message,
-            style = NsType.BodySmall,
-            color = NsColor.TextSecondary,
+            style = PsType.BodySmall,
+            color = PsColor.TextSecondary,
             modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
         )
-        Text(text = actionLabel, style = NsType.Caption, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+        Text(text = actionLabel, style = PsType.Caption, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    NsTheme {
+    PsTheme {
         HomeContent(
             state = HomeUiState(
                 greetingName = "María",

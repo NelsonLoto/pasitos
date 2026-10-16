@@ -32,12 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 @Composable
 fun ReportExportScreen(
@@ -70,7 +70,7 @@ private fun ReportExportContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Exportar reporte", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Exportar reporte", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -87,7 +87,7 @@ private fun ReportExportContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(text = "Incluir en el reporte", style = NsType.BodySmall)
+                Text(text = "Incluir en el reporte", style = PsType.BodySmall)
 
                 ReportSectionCheckbox(
                     label = "Curva de crecimiento",
@@ -106,10 +106,10 @@ private fun ReportExportContent(
                 )
             }
 
-            NsButton(
+            PsButton(
                 text = "Generar y compartir PDF",
                 onClick = onSubmit,
-                variant = NsButtonVariant.Primary,
+                variant = PsButtonVariant.Primary,
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
@@ -117,16 +117,16 @@ private fun ReportExportContent(
 
             Text(
                 text = "Se genera un PDF descargable para compartir con el pediatra en la consulta.",
-                style = NsType.Caption,
-                color = NsColor.TextSecondary,
+                style = PsType.Caption,
+                color = PsColor.TextSecondary,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
 
             state.generalError?.let { error ->
-                Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
             state.successMessage?.let { message ->
-                Text(text = message, style = NsType.BodySmall, color = MaterialTheme.colorScheme.primary)
+                Text(text = message, style = PsType.BodySmall, color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -139,13 +139,13 @@ private fun ReportPreviewCard(childName: String) {
             .width(220.dp)
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp))
             .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-            .border(width = 1.dp, color = NsColor.Border, shape = RoundedCornerShape(12.dp))
+            .border(width = 1.dp, color = PsColor.Border, shape = RoundedCornerShape(12.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
             text = if (childName.isNotBlank()) "Reporte — $childName" else "Reporte",
-            style = NsType.H3.copy(fontSize = 12.sp),
+            style = PsType.H3.copy(fontSize = 12.sp),
         )
         ReportPreviewChart()
         SkeletonBar(widthFraction = 1f)
@@ -157,7 +157,7 @@ private fun ReportPreviewCard(childName: String) {
 @Composable
 private fun ReportPreviewChart() {
     val primaryColor = MaterialTheme.colorScheme.primary
-    val borderColor = NsColor.Border
+    val borderColor = PsColor.Border
     Canvas(modifier = Modifier.fillMaxWidth().height(60.dp)) {
         fun point(xFraction: Float, yFraction: Float) = Offset(size.width * xFraction, size.height * yFraction)
 
@@ -201,7 +201,7 @@ private fun SkeletonBar(widthFraction: Float) {
         modifier = Modifier
             .fillMaxWidth(widthFraction)
             .height(6.dp)
-            .background(color = NsColor.Border, shape = RoundedCornerShape(3.dp)),
+            .background(color = PsColor.Border, shape = RoundedCornerShape(3.dp)),
     ) {}
 }
 
@@ -213,17 +213,17 @@ private fun ReportSectionCheckbox(label: String, checked: Boolean, onCheckedChan
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary,
-                checkmarkColor = NsColor.TextOnPrimary,
+                checkmarkColor = PsColor.TextOnPrimary,
             ),
         )
-        Text(text = label, style = NsType.BodySmall, modifier = Modifier.padding(start = 2.dp))
+        Text(text = label, style = PsType.BodySmall, modifier = Modifier.padding(start = 2.dp))
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ReportExportScreenPreview() {
-    NsTheme {
+    PsTheme {
         ReportExportContent(
             state = ReportExportUiState(childName = "Lucía"),
             onBackClick = {},

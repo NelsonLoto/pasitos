@@ -33,10 +33,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.core.designsystem.component.ChildAvatar
-import com.pasitos.app.core.designsystem.component.NsMenuRow
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsMenuRow
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 @Composable
 fun ProfileScreen(
@@ -75,7 +75,7 @@ private fun ProfileContent(
     ) {
         Text(
             text = "Perfil",
-            style = NsType.H3,
+            style = PsType.H3,
             modifier = Modifier.padding(horizontal = 20.dp).padding(top = 30.dp, bottom = 14.dp),
         )
 
@@ -88,30 +88,30 @@ private fun ProfileContent(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ChildAvatar(initial = state.avatarInitial, color = NsColor.Primary, size = 56.dp)
+                ChildAvatar(initial = state.avatarInitial, color = PsColor.Primary, size = 56.dp)
                 Column(modifier = Modifier.padding(start = 12.dp)) {
-                    Text(text = state.displayName, style = NsType.BodyMedium)
-                    Text(text = state.email, style = NsType.BodySmall, color = NsColor.TextSecondary)
+                    Text(text = state.displayName, style = PsType.BodyMedium)
+                    Text(text = state.email, style = PsType.BodySmall, color = PsColor.TextSecondary)
                 }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SectionLabel(text = "CUENTA")
                 MenuGroupCard {
-                    NsMenuRow(icon = Icons.Filled.Person, label = "Mis hijos/as", onClick = onMyChildrenClick)
-                    HorizontalDivider(color = NsColor.Border)
-                    NsMenuRow(icon = Icons.Filled.Notifications, label = "Notificaciones", onClick = onNotificationsClick)
-                    HorizontalDivider(color = NsColor.Border)
-                    NsMenuRow(icon = Icons.Filled.Description, label = "Exportar reportes", onClick = onExportReportsClick)
+                    PsMenuRow(icon = Icons.Filled.Person, label = "Mis hijos/as", onClick = onMyChildrenClick)
+                    HorizontalDivider(color = PsColor.Border)
+                    PsMenuRow(icon = Icons.Filled.Notifications, label = "Notificaciones", onClick = onNotificationsClick)
+                    HorizontalDivider(color = PsColor.Border)
+                    PsMenuRow(icon = Icons.Filled.Description, label = "Exportar reportes", onClick = onExportReportsClick)
                 }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SectionLabel(text = "SOPORTE")
                 MenuGroupCard {
-                    NsMenuRow(icon = Icons.AutoMirrored.Filled.HelpOutline, label = "Ayuda y soporte", onClick = {})
-                    HorizontalDivider(color = NsColor.Border)
-                    NsMenuRow(icon = Icons.Filled.Lock, label = "Términos y Privacidad", onClick = {})
+                    PsMenuRow(icon = Icons.AutoMirrored.Filled.HelpOutline, label = "Ayuda y soporte", onClick = {})
+                    HorizontalDivider(color = PsColor.Border)
+                    PsMenuRow(icon = Icons.Filled.Lock, label = "Términos y Privacidad", onClick = {})
                 }
             }
 
@@ -126,7 +126,7 @@ private fun ProfileContent(
                     Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                     Text(
                         text = "Cerrar sesión",
-                        style = NsType.BodyRegular,
+                        style = PsType.BodyRegular,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(start = 10.dp),
                     )
@@ -140,8 +140,8 @@ private fun ProfileContent(
 private fun SectionLabel(text: String) {
     Text(
         text = text,
-        style = NsType.Caption.copy(letterSpacing = 0.5.sp),
-        color = NsColor.TextSecondary,
+        style = PsType.Caption.copy(letterSpacing = 0.5.sp),
+        color = PsColor.TextSecondary,
     )
 }
 
@@ -160,7 +160,7 @@ private fun MenuGroupCard(content: @Composable () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun ProfileScreenPreview() {
-    NsTheme {
+    PsTheme {
         ProfileContent(
             state = ProfileUiState(displayName = "María Gómez", email = "maria@email.com", avatarInitial = "M"),
             onMyChildrenClick = {},

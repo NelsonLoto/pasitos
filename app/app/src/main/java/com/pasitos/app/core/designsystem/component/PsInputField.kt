@@ -17,9 +17,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /**
  * Equivalente al componente "Input Field" (1:34) del Design System de Figma: label + input box.
@@ -29,7 +29,7 @@ import com.pasitos.app.ui.theme.NsType
  * nacimiento con un `DatePickerDialog`), manteniendo el mismo aspecto visual que un campo normal.
  */
 @Composable
-fun NsInputField(
+fun PsInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -46,8 +46,8 @@ fun NsInputField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(label, style = NsType.BodySmall) },
-            placeholder = placeholder?.let { { Text(it, style = NsType.BodyRegular, color = NsColor.TextSecondary) } },
+            label = { Text(label, style = PsType.BodySmall) },
+            placeholder = placeholder?.let { { Text(it, style = PsType.BodyRegular, color = PsColor.TextSecondary) } },
             isError = errorText != null,
             // Un campo "solo click" se deshabilita para bloquear teclado/foco, pero conserva
             // los colores de habilitado para que no se vea grisado.
@@ -59,14 +59,14 @@ fun NsInputField(
             trailingIcon = trailingIcon,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = NsColor.Border,
+                unfocusedBorderColor = PsColor.Border,
                 errorBorderColor = MaterialTheme.colorScheme.error,
-                disabledBorderColor = NsColor.Border,
-                disabledTextColor = NsColor.TextPrimary,
-                disabledLabelColor = NsColor.TextSecondary,
-                disabledPlaceholderColor = NsColor.TextSecondary,
+                disabledBorderColor = PsColor.Border,
+                disabledTextColor = PsColor.TextPrimary,
+                disabledLabelColor = PsColor.TextSecondary,
+                disabledPlaceholderColor = PsColor.TextSecondary,
             ),
-            textStyle = NsType.BodyRegular,
+            textStyle = PsType.BodyRegular,
             modifier = Modifier
                 .fillMaxWidth()
                 .let { m ->
@@ -84,7 +84,7 @@ fun NsInputField(
         if (errorText != null) {
             Text(
                 text = errorText,
-                style = NsType.Caption,
+                style = PsType.Caption,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp),
             )
@@ -94,11 +94,11 @@ fun NsInputField(
 
 @Preview(showBackground = true)
 @Composable
-private fun NsInputFieldPreview() {
-    NsTheme {
+private fun PsInputFieldPreview() {
+    PsTheme {
         Column(modifier = Modifier.padding(16.dp)) {
-            NsInputField(label = "Email", value = "familia@ejemplo.com", onValueChange = {})
-            NsInputField(
+            PsInputField(label = "Email", value = "familia@ejemplo.com", onValueChange = {})
+            PsInputField(
                 label = "Contraseña",
                 value = "1234",
                 onValueChange = {},

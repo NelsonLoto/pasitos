@@ -19,7 +19,7 @@ val InterFamily = FontFamily(
 )
 
 /** Los 8 estilos de texto del Design System de Figma. */
-object NsType {
+object PsType {
     val H1 = TextStyle(fontFamily = BalooFamily, fontWeight = FontWeight.SemiBold, fontSize = 28.sp, lineHeight = 34.sp)
     val H2 = TextStyle(fontFamily = BalooFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp)
     val H3 = TextStyle(fontFamily = BalooFamily, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, lineHeight = 24.sp)
@@ -32,13 +32,13 @@ object NsType {
 
 // Nota: tamaños en sp son un punto de partida razonable — confirmar contra las specs
 // exactas de Figma (estilos de texto) cuando se haga la revisión visual pantalla por pantalla.
-val NsMaterialTypography = Typography(
-    headlineLarge = NsType.H1,
-    headlineMedium = NsType.H2,
-    headlineSmall = NsType.H3,
-    bodyLarge = NsType.BodyRegular,
-    bodyMedium = NsType.BodyMedium,
-    bodySmall = NsType.BodySmall,
-    labelSmall = NsType.Caption,
-    labelLarge = NsType.ButtonLabel,
+val PsMaterialTypography = Typography(
+    headlineLarge = PsType.H1,
+    headlineMedium = PsType.H2,
+    headlineSmall = PsType.H3,
+    bodyLarge = PsType.BodyRegular,
+    bodyMedium = PsType.BodyMedium,
+    bodySmall = PsType.BodySmall,
+    labelSmall = PsType.Caption,
+    labelLarge = PsType.ButtonLabel,
 )

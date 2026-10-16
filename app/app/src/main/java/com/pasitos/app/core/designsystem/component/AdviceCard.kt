@@ -9,25 +9,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Tarjeta de "Consejos por edad" (RF14): tinte + link "Leer más". */
 @Composable
 fun AdviceCard(title: String, summary: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    NsCard(modifier = modifier.clickable(onClick = onClick)) {
+    PsCard(modifier = modifier.clickable(onClick = onClick)) {
         Column {
-            Text(text = title, style = NsType.H3)
+            Text(text = title, style = PsType.H3)
             Text(
                 text = summary,
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
                 modifier = Modifier.padding(top = 4.dp),
             )
             Text(
                 text = "Leer más",
-                style = NsType.BodySmall,
+                style = PsType.BodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -38,7 +38,7 @@ fun AdviceCard(title: String, summary: String, onClick: () -> Unit, modifier: Mo
 @Preview(showBackground = true)
 @Composable
 private fun AdviceCardPreview() {
-    NsTheme {
+    PsTheme {
         AdviceCard(
             title = "¿Qué se viene? 6 meses",
             summary = "Comienza la introducción de alimentos sólidos.",

@@ -8,28 +8,28 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /** Tokens de color que no tienen slot nativo en el ColorScheme de Material 3. */
-data class NsExtendedColors(
+data class PsExtendedColors(
     val success: Color,
     val warning: Color,
 )
 
 private val LocalNsExtendedColors = staticCompositionLocalOf {
-    NsExtendedColors(success = NsColor.Success, warning = NsColor.Warning)
+    PsExtendedColors(success = PsColor.Success, warning = PsColor.Warning)
 }
 
-private val NsLightColorScheme = lightColorScheme(
-    primary = NsColor.Primary,
-    onPrimary = NsColor.TextOnPrimary,
-    tertiary = NsColor.Accent,
-    onTertiary = NsColor.TextOnPrimary,
-    error = NsColor.Error,
-    onError = NsColor.TextOnPrimary,
-    background = NsColor.Background,
-    onBackground = NsColor.TextPrimary,
-    surface = NsColor.Surface,
-    onSurface = NsColor.TextPrimary,
-    onSurfaceVariant = NsColor.TextSecondary,
-    outline = NsColor.Border,
+private val PsLightColorScheme = lightColorScheme(
+    primary = PsColor.Primary,
+    onPrimary = PsColor.TextOnPrimary,
+    tertiary = PsColor.Accent,
+    onTertiary = PsColor.TextOnPrimary,
+    error = PsColor.Error,
+    onError = PsColor.TextOnPrimary,
+    background = PsColor.Background,
+    onBackground = PsColor.TextPrimary,
+    surface = PsColor.Surface,
+    onSurface = PsColor.TextPrimary,
+    onSurfaceVariant = PsColor.TextSecondary,
+    outline = PsColor.Border,
 )
 
 /**
@@ -37,17 +37,17 @@ private val NsLightColorScheme = lightColorScheme(
  * no tiene un modo oscuro definido todavía.
  */
 @Composable
-fun NsTheme(content: @Composable () -> Unit) {
+fun PsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalNsExtendedColors provides NsExtendedColors(success = NsColor.Success, warning = NsColor.Warning),
+        LocalNsExtendedColors provides PsExtendedColors(success = PsColor.Success, warning = PsColor.Warning),
     ) {
         MaterialTheme(
-            colorScheme = NsLightColorScheme,
-            typography = NsMaterialTypography,
+            colorScheme = PsLightColorScheme,
+            typography = PsMaterialTypography,
             content = content,
         )
     }
 }
 
-val MaterialTheme.extendedColors: NsExtendedColors
+val MaterialTheme.extendedColors: PsExtendedColors
     @Composable get() = LocalNsExtendedColors.current

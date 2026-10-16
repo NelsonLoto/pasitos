@@ -20,13 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsDatePickerField
-import com.pasitos.app.core.designsystem.component.NsInputField
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsDatePickerField
+import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 
 @Composable
@@ -67,7 +67,7 @@ private fun MeasurementFormContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Registrar medición", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Registrar medición", showBack = true, onBackClick = onBackClick)
 
         Column(
             modifier = Modifier
@@ -76,7 +76,7 @@ private fun MeasurementFormContent(
                 .padding(horizontal = 24.dp)
                 .padding(top = 20.dp, bottom = 24.dp),
         ) {
-            NsDatePickerField(
+            PsDatePickerField(
                 label = "Fecha",
                 selectedDate = state.date,
                 onDateSelected = onDateSelected,
@@ -85,7 +85,7 @@ private fun MeasurementFormContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Peso (kg)",
                 value = state.weightKg,
                 onValueChange = onWeightChange,
@@ -96,7 +96,7 @@ private fun MeasurementFormContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Talla / longitud (cm)",
                 value = state.heightCm,
                 onValueChange = onHeightChange,
@@ -107,7 +107,7 @@ private fun MeasurementFormContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsInputField(
+            PsInputField(
                 label = "Perímetro cefálico (cm)",
                 value = state.headCircumferenceCm,
                 onValueChange = onHeadCircumferenceChange,
@@ -119,14 +119,14 @@ private fun MeasurementFormContent(
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            NsButton(
+            PsButton(
                 text = "Guardar medición",
                 onClick = onSubmit,
-                variant = NsButtonVariant.Primary,
+                variant = PsButtonVariant.Primary,
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
@@ -138,7 +138,7 @@ private fun MeasurementFormContent(
 @Preview(showBackground = true)
 @Composable
 private fun MeasurementFormScreenPreview() {
-    NsTheme {
+    PsTheme {
         MeasurementFormContent(
             state = MeasurementFormUiState(weightKg = "7,8", heightCm = "68"),
             onBackClick = {},

@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Fila de menú (usada en Perfil/Configuración): ícono + label + chevron. */
 @Composable
-fun NsMenuRow(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun PsMenuRow(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -32,18 +32,18 @@ fun NsMenuRow(icon: ImageVector, label: String, onClick: () -> Unit, modifier: M
             .padding(vertical = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = NsColor.TextSecondary)
-            Text(text = label, style = NsType.BodyRegular, modifier = Modifier.padding(start = 12.dp))
+            Icon(icon, contentDescription = null, tint = PsColor.TextSecondary)
+            Text(text = label, style = PsType.BodyRegular, modifier = Modifier.padding(start = 12.dp))
         }
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = NsColor.TextSecondary)
+        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = PsColor.TextSecondary)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun NsMenuRowPreview() {
-    NsTheme {
-        NsMenuRow(
+private fun PsMenuRowPreview() {
+    PsTheme {
+        PsMenuRow(
             icon = Icons.Filled.Notifications,
             label = "Notificaciones",
             onClick = {},

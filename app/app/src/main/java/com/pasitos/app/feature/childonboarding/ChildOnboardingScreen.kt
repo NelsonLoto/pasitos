@@ -33,15 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.R
-import com.pasitos.app.core.designsystem.component.NsButton
-import com.pasitos.app.core.designsystem.component.NsButtonVariant
-import com.pasitos.app.core.designsystem.component.NsDatePickerField
-import com.pasitos.app.core.designsystem.component.NsInputField
-import com.pasitos.app.core.designsystem.component.NsTopAppBar
+import com.pasitos.app.core.designsystem.component.PsButton
+import com.pasitos.app.core.designsystem.component.PsButtonVariant
+import com.pasitos.app.core.designsystem.component.PsDatePickerField
+import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.data.child.model.ChildSex
-import com.pasitos.app.ui.theme.NsColor
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsColor
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 import java.time.LocalDate
 
 @Composable
@@ -80,7 +80,7 @@ private fun ChildOnboardingContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        NsTopAppBar(title = "Agregar hijo/a", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = "Agregar hijo/a", showBack = true, onBackClick = onBackClick)
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -92,8 +92,8 @@ private fun ChildOnboardingContent(
         ) {
             Text(
                 text = "Contanos un poco sobre tu hijo/a para empezar su seguimiento.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
+                style = PsType.BodySmall,
+                color = PsColor.TextSecondary,
                 textAlign = TextAlign.Center,
             )
 
@@ -104,7 +104,7 @@ private fun ChildOnboardingContent(
                 modifier = Modifier
                     .size(88.dp)
                     .background(color = MaterialTheme.colorScheme.surface, shape = CircleShape)
-                    .border(width = 1.5.dp, color = NsColor.Border, shape = CircleShape),
+                    .border(width = 1.5.dp, color = PsColor.Border, shape = CircleShape),
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -116,7 +116,7 @@ private fun ChildOnboardingContent(
             )
 
             Spacer(modifier = Modifier.height(18.dp))
-            NsInputField(
+            PsInputField(
                 label = "Nombre",
                 value = state.name,
                 onValueChange = onNameChange,
@@ -126,7 +126,7 @@ private fun ChildOnboardingContent(
             )
 
             Spacer(modifier = Modifier.height(18.dp))
-            NsDatePickerField(
+            PsDatePickerField(
                 label = "Fecha de nacimiento",
                 selectedDate = state.birthDate,
                 onDateSelected = onBirthDateSelected,
@@ -135,7 +135,7 @@ private fun ChildOnboardingContent(
             )
 
             Spacer(modifier = Modifier.height(18.dp))
-            Text(text = "Sexo", style = NsType.BodySmall, color = NsColor.TextSecondary, modifier = Modifier.fillMaxWidth())
+            Text(text = "Sexo", style = PsType.BodySmall, color = PsColor.TextSecondary, modifier = Modifier.fillMaxWidth())
 
             Spacer(modifier = Modifier.height(18.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -156,14 +156,14 @@ private fun ChildOnboardingContent(
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = error, style = NsType.BodySmall, color = MaterialTheme.colorScheme.error)
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(18.dp))
-            NsButton(
+            PsButton(
                 text = "Guardar y continuar",
                 onClick = onSubmit,
-                variant = NsButtonVariant.Primary,
+                variant = PsButtonVariant.Primary,
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
@@ -184,15 +184,15 @@ private fun SexOption(label: String, selected: Boolean, onClick: () -> Unit, mod
                 } else {
                     Modifier
                         .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(10.dp))
-                        .border(width = 1.5.dp, color = NsColor.Border, shape = RoundedCornerShape(10.dp))
+                        .border(width = 1.5.dp, color = PsColor.Border, shape = RoundedCornerShape(10.dp))
                 },
             )
             .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
         Text(
             text = label,
-            style = NsType.BodyRegular,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else NsColor.TextPrimary,
+            style = PsType.BodyRegular,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else PsColor.TextPrimary,
         )
     }
 }
@@ -200,7 +200,7 @@ private fun SexOption(label: String, selected: Boolean, onClick: () -> Unit, mod
 @Preview(showBackground = true)
 @Composable
 private fun ChildOnboardingScreenPreview() {
-    NsTheme {
+    PsTheme {
         ChildOnboardingContent(
             state = ChildOnboardingUiState(name = "Lucía", birthDate = LocalDate.of(2024, 3, 15)),
             onBackClick = {},

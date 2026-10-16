@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pasitos.app.ui.theme.NsTheme
-import com.pasitos.app.ui.theme.NsType
+import com.pasitos.app.ui.theme.PsTheme
+import com.pasitos.app.ui.theme.PsType
 
 /** Contenedor con el efecto "elevation/card" (drop shadow) del Design System. */
 @Composable
-fun NsCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun PsCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Column(
         modifier = modifier
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp))
@@ -29,10 +29,10 @@ fun NsCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun NsCardPreview() {
-    NsTheme {
-        NsCard(modifier = Modifier.padding(16.dp)) {
-            Text("Próxima vacuna", style = NsType.BodyMedium)
+private fun PsCardPreview() {
+    PsTheme {
+        PsCard(modifier = Modifier.padding(16.dp)) {
+            Text("Próxima vacuna", style = PsType.BodyMedium)
         }
     }
 }

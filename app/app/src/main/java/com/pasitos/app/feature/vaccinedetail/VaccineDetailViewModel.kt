@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.pasitos.app.core.designsystem.component.NsBadgeTone
-import com.pasitos.app.core.navigation.NsRoute
+import com.pasitos.app.core.designsystem.component.PsBadgeTone
+import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.vaccination.VaccinationRepository
 import com.pasitos.app.data.vaccination.model.DoseStatus
@@ -30,7 +30,7 @@ class VaccineDetailViewModel @Inject constructor(
     private val vaccinationRepository: VaccinationRepository,
 ) : ViewModel() {
 
-    private val doseScheduleId: String = savedStateHandle.toRoute<NsRoute.VaccineDetail>().vaccineId
+    private val doseScheduleId: String = savedStateHandle.toRoute<PsRoute.VaccineDetail>().vaccineId
     private val dose: VaccineDoseSchedule = vaccinationRepository.schedule.first { it.id == doseScheduleId }
 
     private val _uiState = MutableStateFlow(buildInitialState())
@@ -99,10 +99,10 @@ class VaccineDetailViewModel @Inject constructor(
         DoseStatus.Applied -> "Aplicada" + (appliedDate?.let { " · ${DateDisplayFormatter.format(it)}" } ?: "")
     }
 
-    private fun statusTone(status: DoseStatus): NsBadgeTone = when (status) {
-        DoseStatus.Applied -> NsBadgeTone.Success
-        DoseStatus.Overdue -> NsBadgeTone.Error
-        DoseStatus.Pending -> NsBadgeTone.Warning
+    private fun statusTone(status: DoseStatus): PsBadgeTone = when (status) {
+        DoseStatus.Applied -> PsBadgeTone.Success
+        DoseStatus.Overdue -> PsBadgeTone.Error
+        DoseStatus.Pending -> PsBadgeTone.Warning
     }
 
     private companion object {
