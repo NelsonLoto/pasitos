@@ -12,6 +12,7 @@
 | **Edad cronológica** | Tiempo transcurrido desde la fecha de nacimiento. |
 | **Edad corregida** | En prematuros, la edad cronológica menos las semanas que faltaron para llegar a las 40 de gestación. Permite comparar su crecimiento con el de niños nacidos a término. |
 | **Estado del niño** | Nivel que resume la evaluación de un indicador o del conjunto: Dentro de lo esperado, A controlar o Consultar con el pediatra. Orienta, no diagnostica. |
+| **Fecha de término** | Fecha en que un prematuro habría cumplido 40 semanas de gestación: su fecha de nacimiento más las semanas que faltaron. Desde ese día se informa su edad corregida. |
 | **Hito del desarrollo** | Habilidad que se espera que un niño adquiera en cierto rango de edad (por ejemplo, sentarse sin apoyo). |
 | **IMC** | Índice de masa corporal: peso (kg) dividido por la talla (m) al cuadrado. |
 | **Incremento** | Bloque funcional completo que se desarrolla en alrededor de 2 semanas y se muestra funcionando en un encuentro de seguimiento (I1 a I6). |

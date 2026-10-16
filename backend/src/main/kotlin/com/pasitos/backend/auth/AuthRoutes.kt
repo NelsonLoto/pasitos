@@ -1,8 +1,9 @@
 package com.pasitos.backend.auth
 
-import com.pasitos.backend.common.ErrorResponse
 import com.pasitos.backend.common.caller
 import com.pasitos.backend.common.toUuidOrNull
+import com.pasitos.shared.api.ErrorCode
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -35,7 +36,7 @@ fun Application.configureAuthentication(jwt: JwtService, authService: AuthServic
                 }
             }
             challenge { _, _ ->
-                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("unauthorized", "Token inválido o ausente"))
+                call.respond(HttpStatusCode.Unauthorized, ErrorResponse(ErrorCode.UNAUTHORIZED, "Token inválido o ausente"))
             }
         }
     }

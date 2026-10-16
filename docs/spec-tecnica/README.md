@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.2 |
+| **Versión** | 1.2.3 |
 | **Fecha** | 16/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
-| **Implementa** | [SPEC funcional v1.2.0](../spec/README.md) |
+| **Implementa** | [SPEC funcional v1.3.0](../spec/README.md) |
 
 ## Propósito
 
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.3 | 16/10/2026 | Ktor Server 3.6.0 y kotlinx.serialization 1.11.0 en los tres builds (P-12 resuelto); firma de `formatAge`, que antes de la fecha de término informa cuánto falta (SPEC funcional 1.3.0, D-66); `ErrorCode` tolera códigos desconocidos ([01](01-stack.md), [10](10-modulo-compartido.md), [92](92-pendientes.md)) | Decisiones tomadas al implementar el módulo `shared` (#30) |
 | 1.2.2 | 16/10/2026 | `author_account_id` sin FK a `accounts`; las FK hacia tablas de incrementos posteriores se agregan con esas tablas ([13](13-base-de-datos.md)) | Decisiones tomadas al implementar la línea base (#32) |
 | 1.2.1 | 16/10/2026 | El encabezado cita la SPEC funcional vigente (1.2.0) | Corrección de redacción (#75) |
 | 1.2.0 | 14/10/2026 | Tablero: qué movimientos son automáticos y cómo están configuradas las automatizaciones del proyecto; dependencias entre tareas cargadas como dependencias nativas de GitHub y verificación 4 basada en ellas ([32](32-proceso-de-desarrollo.md)) | Revisión del tablero antes de empezar I0 (#71) |

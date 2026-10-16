@@ -1,9 +1,9 @@
 package com.pasitos.app.data.child
 
 import com.pasitos.app.data.auth.AuthRepository
-import com.pasitos.app.data.auth.ErrorResponseDto
 import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ChildSex
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -87,7 +87,7 @@ class ChildApiRepository @Inject constructor(
             }
             when (response.status) {
                 HttpStatusCode.Created -> response.body<ChildResponseDto>().toDomain()
-                HttpStatusCode.BadRequest -> throw Exception(response.body<ErrorResponseDto>().message)
+                HttpStatusCode.BadRequest -> throw Exception(response.body<ErrorResponse>().message)
                 else -> throw Exception("No se pudo conectar con el servidor")
             }
         }.onSuccess { child ->

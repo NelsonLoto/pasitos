@@ -1,7 +1,7 @@
 package com.pasitos.app.data.child.model
 
+import com.pasitos.shared.time.formatAge
 import java.time.LocalDate
-import java.time.Period
 
 enum class ChildSex { Female, Male }
 
@@ -18,16 +18,14 @@ private val ChildSex.label: String
         ChildSex.Male -> "Niño"
     }
 
-/** Ej: "8 meses", "1 año", "3 años". */
-fun Child.ageLabel(today: LocalDate = LocalDate.now()): String {
-    val period = Period.between(birthDate, today)
-    return if (period.years < 1) {
-        val months = period.years * 12 + period.months
-        if (months == 1) "1 mes" else "$months meses"
-    } else {
-        if (period.years == 1) "1 año" else "${period.years} años"
-    }
-}
+/**
+ * Edad según RN-HIJ-04, con el formato compartido con el backend: "12 días", "4 meses y 1 día",
+ * "3 años y 2 meses". La app todavía no conoce las semanas de gestación, así que no muestra la
+ * edad corregida.
+ */
+fun Child.ageLabel(today: LocalDate = LocalDate.now()): String =
+    // Si el reloj del teléfono atrasa, "hoy" podría quedar antes del nacimiento: se muestra 0 días.
+    formatAge(birthDate, maxOf(today, birthDate)).text
 
-/** Ej: "8 meses · Niña". */
+/** Ej: "8 meses y 3 días · Niña". */
 fun Child.ageAndSexLabel(today: LocalDate = LocalDate.now()): String = "${ageLabel(today)} · ${sex.label}"

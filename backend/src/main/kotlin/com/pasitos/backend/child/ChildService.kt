@@ -8,8 +8,9 @@ import com.pasitos.backend.common.toLocalDateOrNull
 import com.pasitos.backend.common.tx
 import com.pasitos.backend.guardianship.GuardianshipRepository
 import com.pasitos.backend.guardianship.GuardianshipRole
+import com.pasitos.shared.api.ErrorCode
 
-class ChildNotFoundException : NotFoundException("child_not_found", "No se encontró ese hijo/a")
+class ChildNotFoundException : NotFoundException(ErrorCode.CHILD_NOT_FOUND, "No se encontró ese hijo/a")
 
 class ChildService(
     private val children: ChildRepository,

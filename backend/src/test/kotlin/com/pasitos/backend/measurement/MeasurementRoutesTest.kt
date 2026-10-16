@@ -1,11 +1,12 @@
 package com.pasitos.backend.measurement
 
 import com.pasitos.backend.common.ArgentinaClock
-import com.pasitos.backend.common.ErrorResponse
 import com.pasitos.backend.support.TestDatabase
 import com.pasitos.backend.support.apiTest
 import com.pasitos.backend.support.createChild
 import com.pasitos.backend.support.register
+import com.pasitos.shared.api.ErrorCode
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -84,7 +85,9 @@ class MeasurementRoutesTest {
         val response = client.postMeasurement(token, child.id, CreateMeasurementRequest("2026-10-01", weightKg = 6.5))
 
         assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
-        assertEquals("business_rule", response.body<ErrorResponse>().error)
+        val error = response.body<ErrorResponse>()
+        assertEquals(ErrorCode.BUSINESS_RULE, error.code)
+        assertEquals("RN-CRE-12", error.rule)
     }
 
     @Test
@@ -99,7 +102,7 @@ class MeasurementRoutesTest {
 
         listOf(post, get, unknown).forEach { response ->
             assertEquals(HttpStatusCode.NotFound, response.status)
-            assertEquals("child_not_found", response.body<ErrorResponse>().error)
+            assertEquals(ErrorCode.CHILD_NOT_FOUND, response.body<ErrorResponse>().code)
         }
     }
 
@@ -120,7 +123,7 @@ class MeasurementRoutesTest {
         invalid.forEach { (childId, request) ->
             val response = client.postMeasurement(token, childId, request)
             assertEquals(HttpStatusCode.BadRequest, response.status, "Pedido: $request")
-            assertEquals("invalid_input", response.body<ErrorResponse>().error)
+            assertEquals(ErrorCode.INVALID_INPUT, response.body<ErrorResponse>().code)
         }
         assertEquals(0L, TestDatabase.column<Long>("SELECT count(*) FROM measurements").single())
     }

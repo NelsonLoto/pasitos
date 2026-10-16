@@ -92,4 +92,5 @@ alternativas; aquí se registran la decisión y su motivo para que puedan revisa
 
 | ID | Decisión | Motivo |
 |---|---|---|
+| D-66 | Antes de su fecha de término, un prematuro no muestra edad corregida (sería negativa) sino cuánto falta para esa fecha (16/10/2026). | Es más útil para la familia que ocultar el dato. La fecha se calcula con las semanas de gestación del alta, sin pedir otro dato. |
 | D-65 | La prueba piloto se hace con **datos ficticios**: niños inventados que no corresponden a ninguna persona real (14/10/2026). Reemplaza la idea de un piloto con datos reales de D-57. | Evita exponer datos de salud de menores, y con ello el aval de un comité de ética y el consentimiento informado específico (SUP-14 deja de aplicar). |

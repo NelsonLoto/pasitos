@@ -22,9 +22,3 @@ internal data class AuthResponseDto(
     val nombre: String,
     val token: String,
 )
-
-@Serializable
-internal data class ErrorResponseDto(
-    val error: String,
-    val message: String,
-)
