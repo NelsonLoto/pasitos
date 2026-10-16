@@ -1,11 +1,12 @@
 package com.pasitos.backend.child
 
 import com.pasitos.backend.common.ArgentinaClock
-import com.pasitos.backend.common.ErrorResponse
 import com.pasitos.backend.support.TestDatabase
 import com.pasitos.backend.support.apiTest
 import com.pasitos.backend.support.createChild
 import com.pasitos.backend.support.register
+import com.pasitos.shared.api.ErrorCode
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -65,7 +66,7 @@ class ChildRoutesTest {
         invalid.forEach { request ->
             val response = client.postChild(token, request)
             assertEquals(HttpStatusCode.BadRequest, response.status, "Pedido: $request")
-            assertEquals("invalid_input", response.body<ErrorResponse>().error)
+            assertEquals(ErrorCode.INVALID_INPUT, response.body<ErrorResponse>().code)
         }
         assertEquals(0L, TestDatabase.column<Long>("SELECT count(*) FROM children").single())
     }
@@ -81,7 +82,7 @@ class ChildRoutesTest {
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertEquals("invalid_input", response.body<ErrorResponse>().error)
+        assertEquals(ErrorCode.INVALID_INPUT, response.body<ErrorResponse>().code)
     }
 
     private suspend fun HttpClient.postChild(token: String, request: CreateChildRequest): HttpResponse = post("/children") {

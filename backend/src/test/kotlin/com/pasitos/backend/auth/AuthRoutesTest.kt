@@ -1,9 +1,10 @@
 package com.pasitos.backend.auth
 
-import com.pasitos.backend.common.ErrorResponse
 import com.pasitos.backend.support.TestDatabase
 import com.pasitos.backend.support.apiTest
 import com.pasitos.backend.support.register
+import com.pasitos.shared.api.ErrorCode
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -41,7 +42,7 @@ class AuthRoutesTest {
         val response = client.postJson("/auth/register", RegisterRequest("Otra", "ANA@example.com", "secreta123"))
 
         assertEquals(HttpStatusCode.Conflict, response.status)
-        assertEquals("email_already_in_use", response.body<ErrorResponse>().error)
+        assertEquals(ErrorCode.EMAIL_ALREADY_IN_USE, response.body<ErrorResponse>().code)
     }
 
     @Test
@@ -49,7 +50,7 @@ class AuthRoutesTest {
         val response = client.postJson("/auth/register", RegisterRequest("Ana", "ana@example.com", "corta"))
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertEquals("invalid_input", response.body<ErrorResponse>().error)
+        assertEquals(ErrorCode.INVALID_INPUT, response.body<ErrorResponse>().code)
     }
 
     @Test
@@ -73,7 +74,7 @@ class AuthRoutesTest {
         val unknownEmail = client.postJson("/auth/login", LoginRequest("nadie@example.com", "secreta123"))
 
         assertEquals(HttpStatusCode.Unauthorized, wrongPassword.status)
-        assertEquals("invalid_credentials", wrongPassword.body<ErrorResponse>().error)
+        assertEquals(ErrorCode.INVALID_CREDENTIALS, wrongPassword.body<ErrorResponse>().code)
         assertEquals(HttpStatusCode.Unauthorized, unknownEmail.status)
     }
 
@@ -105,7 +106,7 @@ class AuthRoutesTest {
         val invalidToken = client.get("/children") { bearerAuth("no-es-un-jwt") }
 
         assertEquals(HttpStatusCode.Unauthorized, withoutToken.status)
-        assertEquals("unauthorized", withoutToken.body<ErrorResponse>().error)
+        assertEquals(ErrorCode.UNAUTHORIZED, withoutToken.body<ErrorResponse>().code)
         assertEquals(HttpStatusCode.Unauthorized, invalidToken.status)
     }
 

@@ -3,6 +3,7 @@ package com.pasitos.app.data.auth
 import com.pasitos.app.data.auth.model.AuthSession
 import com.pasitos.app.data.auth.model.EmailAlreadyInUseException
 import com.pasitos.app.data.auth.model.InvalidCredentialsException
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -39,7 +40,7 @@ class AuthApiRepository @Inject constructor(
             }
             when (response.status) {
                 HttpStatusCode.OK -> response.body<AuthResponseDto>().toSession()
-                HttpStatusCode.Unauthorized -> throw InvalidCredentialsException(response.body<ErrorResponseDto>().message)
+                HttpStatusCode.Unauthorized -> throw InvalidCredentialsException(response.body<ErrorResponse>().message)
                 else -> throw Exception("No se pudo conectar con el servidor")
             }
         }.onSuccess { _currentSession.value = it }
@@ -65,7 +66,7 @@ class AuthApiRepository @Inject constructor(
             }
             when (response.status) {
                 HttpStatusCode.Created -> response.body<AuthResponseDto>().toSession()
-                HttpStatusCode.Conflict -> throw EmailAlreadyInUseException(response.body<ErrorResponseDto>().message)
+                HttpStatusCode.Conflict -> throw EmailAlreadyInUseException(response.body<ErrorResponse>().message)
                 else -> throw Exception("No se pudo conectar con el servidor")
             }
         }.onSuccess { _currentSession.value = it }
