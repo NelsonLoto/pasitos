@@ -57,7 +57,7 @@ necesitar cambios grandes.
     `pasitos_keyset`, cifrado con la clave maestra del Keystore, que no se puede extraer del
     teléfono. Cada valor cifrado lleva un dato asociado según su uso, para que la clave de la base
     no se pueda descifrar como si fuera un token ni al revés.
-  - La clave cifrada vive en el DataStore `secrets`, que en I0-06 también guarda los tokens.
+  - La clave cifrada vive en el DataStore `secrets`, que también guarda la sesión (sección 4).
   - SQLCipher recibe la clave como clave cruda (`x'…'`): ya es aleatoria, así que no hace falta
     derivarla con PBKDF2 en cada apertura.
   - La clave se lee recién cuando Room abre el archivo, que siempre ocurre fuera del hilo
@@ -65,15 +65,19 @@ necesitar cambios grandes.
 - Hay una sola `PasitosDatabase` por proceso, creada por `LocalDatabase`. Hilt la inyecta, y
   también sus DAOs.
 - **Cierre de sesión (RF-CTA-07):** no debe quedar nada de la sesión anterior, ni en el teléfono
-  ni en memoria. Lo implementa I0-06, en este orden:
-  1. Si hay cambios pendientes, advertirlo y pedir confirmación (CA2).
-  2. Revocar la sesión en el servidor.
+  ni en memoria. `AuthRepository.logout()` lo hace en este orden:
+  1. Si hay cambios pendientes, Perfil lo advierte y pide confirmación (CA2).
+  2. Revocar la sesión en el servidor. Necesita conexión (RF-CTA-07 no está disponible sin
+     conexión): si el pedido no llega o el servidor falla, la sesión sigue abierta y se muestra el
+     error. Si el servidor responde 401, la sesión ya estaba vencida o revocada, y se sigue.
   3. Cancelar los trabajos de sincronización.
-  4. Borrar los tokens y llamar a `LocalDatabase.wipe()`, que cierra la base y borra el archivo
-     y su clave (CA1).
-  5. Reiniciar el proceso de la app. Así desaparece todo lo que estaba en memoria: tokens en
-     caché, datos en repositorios y pantallas, la clave de la base en claro. Ningún componente
-     tiene que acordarse de limpiarse.
+  4. Borrar la sesión guardada y llamar a `LocalDatabase.wipe()`, que cierra la base y borra el
+     archivo y su clave (CA1).
+  5. Reiniciar el proceso de la app (`ProcessRestarter`). Así desaparece todo lo que estaba en
+     memoria: tokens, datos en repositorios y pantallas, la clave de la base en claro. Ningún
+     componente tiene que acordarse de limpiarse.
+
+  Revocada la sesión, los pasos 3 a 5 terminan aunque el usuario salga de la pantalla.
 - **Si la clave no se puede leer**, el archivo tampoco se puede abrir. Entonces se borra y se
   empieza con una base vacía; los datos vuelven del servidor. Lo cargado sin conexión y no enviado
   se pierde, porque sin la clave no se puede recuperar. Hay dos casos:
@@ -98,11 +102,42 @@ necesitar cambios grandes.
 
 | Elemento | Implementación |
 |---|---|
-| Tokens | Acceso y renovación guardados en DataStore, cifrados con Tink y el Android Keystore |
-| Renovación automática | El plugin `Auth` de Ktor Client renueva el token de acceso cuando el servidor responde 401 y reintenta el request. Si la renovación falla, se cierra la sesión |
-| Estado de sesión | `SessionRepository` expone `StateFlow<Session?>` con cuenta, perfiles y modo activo. Al iniciar la app se restaura desde DataStore (RF-CTA-06) |
-| Google | Credential Manager con `GetGoogleIdOption` (client ID web del proyecto). El ID token se envía a `POST /auth/google` |
+| Tokens | La cuenta y los tokens de acceso y renovación se guardan juntos en el DataStore `secrets`, cifrados con `LocalCipher` y su propio dato asociado (`SessionStore`). Solo `SessionRepository` y el cliente de la API los conocen; nunca van a logs |
+| Renovación automática | El plugin `Auth` de Ktor Client agrega el token de acceso a cada pedido. Si el servidor responde 401, renueva los tokens y repite el pedido sin que el usuario lo note. Detalles abajo |
+| Estado de sesión | `SessionRepository` expone `StateFlow<SessionState>`: restaurando, iniciada (con la cuenta) o cerrada (vencida o no). Al abrir la app se restaura desde DataStore, también sin conexión (RF-CTA-06, CA1 y CA3). Mientras se restaura no se muestra ni el login ni el inicio |
+| Sincronización | Solo con sesión iniciada: al iniciarla o restaurarla se programa la periódica y se pide una inmediata; al vencer o cerrarla se cancelan |
+| Google | Credential Manager con `GetGoogleIdOption` (client ID web del proyecto). El ID token se envía a `POST /auth/google`. Hasta I1-A2 el botón avisa que todavía no está disponible |
 | Bloqueo con huella o PIN | `BiometricPrompt` con `BIOMETRIC_STRONG` o credencial del dispositivo. Se pide al abrir la app y al volver después de 5 minutos en segundo plano. Con el bloqueo activo se marca la ventana con `FLAG_SECURE` (RNF-SEG-08) |
+
+**Renovación de tokens.** El backend revoca la sesión completa si recibe dos veces el mismo token
+de renovación ([11](11-backend.md)), así que la app nunca debe reusarlo:
+
+- Se renueva de a una vez: `SessionRepository.refresh()` toma un `Mutex` y compara el token
+  rechazado con el vigente. Si ya cambió, otro pedido renovó antes y se repite el pedido con el
+  nuevo, sin volver a renovar.
+- Los tokens nuevos se guardan aunque se cancele el pedido que pidió la renovación
+  (`nonCancellableRefresh`): el servidor ya invalidó los anteriores.
+- El plugin no guarda los tokens en su caché (`cacheTokens = false`): los lee de
+  `SessionRepository`, así iniciar o cerrar sesión no deja uno viejo en memoria.
+- Registro e inicio de sesión llevan `withoutSession()`: no mandan token y un 401 por contraseña
+  equivocada no dispara una renovación ni se reenvía (contaría doble para el bloqueo de
+  RN-CTA-05).
+
+**Sesión vencida (RF-CTA-06, CA2).** Si el servidor rechaza la renovación con 401, la sesión vence:
+se borran los tokens y la app vuelve al login con "Tu sesión venció". La cuenta y la base local se
+conservan, porque puede haber cambios sin sincronizar:
+
+- Si vuelve a entrar la misma cuenta, sigue con sus datos y los cambios pendientes se envían.
+- Si entra otra cuenta, se cancela la sincronización, se borra la base local y se reinicia la app
+  antes de mostrar nada.
+
+Cualquier otra respuesta a la renovación (por ejemplo, un 500) no cierra la sesión: se vuelve a
+intentar en el próximo pedido.
+
+**Riesgo aceptado:** si se pierde la respuesta de una renovación (se corta la red) o la app se
+cierra antes de guardar los tokens nuevos, el próximo intento usa el token viejo y el backend lo
+toma como un robo: revoca la sesión y el usuario vuelve a iniciarla, sin perder los datos locales.
+Desde I0-10, Sentry permite medir cuánto pasa.
 
 ## 5. Modos tutor y pediatra
 
