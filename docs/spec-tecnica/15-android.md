@@ -67,9 +67,10 @@ necesitar cambios grandes.
 - **Cierre de sesión (RF-CTA-07):** no debe quedar nada de la sesión anterior, ni en el teléfono
   ni en memoria. `AuthRepository.logout()` lo hace en este orden:
   1. Si hay cambios pendientes, Perfil lo advierte y pide confirmación (CA2).
-  2. Revocar la sesión en el servidor. Necesita conexión (RF-CTA-07 no está disponible sin
-     conexión): si el pedido no llega o el servidor falla, la sesión sigue abierta y se muestra el
-     error. Si el servidor responde 401, la sesión ya estaba vencida o revocada, y se sigue.
+  2. Revocar la sesión en el servidor. Si responde 401, la sesión ya estaba vencida o revocada.
+     Si el pedido no llega o el servidor falla, la sesión se cierra igual en el teléfono y la
+     revocación queda pendiente (RF-CTA-07, CA3): el token de renovación se guarda cifrado en
+     `secrets` y `RevokeSessionsWorker` la completa cuando hay red (ver abajo).
   3. Cancelar los trabajos de sincronización.
   4. Borrar la sesión guardada y llamar a `LocalDatabase.wipe()`, que cierra la base y borra el
      archivo y su clave (CA1).
@@ -77,7 +78,16 @@ necesitar cambios grandes.
      memoria: tokens, datos en repositorios y pantallas, la clave de la base en claro. Ningún
      componente tiene que acordarse de limpiarse.
 
-  Revocada la sesión, los pasos 3 a 5 terminan aunque el usuario salga de la pantalla.
+  Desde el paso 2, la limpieza termina aunque el usuario salga de la pantalla. El reinicio se
+  probó en Android 8 y 17.
+- **Revocación pendiente:** para cerrar una sesión hace falta un token de acceso, que ya venció o
+  se borró. `RevokeSessionsWorker` (trabajo único `revoke-sessions`, solo con red y con
+  reintentos) renueva con el token guardado y cierra la sesión con el token de acceso nuevo. Si
+  la renovación responde 401, la sesión ya no existe. Si el cierre falla después de renovar, el
+  reintento usa el token guardado, que ya rotó: el backend lo toma como un reuso y revoca la
+  sesión igual. Puede haber varias pendientes (por ejemplo, dos cierres sin conexión seguidos), y
+  cada token se borra apenas se revoca su sesión. Si ni siquiera se puede guardar el token, el
+  cierre sigue: sin el token nadie puede renovar la sesión, que vence a los 30 días.
 - **Si la clave no se puede leer**, el archivo tampoco se puede abrir. Entonces se borra y se
   empieza con una base vacía; los datos vuelven del servidor. Lo cargado sin conexión y no enviado
   se pierde, porque sin la clave no se puede recuperar. Hay dos casos:
@@ -137,7 +147,9 @@ intentar en el próximo pedido.
 **Riesgo aceptado:** si se pierde la respuesta de una renovación (se corta la red) o la app se
 cierra antes de guardar los tokens nuevos, el próximo intento usa el token viejo y el backend lo
 toma como un robo: revoca la sesión y el usuario vuelve a iniciarla, sin perder los datos locales.
-Desde I0-10, Sentry permite medir cuánto pasa.
+El backend registra cada revocación por reuso y la app cada renovación rechazada, así se puede
+medir cuánto pasa (con Sentry desde I0-10). Si pasa seguido, se puede agregar en el backend un
+margen de unos segundos para aceptar el token anterior, sin cambiar la app.
 
 ## 5. Modos tutor y pediatra
 
