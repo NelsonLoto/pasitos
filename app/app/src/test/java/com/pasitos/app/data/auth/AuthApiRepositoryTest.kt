@@ -62,7 +62,7 @@ class AuthApiRepositoryTest {
     private val databaseKeyStore by lazy { DatabaseKeyStore(dataStore, cipher) }
     private val server = FakeServer()
 
-    /** Lo que hizo la app, en orden: cancelar la sincronización y reiniciar. */
+    /** Lo que hizo la app, en orden: programar la revocación, cancelar la sincronización y reiniciar. */
     private val events = mutableListOf<String>()
     private val pendingMutations = FakePendingMutationDao()
 
@@ -78,6 +78,11 @@ class AuthApiRepositoryTest {
                 override fun requestSync(trigger: SyncTrigger) = Unit
                 override fun cancelAll() {
                     events += "cancelar sincronización"
+                }
+            },
+            sessionRevocation = object : SessionRevocation {
+                override suspend fun schedule(refreshToken: String) {
+                    events += "revocar $refreshToken cuando haya red"
                 }
             },
             processRestarter = object : ProcessRestarter {
@@ -161,6 +166,7 @@ class AuthApiRepositoryTest {
 
         assertTrue(result.isSuccess)
         assertEquals(1, server.requestsTo("/api/v1/auth/logout").size)
+        // Ya quedó revocada: no hay nada pendiente para después
         assertEquals(listOf("cancelar sincronización", "reiniciar"), events)
         assertNull(store.read())
         assertNull(databaseKeyStore.read())
@@ -179,22 +185,23 @@ class AuthApiRepositoryTest {
     }
 
     @Test
-    fun `sin conexión no se cierra la sesión`() = runTest {
+    fun `RF-CTA-07 CA3 sin conexión cierra igual y deja la revocación pendiente`() = runTest {
         session.start(account(), tokens(1))
         databaseKeyStore.create()
         server.routes["/api/v1/auth/logout"] = { throw IOException("sin red") }
 
         val result = repository.logout()
 
-        assertTrue(result.exceptionOrNull() is NoConnectionException)
-        assertTrue(events.isEmpty())
-        assertEquals(tokens(1), store.read()?.tokens)
-        assertNotNull(databaseKeyStore.read())
+        assertTrue(result.isSuccess)
+        assertEquals(listOf("revocar refresh-1 cuando haya red", "cancelar sincronización", "reiniciar"), events)
+        assertNull(store.read())
+        assertNull(databaseKeyStore.read())
     }
 
     @Test
-    fun `si el servidor falla no se cierra la sesión`() = runTest {
+    fun `si el servidor falla cierra igual y deja la revocación pendiente`() = runTest {
         session.start(account(), tokens(1))
+        databaseKeyStore.create()
         server.validAccessToken = "access-1"
         server.routes["/api/v1/auth/logout"] = {
             error(HttpStatusCode.InternalServerError, ErrorCode.INTERNAL_ERROR, "Ocurrió un error, intentá de nuevo")
@@ -202,9 +209,10 @@ class AuthApiRepositoryTest {
 
         val result = repository.logout()
 
-        assertEquals("Ocurrió un error, intentá de nuevo", result.exceptionOrNull()?.message)
-        assertTrue(events.isEmpty())
-        assertTrue(session.state.value is SessionState.SignedIn)
+        assertTrue(result.isSuccess)
+        assertEquals(listOf("revocar refresh-1 cuando haya red", "cancelar sincronización", "reiniciar"), events)
+        assertNull(store.read())
+        assertNull(databaseKeyStore.read())
     }
 
     @Test

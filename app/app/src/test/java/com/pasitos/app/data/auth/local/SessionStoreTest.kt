@@ -86,6 +86,31 @@ class SessionStoreTest {
     }
 
     @Test
+    fun `RF-CTA-07 CA3 las revocaciones pendientes se guardan cifradas y sobreviven al cierre de sesión`() = runTest {
+        store.save(StoredSession(account(), tokens(1)))
+
+        store.addPendingRevocation("refresh-1")
+        store.addPendingRevocation("refresh-2")
+        store.delete()
+
+        assertEquals(listOf("refresh-1", "refresh-2"), SessionStore(dataStore, cipher).pendingRevocations())
+        val stored = dataStore.data.first()[byteArrayPreferencesKey("pending_revocations")]!!.decodeToString()
+        assertFalse(stored.contains("refresh-1"))
+    }
+
+    @Test
+    fun `una revocación hecha sale de la lista`() = runTest {
+        store.addPendingRevocation("refresh-1")
+        store.addPendingRevocation("refresh-2")
+
+        store.removePendingRevocations(listOf("refresh-1"))
+
+        assertEquals(listOf("refresh-2"), store.pendingRevocations())
+        store.removePendingRevocations(listOf("refresh-2"))
+        assertNull(dataStore.data.first()[byteArrayPreferencesKey("pending_revocations")])
+    }
+
+    @Test
     fun `RF-CTA-07 al borrarla no queda sesión y la clave de la base sigue`() = runTest {
         val keyStore = DatabaseKeyStore(dataStore, cipher)
         keyStore.create()

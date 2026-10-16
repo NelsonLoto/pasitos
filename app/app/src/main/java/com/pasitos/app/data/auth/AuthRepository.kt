@@ -31,7 +31,7 @@ interface AuthRepository {
 
     /**
      * Cierra la sesión (RF-CTA-07): la revoca en el servidor, borra los tokens y la base local, y
-     * reinicia la app. Necesita conexión; si falla, la sesión sigue abierta y devuelve el error.
+     * reinicia la app. Sin conexión cierra igual y la revocación queda pendiente hasta que haya red.
      */
     suspend fun logout(): Result<Unit>
 }

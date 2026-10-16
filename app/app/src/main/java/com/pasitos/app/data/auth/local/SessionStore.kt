@@ -1,6 +1,7 @@
 package com.pasitos.app.data.auth.local
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -57,10 +58,47 @@ class SessionStore @Inject constructor(
         dataStore.edit { it.remove(ENCRYPTED_SESSION) }
     }
 
+    /**
+     * Tokens de renovación de sesiones cerradas sin conexión, que todavía hay que revocar en el
+     * servidor (RF-CTA-07, CA3). Sobreviven al cierre de sesión hasta que se revocan.
+     */
+    suspend fun pendingRevocations(): List<String> = decryptRevocations(dataStore.data.first())
+
+    suspend fun addPendingRevocation(refreshToken: String) {
+        dataStore.edit { it.setRevocations(decryptRevocations(it) + refreshToken) }
+    }
+
+    suspend fun removePendingRevocations(refreshTokens: Collection<String>) {
+        dataStore.edit { it.setRevocations(decryptRevocations(it) - refreshTokens.toSet()) }
+    }
+
+    /** Si ya no se pueden descifrar, tampoco se pueden revocar: el servidor las vence a los 30 días. */
+    private fun decryptRevocations(preferences: Preferences): List<String> {
+        val encrypted = preferences[ENCRYPTED_REVOCATIONS] ?: return emptyList()
+        return try {
+            Json.decodeFromString<List<String>>(cipher.decrypt(encrypted, REVOCATIONS_ASSOCIATED_DATA).decodeToString())
+        } catch (_: GeneralSecurityException) {
+            emptyList()
+        } catch (_: SerializationException) {
+            emptyList()
+        }
+    }
+
+    private fun MutablePreferences.setRevocations(refreshTokens: List<String>) {
+        if (refreshTokens.isEmpty()) {
+            remove(ENCRYPTED_REVOCATIONS)
+        } else {
+            this[ENCRYPTED_REVOCATIONS] =
+                cipher.encrypt(Json.encodeToString(refreshTokens).encodeToByteArray(), REVOCATIONS_ASSOCIATED_DATA)
+        }
+    }
+
     private companion object {
         val ENCRYPTED_SESSION = byteArrayPreferencesKey("session")
+        val ENCRYPTED_REVOCATIONS = byteArrayPreferencesKey("pending_revocations")
 
         /** Distinto del de la clave de la base: un valor no se puede descifrar como si fuera el otro. */
         val ASSOCIATED_DATA = "pasitos.session".toByteArray()
+        val REVOCATIONS_ASSOCIATED_DATA = "pasitos.pending_revocations".toByteArray()
     }
 }
