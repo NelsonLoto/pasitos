@@ -1,101 +1,58 @@
 package com.pasitos.backend.auth
 
+import com.pasitos.backend.common.ErrorResponse
+import com.pasitos.backend.common.caller
+import com.pasitos.backend.common.toUuidOrNull
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.UUID
 
-fun Route.authRoutes(jwtService: JwtService) {
+/** Nombre del esquema de autenticación de las rutas de la app. */
+const val AUTH_JWT = "auth-jwt"
 
-    post("/auth/register") {
-        val request = call.receive<RegisterRequest>()
-        val nombre = request.nombre.trim()
-        val email = request.email.trim().lowercase()
-
-        if (nombre.isBlank() || email.isBlank() || request.password.length < 6) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse("invalid_input", "Completá nombre, email y una contraseña de al menos 6 caracteres"),
-            )
-            return@post
-        }
-
-        val response = withContext(Dispatchers.IO) {
-            transaction {
-                val yaExiste = Personas.selectAll().where { Personas.email eq email }.firstOrNull() != null
-                if (yaExiste) throw EmailAlreadyInUseException()
-
-                val id = UUID.randomUUID()
-                Personas.insert {
-                    it[Personas.id] = id
-                    it[tipoPersona] = "tutor"
-                    it[Personas.nombre] = nombre
-                    it[Personas.email] = email
+fun Application.configureAuthentication(jwt: JwtService, authService: AuthService) {
+    install(Authentication) {
+        jwt(AUTH_JWT) {
+            realm = jwt.issuer
+            verifier(jwt.verifier())
+            validate { credential ->
+                // Firma y vencimiento ya los verificó el verifier. Además la sesión tiene que seguir
+                // vigente en la base (RNF-SEG-04).
+                val accountId = credential.payload.subject?.toUuidOrNull()
+                val sessionId = credential.payload.getClaim(JwtService.SESSION_CLAIM).asString()?.toUuidOrNull()
+                if (accountId != null && sessionId != null && authService.isSessionActive(sessionId)) {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
                 }
-                Usuarios.insert {
-                    it[personaId] = id
-                    it[passwordHash] = PasswordHasher.hash(request.password)
-                    it[authProvider] = "email"
-                }
-
-                val issued = jwtService.generateToken(id, email)
-                SessionStore.create(id, issued)
-
-                AuthResponse(
-                    userId = id.toString(),
-                    email = email,
-                    nombre = nombre,
-                    token = issued.token,
-                )
+            }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("unauthorized", "Token inválido o ausente"))
             }
         }
+    }
+}
 
-        call.respond(HttpStatusCode.Created, response)
+fun Route.authRoutes(authService: AuthService) {
+    post("/auth/register") {
+        call.respond(HttpStatusCode.Created, authService.register(call.receive()))
     }
 
     post("/auth/login") {
-        val request = call.receive<LoginRequest>()
-        val email = request.email.trim().lowercase()
-
-        val response = withContext(Dispatchers.IO) {
-            transaction {
-                val persona = Personas.selectAll().where { Personas.email eq email }.firstOrNull()
-                    ?: throw InvalidCredentialsException()
-                val id = persona[Personas.id]
-
-                val usuario = Usuarios.selectAll().where { Usuarios.personaId eq id }.firstOrNull()
-                    ?: throw InvalidCredentialsException()
-                val hash = usuario[Usuarios.passwordHash] ?: throw InvalidCredentialsException()
-                if (!PasswordHasher.verify(request.password, hash)) throw InvalidCredentialsException()
-
-                val issued = jwtService.generateToken(id, email)
-                SessionStore.create(id, issued)
-
-                AuthResponse(
-                    userId = id.toString(),
-                    email = email,
-                    nombre = persona[Personas.nombre],
-                    token = issued.token,
-                )
-            }
-        }
-
-        call.respond(HttpStatusCode.OK, response)
+        call.respond(HttpStatusCode.OK, authService.login(call.receive()))
     }
 
-    authenticate("auth-jwt") {
+    authenticate(AUTH_JWT) {
         post("/auth/logout") {
-            // authenticate ya garantizó que hay un Bearer válido con sesión vigente.
-            val token = call.request.bearerToken()!!
-            withContext(Dispatchers.IO) { transaction { SessionStore.revoke(token) } }
+            authService.logout(call.caller())
             call.respond(HttpStatusCode.NoContent)
         }
     }
