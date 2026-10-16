@@ -15,7 +15,7 @@
 | P-09 | Descargar las tablas expandidas de la OMS (L, M, S por día y por longitud o talla) y convertirlas al formato de importación | Equipo | I2 | [10](10-modulo-compartido.md#datos-de-referencia) |
 | P-10 | Confirmar si el libro de la SAP publica L, M y S o solo percentiles (define si el puntaje Z de 5 a 15 años es exacto o aproximado) | Equipo con pediatras | I2 | PVM-14 |
 | P-11 | ✅ **Resuelto 14/10/2026.** La nota para agentes de IA y las verificaciones previas a tomar una tarea están en [`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia) | — | — | ADR-22 |
-| P-12 | Alinear la versión de Ktor Server (3.2.0) con la del cliente (3.6.x) | Equipo | I0 | [01](01-stack.md) |
+| P-12 | ✅ **Resuelto 16/10/2026.** Ktor Server pasó de 3.2.0 a 3.6.0, la misma versión que el cliente de la app (I0-02) | — | — | [01](01-stack.md) |
 
 ## Supuestos técnicos
 
@@ -28,5 +28,6 @@ revisión, quedan confirmados al mergear:
 | Hasta 50 pacientes con detalle guardado en el teléfono del pediatra | [14](14-sincronizacion.md#4-alcance-por-rol-adr-16) |
 | Páginas de hasta 500 filas en la sincronización | [14](14-sincronizacion.md#2-traer-cambios) |
 | Copias de seguridad: 14 diarias y 8 semanales | [30](30-infraestructura.md#copias-de-seguridad) |
+| Antes de llegar al término, un prematuro no muestra edad corregida (sería negativa), solo la cronológica | [10](10-modulo-compartido.md#4-tiempo) |
 | PRs de hasta unas 400 líneas como referencia | [31](31-calidad-y-ci.md#4-revisión-de-código) |
 | Sin entorno de producción para la tesis: el piloto cumple ese rol | [30](30-infraestructura.md#entornos) |
