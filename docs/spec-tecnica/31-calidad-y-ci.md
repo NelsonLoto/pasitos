@@ -90,3 +90,5 @@ Una tarea está terminada cuando:
   generados ni datos), conviene partirlo.
 - El revisor verifica: que la tarea cumpla su issue y sus RF, las pruebas, los permisos (¿quién
   puede llamar a esto?) y que no se filtren datos personales.
+
+Link roto a propósito para probar el job docs: [no existe](no-existe.md) y [ancla rota](15-android.md#seccion-que-no-existe).
