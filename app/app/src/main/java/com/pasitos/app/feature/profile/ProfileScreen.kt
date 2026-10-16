@@ -18,10 +18,12 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,7 +45,6 @@ fun ProfileScreen(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
-    onLogoutClick: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -53,9 +54,33 @@ fun ProfileScreen(
         onMyChildrenClick = onMyChildrenClick,
         onNotificationsClick = onNotificationsClick,
         onExportReportsClick = onExportReportsClick,
-        onLogoutClick = {
-            viewModel.onLogoutClick()
-            onLogoutClick()
+        onLogoutClick = viewModel::onLogoutClick,
+    )
+
+    state.pendingChangesToConfirm?.let { pending ->
+        PendingChangesDialog(
+            pending = pending,
+            onConfirm = viewModel::onConfirmLogout,
+            onDismiss = viewModel::onDismissLogout,
+        )
+    }
+}
+
+/** RF-CTA-07, CA2. */
+@Composable
+private fun PendingChangesDialog(pending: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val changes = if (pending == 1) "1 cambio que todavía no se sincronizó" else "$pending cambios que todavía no se sincronizaron"
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "¿Cerrar sesión igual?") },
+        text = { Text(text = "Tenés $changes. Si cerrás sesión ahora, se van a perder.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = "Cerrar sesión", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = "Cancelar") }
         },
     )
 }
@@ -120,17 +145,21 @@ private fun ProfileContent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = onLogoutClick)
+                        .clickable(enabled = !state.isLoggingOut, onClick = onLogoutClick)
                         .padding(horizontal = 14.dp, vertical = 13.dp),
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                     Text(
-                        text = "Cerrar sesión",
+                        text = if (state.isLoggingOut) "Cerrando sesión…" else "Cerrar sesión",
                         style = PsType.BodyRegular,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(start = 10.dp),
                     )
                 }
+            }
+
+            state.logoutError?.let { error ->
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
             }
         }
     }

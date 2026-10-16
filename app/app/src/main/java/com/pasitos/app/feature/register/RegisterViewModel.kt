@@ -25,8 +25,12 @@ class RegisterViewModel @Inject constructor(
     private val _navigateToHome = Channel<Unit>(Channel.BUFFERED)
     val navigateToHome = _navigateToHome.receiveAsFlow()
 
-    fun onFullNameChange(value: String) {
-        _uiState.update { it.copy(fullName = value, fullNameError = null, generalError = null) }
+    fun onFirstNameChange(value: String) {
+        _uiState.update { it.copy(firstName = value, firstNameError = null, generalError = null) }
+    }
+
+    fun onLastNameChange(value: String) {
+        _uiState.update { it.copy(lastName = value, lastNameError = null, generalError = null) }
     }
 
     fun onEmailChange(value: String) {
@@ -41,26 +45,35 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { it.copy(confirmPassword = value, confirmPasswordError = null, generalError = null) }
     }
 
+    fun onAcceptTermsChange(value: Boolean) {
+        _uiState.update { it.copy(acceptTerms = value, termsError = null, generalError = null) }
+    }
+
     fun onSubmit() {
         val state = _uiState.value
-        val fullNameError = validateFullName(state.fullName)
-        val emailError = validateEmail(state.email)
-        val passwordError = validatePassword(state.password)
-        val confirmPasswordError = validateConfirmPassword(state.password, state.confirmPassword)
-        if (fullNameError != null || emailError != null || passwordError != null || confirmPasswordError != null) {
-            _uiState.update {
-                it.copy(
-                    fullNameError = fullNameError,
-                    emailError = emailError,
-                    passwordError = passwordError,
-                    confirmPasswordError = confirmPasswordError,
-                )
-            }
+        val validated = state.copy(
+            firstNameError = if (state.firstName.isBlank()) "Ingresá tu nombre" else null,
+            lastNameError = if (state.lastName.isBlank()) "Ingresá tu apellido" else null,
+            emailError = validateEmail(state.email),
+            passwordError = validatePassword(state.password),
+            confirmPasswordError = validateConfirmPassword(state.password, state.confirmPassword),
+            termsError = if (state.acceptTerms) null else "Para crear la cuenta tenés que aceptar los términos y la política de privacidad",
+        )
+        val hasErrors = listOfNotNull(
+            validated.firstNameError,
+            validated.lastNameError,
+            validated.emailError,
+            validated.passwordError,
+            validated.confirmPasswordError,
+            validated.termsError,
+        ).isNotEmpty()
+        if (hasErrors) {
+            _uiState.value = validated
             return
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, generalError = null) }
-            authRepository.register(state.fullName, state.email, state.password)
+            authRepository.register(state.firstName, state.lastName, state.email, state.password, state.acceptTerms)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
                     _navigateToHome.send(Unit)
@@ -73,20 +86,17 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun validateFullName(value: String): String? = when {
-        value.isBlank() -> "Ingresá tu nombre completo"
-        else -> null
-    }
-
     private fun validateEmail(value: String): String? = when {
         value.isBlank() -> "Ingresá tu email"
         !Patterns.EMAIL_ADDRESS.matcher(value.trim()).matches() -> "Ingresá un email válido"
         else -> null
     }
 
+    /** RN-CTA-01. La validación en vivo llega con I1-A1. */
     private fun validatePassword(value: String): String? = when {
         value.isBlank() -> "Ingresá una contraseña"
-        value.length < 6 -> "Mínimo 6 caracteres"
+        value.length < 8 || value.none { it.isLetter() } || value.none { it.isDigit() } ->
+            "Tiene que tener al menos 8 caracteres, con letras y números"
         else -> null
     }
 

@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -49,10 +53,12 @@ fun RegisterScreen(
     RegisterContent(
         state = state,
         onBackClick = onBackClick,
-        onFullNameChange = viewModel::onFullNameChange,
+        onFirstNameChange = viewModel::onFirstNameChange,
+        onLastNameChange = viewModel::onLastNameChange,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+        onAcceptTermsChange = viewModel::onAcceptTermsChange,
         onSubmit = viewModel::onSubmit,
         onLoginClick = onLoginClick,
     )
@@ -62,10 +68,12 @@ fun RegisterScreen(
 private fun RegisterContent(
     state: RegisterUiState,
     onBackClick: () -> Unit,
-    onFullNameChange: (String) -> Unit,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
+    onAcceptTermsChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
     onLoginClick: () -> Unit,
 ) {
@@ -91,11 +99,21 @@ private fun RegisterContent(
 
             Spacer(modifier = Modifier.height(16.dp))
             PsInputField(
-                label = "Nombre completo",
-                value = state.fullName,
-                onValueChange = onFullNameChange,
-                placeholder = "Ej: María Gómez",
-                errorText = state.fullNameError,
+                label = "Nombre",
+                value = state.firstName,
+                onValueChange = onFirstNameChange,
+                placeholder = "Ej: María",
+                errorText = state.firstNameError,
+                enabled = !state.isLoading,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            PsInputField(
+                label = "Apellido",
+                value = state.lastName,
+                onValueChange = onLastNameChange,
+                placeholder = "Ej: Gómez",
+                errorText = state.lastNameError,
                 enabled = !state.isLoading,
             )
 
@@ -130,12 +148,29 @@ private fun RegisterContent(
                 enabled = !state.isLoading,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Al continuar aceptás los Términos y Condiciones y la Política de Privacidad.",
-                style = PsType.BodySmall,
-                color = PsColor.TextSecondary,
-            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = state.acceptTerms,
+                        enabled = !state.isLoading,
+                        role = Role.Checkbox,
+                        onValueChange = onAcceptTermsChange,
+                    ),
+            ) {
+                Checkbox(checked = state.acceptTerms, onCheckedChange = null, enabled = !state.isLoading)
+                Text(
+                    text = "Acepto los Términos y Condiciones y la Política de Privacidad",
+                    style = PsType.BodySmall,
+                    color = PsColor.TextSecondary,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+            state.termsError?.let { error ->
+                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
+            }
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))
@@ -178,10 +213,12 @@ private fun RegisterScreenPreview() {
         RegisterContent(
             state = RegisterUiState(),
             onBackClick = {},
-            onFullNameChange = {},
+            onFirstNameChange = {},
+            onLastNameChange = {},
             onEmailChange = {},
             onPasswordChange = {},
             onConfirmPasswordChange = {},
+            onAcceptTermsChange = {},
             onSubmit = {},
             onLoginClick = {},
         )
@@ -194,17 +231,21 @@ private fun RegisterScreenErrorPreview() {
     PsTheme {
         RegisterContent(
             state = RegisterUiState(
-                fullName = "María Gómez",
+                firstName = "María",
+                lastName = "Gómez",
                 email = "demo@example.com",
-                password = "123456",
-                confirmPassword = "123456",
+                password = "secreta123",
+                confirmPassword = "secreta123",
+                acceptTerms = true,
                 generalError = "Ya existe una cuenta con este email",
             ),
             onBackClick = {},
-            onFullNameChange = {},
+            onFirstNameChange = {},
+            onLastNameChange = {},
             onEmailChange = {},
             onPasswordChange = {},
             onConfirmPasswordChange = {},
+            onAcceptTermsChange = {},
             onSubmit = {},
             onLoginClick = {},
         )

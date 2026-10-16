@@ -39,7 +39,6 @@ object TestDatabase {
         "jwt.secret" to "secreto-de-prueba",
         "jwt.issuer" to "pasitos-backend",
         "jwt.audience" to "pasitos-app",
-        "jwt.expirationMinutes" to "480",
         "terms.version" to TERMS_VERSION,
     )
 

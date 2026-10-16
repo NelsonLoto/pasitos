@@ -137,6 +137,8 @@ sequenceDiagram
   una notificación. Por eso ahí el inmediato se encola como trabajo normal, que con la app abierta
   igual corre en segundos.
 - La app abre o vuelve al frente: `ProcessLifecycleOwner` pide una sincronización inmediata.
+- Sin sesión no se sincroniza: la periódica se programa al iniciar o restaurar la sesión y todo se
+  cancela al vencer o cerrarla ([15](15-android.md#4-sesión)).
 - La inmediata y la periódica son trabajos distintos y pueden coincidir. Si dos sincronizaciones
   se pisan, un registro puede volver a una versión vieja. El motor de sincronización
   (I0-08 e I1) cumple dos reglas:

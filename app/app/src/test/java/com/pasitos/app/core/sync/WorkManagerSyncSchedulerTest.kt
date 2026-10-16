@@ -69,6 +69,17 @@ class WorkManagerSyncSchedulerTest {
         assertEquals(1, pending(WorkManagerSyncScheduler.IMMEDIATE_WORK).size)
     }
 
+    @Test
+    fun `RF-CTA-07 al cerrar sesión no queda ninguna sincronización programada`() {
+        scheduler.schedulePeriodic()
+        scheduler.requestSync(SyncTrigger.LOCAL_CHANGE)
+
+        scheduler.cancelAll()
+
+        assertEquals(0, pending(WorkManagerSyncScheduler.PERIODIC_WORK).size)
+        assertEquals(0, pending(WorkManagerSyncScheduler.IMMEDIATE_WORK).size)
+    }
+
     private fun pending(uniqueName: String): List<WorkInfo> =
         workManager.getWorkInfosForUniqueWork(uniqueName).get().filterNot { it.state.isFinished }
 }

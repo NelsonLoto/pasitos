@@ -90,13 +90,16 @@ La sesión se mantiene abierta mientras la app se use al menos una vez cada 30 d
   los datos descargados (RNF-OFF-01).
 
 ### RF-CTA-07 · Cierre de sesión
-**Actores:** Tutor, Pediatra · **Incremento:** I1 · **Sin conexión:** no
+**Actores:** Tutor, Pediatra · **Incremento:** I1 · **Sin conexión:** sí
 
 **Criterios de aceptación**
 - **CA1.** Dado un usuario con sesión iniciada, cuando cierra sesión, entonces la sesión queda
   revocada en el servidor y se borran del dispositivo los datos descargados de la cuenta.
 - **CA2.** Dado que hay registros cargados sin conexión pendientes de sincronizar, cuando el
   usuario intenta cerrar sesión, entonces se le advierte que se perderán y debe confirmar.
+- **CA3.** Dado un usuario sin conexión, cuando cierra sesión, entonces los datos del dispositivo
+  se borran igual y la sesión se revoca en el servidor apenas el dispositivo recupera la conexión
+  (D-67).
 
 ### RF-CTA-08 · Bloqueo de la app con huella o PIN
 **Actores:** Tutor, Pediatra · **Incremento:** I6 · **Sin conexión:** sí

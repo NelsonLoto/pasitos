@@ -26,7 +26,7 @@ class HomeViewModel @Inject constructor(
         measurementRepository.measurements,
     ) { session, children, activeChildId, measurements ->
         HomeUiState(
-            greetingName = session?.displayName?.substringBefore(" ").orEmpty(),
+            greetingName = session?.firstName.orEmpty(),
             activeChild = children.firstOrNull { it.id == activeChildId },
             // Último peso cargado del hijo activo (RF04) - puede haber mediciones sin peso
             // (solo talla, por ejemplo), por eso se filtra antes de buscar la más reciente.

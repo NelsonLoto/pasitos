@@ -6,13 +6,13 @@ import com.pasitos.app.data.child.model.ChildSex
 import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,15 +50,18 @@ class ChildApiRepository @Inject constructor(
                     _children.value = emptyList()
                     _activeChildId.value = null
                 } else {
-                    refreshChildren(session.token)
+                    refreshChildren()
                 }
             }
             .launchIn(repositoryScope)
     }
 
-    private suspend fun refreshChildren(token: String) {
-        val response = httpClient.get("/children") {
-            bearerAuth(token)
+    private suspend fun refreshChildren() {
+        // Sin conexión la lista queda como estaba. Desde I1 se lee de la base local (RNF-OFF-01)
+        val response = try {
+            httpClient.get("/children")
+        } catch (_: IOException) {
+            return
         }
         if (response.status == HttpStatusCode.OK) {
             val fetched = response.body<List<ChildResponseDto>>().map { it.toDomain() }
@@ -70,12 +73,10 @@ class ChildApiRepository @Inject constructor(
     }
 
     override suspend fun addChild(name: String, birthDate: LocalDate, sex: ChildSex): Result<Child> {
-        val token = authRepository.currentSession.value?.token
-            ?: return Result.failure(Exception("No hay sesión activa"))
+        if (authRepository.currentSession.value == null) return Result.failure(Exception("No hay sesión activa"))
 
         return runCatching {
             val response = httpClient.post("/children") {
-                bearerAuth(token)
                 contentType(ContentType.Application.Json)
                 setBody(
                     CreateChildRequestDto(

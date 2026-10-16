@@ -5,13 +5,13 @@ import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.measurement.model.Measurement
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,19 +42,21 @@ class MeasurementApiRepository @Inject constructor(
         // cada vez que cambia la lista de hijos (alta de hijo nuevo, login, logout).
         childRepository.children
             .onEach { children ->
-                val token = authRepository.currentSession.value?.token
-                if (token == null || children.isEmpty()) {
+                if (authRepository.currentSession.value == null || children.isEmpty()) {
                     _measurements.value = emptyList()
                     return@onEach
                 }
-                _measurements.value = children.flatMap { child -> fetchMeasurements(child.id, token) }
+                _measurements.value = children.flatMap { child -> fetchMeasurements(child.id) }
             }
             .launchIn(repositoryScope)
     }
 
-    private suspend fun fetchMeasurements(childId: String, token: String): List<Measurement> {
-        val response = httpClient.get("/children/$childId/measurements") {
-            bearerAuth(token)
+    private suspend fun fetchMeasurements(childId: String): List<Measurement> {
+        // Sin conexión no hay mediciones para mostrar. Desde I1 se leen de la base local (RNF-OFF-01)
+        val response = try {
+            httpClient.get("/children/$childId/measurements")
+        } catch (_: IOException) {
+            return emptyList()
         }
         return if (response.status == HttpStatusCode.OK) {
             response.body<List<MeasurementResponseDto>>().map { it.toDomain(childId) }
@@ -70,12 +72,10 @@ class MeasurementApiRepository @Inject constructor(
         heightCm: Double?,
         headCircumferenceCm: Double?,
     ): Result<Measurement> {
-        val token = authRepository.currentSession.value?.token
-            ?: return Result.failure(Exception("No hay sesión activa"))
+        if (authRepository.currentSession.value == null) return Result.failure(Exception("No hay sesión activa"))
 
         return runCatching {
             val response = httpClient.post("/children/$childId/measurements") {
-                bearerAuth(token)
                 contentType(ContentType.Application.Json)
                 setBody(
                     CreateMeasurementRequestDto(
