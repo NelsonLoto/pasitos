@@ -1,0 +1,37 @@
+# Actualizaciones de dependencias (01 · Stack, política de versiones). Dependabot abre los PRs
+# contra develop; se aplican en PRs propios, nunca mezcladas con funcionalidad.
+version: 2
+updates:
+  # Los tres builds de Gradle juntos: Kotlin y kotlinx.serialization tienen que tener la misma
+  # versión en los tres, así que un solo PR los sube a la vez
+  - package-ecosystem: gradle
+    directories:
+      - /app
+      - /backend
+      - /shared
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Argentina/Buenos_Aires
+    commit-message:
+      prefix: chore
+    groups:
+      # Menores y parches en un solo PR por semana. Cada versión mayor llega en su propio PR,
+      # porque se evalúa aparte (por ejemplo, Exposed 1.x)
+      gradle:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Argentina/Buenos_Aires
+    commit-message:
+      prefix: chore
+    groups:
+      github-actions:
+        patterns: ["*"]
