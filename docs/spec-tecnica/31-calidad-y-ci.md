@@ -6,7 +6,7 @@
 |---|---|---|---|
 | 1. Motor de crecimiento y vacunas | Casos de control OMS y SAP, bordes, propiedades ([10](10-modulo-compartido.md#6-pruebas)) | kotlin.test, JUnit 5 | CI en cada PR |
 | 2. Backend | Un test por criterio de aceptación de cada RF con API; **matriz de permisos** (cada rol contra cada acción sobre datos de un niño); sincronización (idempotencia, lápidas, revocaciones) | Ktor `testApplication`, Testcontainers con PostgreSQL 16 real | CI en cada PR |
-| 3. App Android | ViewModels con repositorios falsos; DAOs de Room; flujos críticos de interfaz: alta de hijo, carga de medición, consulta guiada | JUnit 4, kotlinx-coroutines-test, Turbine, Room in-memory, Compose UI Test | Unitarias en CI; de interfaz en emulador local antes de cerrar el incremento |
+| 3. App Android | ViewModels con repositorios falsos; DAOs de Room; flujos críticos de interfaz: alta de hijo, carga de medición, consulta guiada | JUnit 4, kotlinx-coroutines-test, Turbine, Room in-memory con Robolectric, Compose UI Test | Unitarias en CI; de interfaz y las que usan el Android Keystore (cifrado de la base) en emulador local antes de cerrar el incremento |
 | 4. Aceptación manual | Lista de verificación por incremento generada desde los criterios de la SPEC; se ejecuta en un dispositivo real | Checklist en el issue del incremento | Antes de dar por cerrado cada incremento |
 
 ### Nombres de pruebas trazables
@@ -26,10 +26,20 @@ fun `RF-CRE-01 CA2 rechaza una fecha anterior al nacimiento`() { … }
 |---|---|---|
 | `shared` | `shared/**` | `./gradlew test` |
 | `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers) y validación de `openapi.yaml` |
-| `android` | `app/**` o `shared/**` | `./gradlew assembleDebug testDebugUnitTest lint` |
+| `android` | `app/**` o `shared/**` | `./gradlew assembleDebug testDebugUnitTest lint` y verificación de que no se use `LocalDate.now()` |
 | `docs` | `docs/**` | Verificación de links internos entre archivos Markdown |
 
 - Gradle con caché (`gradle/actions/setup-gradle`) para que cada ejecución tarde lo menos posible.
+  El job `android` también guarda en caché las imágenes de Android que descarga Robolectric
+  (`~/.m2/repository/org/robolectric`).
+- **`LocalDate.now()` prohibido en la app (ADR-26):** el job `android` falla si aparece en
+  `app/app/src/main` fuera de `core/time`. "Hoy" se calcula con `ArgentinaClock.today()`. Los
+  archivos anteriores a I0-07 que todavía lo usan quedan en una lista de excepciones que solo
+  puede achicarse: cada tarea de I1 que reescribe uno lo saca de la lista. Son diez:
+  - con lógica: `PsDatePickerField.kt`, `Child.kt`, `DoseStatusResolver.kt`,
+    `ChildOnboardingViewModel.kt`, `MeasurementFormUiState.kt` y `VaccineDetailViewModel.kt`;
+  - vistas previas de diseño, que conviene pasar a fechas fijas: `ChildSelectorScreen.kt`,
+    `GrowthChartScreen.kt`, `HomeScreen.kt` y `VaccineDetailScreen.kt`.
 - Un PR que solo toca documentación no compila la app ni el backend.
 - Duración estimada: entre 8 y 12 minutos cuando corren todos los jobs. El plan gratuito incluye
   2.000 minutos por mes.
