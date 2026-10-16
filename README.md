@@ -22,6 +22,8 @@ en el código.
 - `app/` — App Android (Kotlin + Jetpack Compose), paquete `com.pasitos.app`. En Android Studio
   se abre esta carpeta, no la raíz del repositorio.
 - `backend/` — API propia (Kotlin + Ktor) con PostgreSQL.
+- `shared/` — Biblioteca Kotlin que usan la app y el backend: cálculos (edades, crecimiento,
+  vacunas) y contratos de la API. Ver [shared/README.md](shared/README.md).
 - `docs/` — SPEC funcional, SPEC técnica y plan de implementación.
 
 El stack con sus versiones está en [01 · Stack](docs/spec-tecnica/01-stack.md).

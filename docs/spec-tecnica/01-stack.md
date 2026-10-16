@@ -8,8 +8,8 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| Kotlin | 2.2.10 | Lenguaje de app, backend y `shared`. Debe ser la **misma versión** en los tres builds |
-| kotlinx.serialization | 1.8.x | Contratos de la API en `shared` |
+| Kotlin | 2.2.10 | Lenguaje de app, backend y `shared`. Debe ser la **misma versión** en los tres builds. Ktor 3.6 trae `kotlin-stdlib` 2.3.x, que el compilador 2.2 admite |
+| kotlinx.serialization | 1.11.0 | Contratos de la API en `shared`. Es la versión que trae Ktor 3.6 y se fija igual en los tres builds |
 | Gradle | 9.5.0 (wrapper) | Build |
 | JDK | 21 para compilar; bytecode 17 en `shared` | Backend corre en 21; Android y `shared` apuntan a 17 |
 
@@ -26,7 +26,7 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| Ktor Server (Netty) | 3.2.0 → alinear con la del cliente (3.6.x) en I0 | HTTP, autenticación, sesiones del panel |
+| Ktor Server (Netty) | 3.6.0, la misma que el cliente | HTTP, autenticación, sesiones del panel |
 | Plugins Ktor | — | `content-negotiation`, `status-pages`, `auth-jwt`, `rate-limit`, `sessions`, `thymeleaf`, `call-logging` |
 | Exposed (DSL) | 0.61.0 | Acceso a datos |
 | PostgreSQL | 16 | Base de datos |
@@ -44,7 +44,7 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Sentry Java | Nueva | Errores (ADR-08) |
 | Logback | 1.5.18 | Logs |
 | dotenv-kotlin | 6.5.1 | Variables de entorno en desarrollo local |
-| Testcontainers (PostgreSQL) | Nueva | Pruebas de integración |
+| Testcontainers (PostgreSQL) | 2.0.5 | Pruebas de integración contra PostgreSQL real; requiere Docker |
 
 ## App Android
 

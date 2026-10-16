@@ -118,8 +118,10 @@ fun doseStatuses(
 
 - La zona horaria es `America/Argentina/Buenos_Aires`. `ArgentinaClock.today()` existe solo en
   la app y el backend; `shared` recibe la fecha como parámetro.
-- `formatAge(birthDate, date)` aplica RN-HIJ-04 y devuelve también la edad corregida cuando
-  corresponde (RF-CRE-03, CA2).
+- `formatAge(birthDate, date, gestationalWeeks)` aplica RN-HIJ-04 ("12 días", "4 meses y 1 día",
+  "3 años y 2 meses") y, en prematuros hasta los 24 meses, devuelve también la edad corregida de
+  RN-HIJ-05 ("4 meses · 2 meses corregidos", RF-CRE-03, CA2). Antes de llegar al término la edad
+  corregida sería negativa y no se informa.
 - `nextControlDate(birthDate, schedule, lastFixedDate, today)` aplica RN-NOT-02.
 
 ## 5. Contratos de la API
@@ -129,7 +131,10 @@ fun doseStatuses(
   compilar hasta adaptarse.
 - Dentro de `/api/v1` solo se admiten cambios **compatibles**: agregar campos opcionales o
   endpoints nuevos. Renombrar o quitar campos requiere coordinar ambos lados en el mismo PR.
-- Los códigos de error (`ErrorCode`) son un enum compartido.
+- Los errores son `ErrorResponse` con un código `ErrorCode`, un enum compartido que viaja en
+  `snake_case` ([11 · Backend](11-backend.md#5-errores)). Una versión vieja de la app que recibe
+  un código que no conoce lo lee como `UNKNOWN` en vez de fallar: agregar un código es un cambio
+  compatible.
 
 ## 6. Pruebas
 
