@@ -1,0 +1,17 @@
+package com.pasitos.app.feature.vaccinedetail
+
+import com.pasitos.app.core.designsystem.component.PsBadgeTone
+import java.time.LocalDate
+
+data class VaccineDetailUiState(
+    val vaccineDisplayName: String = "",
+    val statusText: String = "",
+    val statusTone: PsBadgeTone = PsBadgeTone.Warning,
+    val recommendedAgeLabel: String = "",
+    val description: String = "",
+    val date: LocalDate? = null,
+    val lot: String = "",
+    val dateError: String? = null,
+    val generalError: String? = null,
+    val isLoading: Boolean = false,
+)
