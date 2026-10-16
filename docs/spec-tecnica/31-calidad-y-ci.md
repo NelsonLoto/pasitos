@@ -25,22 +25,32 @@ fun `RF-CRE-01 CA2 rechaza una fecha anterior al nacimiento`() { … }
 | Job | Se ejecuta si cambia | Pasos |
 |---|---|---|
 | `shared` | `shared/**` | `./gradlew test` |
-| `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers) y validación de `openapi.yaml` |
-| `android` | `app/**` o `shared/**` | `./gradlew assembleDebug testDebugUnitTest lint` y verificación de que no se use `LocalDate.now()` |
-| `docs` | `docs/**` | Verificación de links internos entre archivos Markdown |
+| `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega cuando exista el archivo |
+| `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use `LocalDate.now()` y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
+| `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
+- Un cambio en `ci.yml` corre todos los jobs, para probar el cambio. Un PR que solo toca
+  documentación no compila la app ni el backend.
+- Si un job falla, se guardan sus informes de pruebas (y de lint en `android`) como artefacto
+  durante 7 días.
 - Gradle con caché (`gradle/actions/setup-gradle`) para que cada ejecución tarde lo menos posible.
-  El job `android` también guarda en caché las imágenes de Android que descarga Robolectric
-  (`~/.m2/repository/org/robolectric`).
-- **`LocalDate.now()` prohibido en la app (ADR-26):** el job `android` falla si aparece en
-  `app/app/src/main` fuera de `core/time`. "Hoy" se calcula con `ArgentinaClock.today()`. Los
-  archivos anteriores a I0-07 que todavía lo usan quedan en una lista de excepciones que solo
-  puede achicarse: cada tarea de I1 que reescribe uno lo saca de la lista. Son diez:
+  La caché se escribe en `develop` y los PRs la leen. El job `android` también guarda en caché las
+  imágenes de Android que descarga Robolectric (`~/.m2/repository/org/robolectric`).
+- **Seguridad del workflow:** permisos de solo lectura y acciones fijadas por SHA del commit, con
+  la versión en un comentario, para que una etiqueta movida no cambie el código que corre.
+  Dependabot las actualiza.
+- **`LocalDate.now()` prohibido en la app (ADR-26):** `.github/scripts/check-local-date-now.sh`
+  falla si aparece en `app/app/src/main` fuera de `core/time`. "Hoy" se calcula con
+  `ArgentinaClock.today()`. Los archivos anteriores a I0-07 que todavía lo usan están en
+  `.github/scripts/local-date-now-allowlist.txt`, una lista que solo puede achicarse: el script
+  también falla si un archivo de la lista ya no lo usa, así la tarea de I1 que lo reescribe tiene
+  que sacarlo. Son diez:
   - con lógica: `PsDatePickerField.kt`, `Child.kt`, `DoseStatusResolver.kt`,
     `ChildOnboardingViewModel.kt`, `MeasurementFormUiState.kt` y `VaccineDetailViewModel.kt`;
   - vistas previas de diseño, que conviene pasar a fechas fijas: `ChildSelectorScreen.kt`,
     `GrowthChartScreen.kt`, `HomeScreen.kt` y `VaccineDetailScreen.kt`.
-- Un PR que solo toca documentación no compila la app ni el backend.
+- Los scripts de shell y los `gradlew` se guardan con fin de línea LF (`.gitattributes`), para
+  que funcionen igual en Linux y en Git Bash de Windows.
 - Duración estimada: entre 8 y 12 minutos cuando corren todos los jobs. El plan gratuito incluye
   2.000 minutos por mes.
 
@@ -50,8 +60,13 @@ equipo, igual que la regla de no pushear directo a `develop`.
 
 ### Dependabot
 
-`.github/dependabot.yml`: revisión semanal de dependencias de Gradle (app, backend y `shared`) y de
-las acciones de GitHub, con PRs agrupados por ecosistema.
+`.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle y de
+las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
+
+- Los tres builds de Gradle (app, backend y `shared`) van en el mismo PR, porque Kotlin y
+  kotlinx.serialization tienen que tener la misma versión en los tres ([01](01-stack.md)).
+- Las versiones menores y los parches van agrupados. Cada versión mayor llega en su propio PR,
+  porque se evalúa aparte.
 
 ## 3. Definición de terminado
 
