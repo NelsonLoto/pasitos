@@ -36,7 +36,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.postgresql:postgresql:42.7.7")
 
-    // Migraciones de schema (versiona Pasitos_base_de_datos.sql como V1__init.sql)
+    // Migraciones del esquema, versionadas por fecha y hora (ADR-23)
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
@@ -48,7 +48,13 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
     testImplementation(kotlin("test"))
+    // Gradle 9 ya no agrega solo el launcher de JUnit Platform.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Pruebas de integración contra PostgreSQL 16 real en Docker (ADR-19)
+    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
 }
 
 kotlin {

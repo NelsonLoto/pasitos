@@ -1,4 +1,4 @@
-package com.pasitos.backend.db
+package com.pasitos.backend.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -9,13 +9,29 @@ import org.jetbrains.exposed.sql.Database
 
 object DatabaseFactory {
 
-    fun init(config: ApplicationConfig) {
+    /** Abre el pool, aplica las migraciones y conecta Exposed. Quien llama cierra el pool al apagar. */
+    fun init(config: ApplicationConfig): HikariDataSource {
         val dataSource = createDataSource(config)
-        runMigrations(dataSource)
+        migrate(dataSource)
         Database.connect(dataSource)
+        return dataSource
     }
 
-    private fun createDataSource(config: ApplicationConfig): DataSource {
+    /**
+     * Las migraciones se versionan por fecha y hora (ADR-23). `outOfOrder` aplica también una
+     * migración con fecha anterior a la última aplicada: pasa cuando una rama se mergea después
+     * de otra más nueva.
+     */
+    fun migrate(dataSource: DataSource) {
+        Flyway.configure()
+            .dataSource(dataSource)
+            .locations("classpath:db/migration")
+            .outOfOrder(true)
+            .load()
+            .migrate()
+    }
+
+    private fun createDataSource(config: ApplicationConfig): HikariDataSource {
         val host = config.property("db.host").getString()
         val port = config.property("db.port").getString()
         val name = config.property("db.name").getString()
@@ -33,13 +49,5 @@ object DatabaseFactory {
             validate()
         }
         return HikariDataSource(hikariConfig)
-    }
-
-    private fun runMigrations(dataSource: DataSource) {
-        Flyway.configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .load()
-            .migrate()
     }
 }
