@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import java.io.File
 import java.security.GeneralSecurityException
 import kotlinx.coroutines.flow.first
@@ -12,6 +14,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -76,9 +79,23 @@ class DatabaseKeyStoreTest {
         assertNull(keyStore.read())
     }
 
+    @Test
+    fun `ADR-17 si el cifrado dejó de funcionar se borran todos los secretos y las claves`() = runTest {
+        keyStore.create()
+        val token = stringPreferencesKey("refresh_token")
+        dataStore.edit { it[token] = "ilegible-sin-la-clave" }
+
+        keyStore.resetEncryption()
+
+        assertTrue(dataStore.data.first().asMap().isEmpty())
+        assertTrue(cipher.wasReset)
+        assertNull(keyStore.read())
+    }
+
     /** Invierte los bytes y antepone el dato asociado; falla como Tink si la clave ya no existe. */
     private class FakeCipher : LocalCipher {
         var keystoreKeyLost = false
+        var wasReset = false
 
         override fun encrypt(plaintext: ByteArray, associatedData: ByteArray): ByteArray =
             associatedData + plaintext.reversedArray()
@@ -86,6 +103,11 @@ class DatabaseKeyStoreTest {
         override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray): ByteArray {
             if (keystoreKeyLost) throw GeneralSecurityException("decryption failed")
             return ciphertext.copyOfRange(associatedData.size, ciphertext.size).reversedArray()
+        }
+
+        override fun reset() {
+            wasReset = true
+            keystoreKeyLost = false
         }
     }
 }

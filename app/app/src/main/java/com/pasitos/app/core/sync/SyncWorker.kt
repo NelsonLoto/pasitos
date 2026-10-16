@@ -7,7 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.pasitos.app.core.database.LocalDatabase
+import com.pasitos.app.core.sync.local.PendingMutationDao
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -19,12 +19,12 @@ import dagger.assisted.AssistedInject
 class SyncWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val localDatabase: LocalDatabase,
+    private val pendingMutationDao: PendingMutationDao,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         val trigger = inputData.getString(TRIGGER)?.let(SyncTrigger::valueOf) ?: SyncTrigger.PERIODIC
-        val pending = localDatabase.get().pendingMutationDao().count()
+        val pending = pendingMutationDao.count()
         Log.i(TAG, "Sincronización ($trigger, intento ${runAttemptCount + 1}): $pending cambios pendientes")
         return Result.success()
     }

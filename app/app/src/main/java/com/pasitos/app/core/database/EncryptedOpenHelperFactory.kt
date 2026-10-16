@@ -63,7 +63,7 @@ private class DeferredKeyOpenHelper(
  * hexadecimal). Con una contraseña común, SQLCipher derivaría la clave con PBKDF2 en cada
  * apertura, lo que suma cientos de milisegundos en un teléfono de gama baja sin ganar seguridad.
  */
-private fun ByteArray.toRawKey(): ByteArray =
+internal fun ByteArray.toRawKey(): ByteArray =
     joinToString(separator = "", prefix = "x'", postfix = "'") { byte ->
         (byte.toInt() and 0xff).toString(16).padStart(2, '0')
     }.toByteArray(Charsets.US_ASCII)

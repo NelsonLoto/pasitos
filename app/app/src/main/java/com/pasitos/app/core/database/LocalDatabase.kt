@@ -4,15 +4,17 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.pasitos.app.core.security.DatabaseKeyStore
+import java.security.GeneralSecurityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 /**
- * Base local cifrada (ADR-17). Al cerrar sesión, [wipe] borra el archivo y la clave, y la próxima
- * llamada a [get] crea una base nueva. Por eso los repositorios piden el DAO en cada uso
- * (`localDatabase.get().measurementDao()`) y no lo guardan en una propiedad: uno guardado
- * quedaría apuntando a la base cerrada.
+ * Base local cifrada (ADR-17), una sola por proceso. Hilt la inyecta, y también sus DAOs.
+ *
+ * Al cerrar sesión, [wipe] borra el archivo y la clave, y después la app se reinicia (I0-06). Así
+ * no queda nada de la sesión anterior: ni en el teléfono ni en memoria (15 · App Android,
+ * sección 3).
  */
 class LocalDatabase(
     private val context: Context,
@@ -20,33 +22,40 @@ class LocalDatabase(
     private val name: String = PasitosDatabase.NAME,
 ) {
 
-    @Volatile
-    private var instance: PasitosDatabase? = null
-
-    fun get(): PasitosDatabase = instance ?: synchronized(this) {
-        instance ?: Room.databaseBuilder(context, PasitosDatabase::class.java, name)
+    private val lazyDatabase = lazy {
+        Room.databaseBuilder(context, PasitosDatabase::class.java, name)
             .openHelperFactory(EncryptedOpenHelperFactory(::key))
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
-            .also { instance = it }
     }
 
-    /** Borra la base y su clave (RF-CTA-07, CA1). Los datos vuelven del servidor al iniciar sesión. */
+    val database: PasitosDatabase by lazyDatabase
+
+    /**
+     * Cierra la base y borra el archivo y la clave (RF-CTA-07, CA1). Después [database] ya no se
+     * puede usar: quien la llama reinicia el proceso.
+     */
     suspend fun wipe() = withContext(Dispatchers.IO) {
-        synchronized(this@LocalDatabase) {
-            instance?.close()
-            instance = null
-            context.deleteDatabase(name)
-        }
+        if (lazyDatabase.isInitialized()) database.close()
+        context.deleteDatabase(name)
         keyStore.delete()
     }
 
     // La pide SQLCipher al abrir el archivo, siempre fuera del hilo principal
     private fun key(): ByteArray = runBlocking {
-        keyStore.read() ?: run {
-            // Sin una clave legible, el archivo que haya quedado ya no se puede abrir: se empieza
-            // de cero y los datos vuelven del servidor en la próxima sincronización.
-            if (context.deleteDatabase(name)) Log.w(TAG, "Base local recreada: no había una clave legible")
+        keyStore.read() ?: startOver()
+    }
+
+    /** Sin una clave legible, el archivo que haya quedado ya no se puede abrir: se empieza de cero. */
+    private suspend fun startOver(): ByteArray {
+        if (context.deleteDatabase(name)) Log.w(TAG, "Base local recreada: no había una clave legible")
+        return try {
+            keyStore.create()
+        } catch (e: GeneralSecurityException) {
+            // El cifrado mismo dejó de funcionar: se regeneran todas las claves. Los datos vuelven
+            // del servidor; lo cargado sin conexión y no enviado ya no se podía recuperar.
+            Log.w(TAG, "Claves de cifrado regeneradas: el Keystore no podía usar las anteriores", e)
+            keyStore.resetEncryption()
             keyStore.create()
         }
     }
