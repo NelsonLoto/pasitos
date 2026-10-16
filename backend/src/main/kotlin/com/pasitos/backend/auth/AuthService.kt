@@ -6,11 +6,12 @@ import com.pasitos.backend.common.ConflictException
 import com.pasitos.backend.common.InvalidInputException
 import com.pasitos.backend.common.UnauthorizedException
 import com.pasitos.backend.common.tx
+import com.pasitos.shared.api.ErrorCode
 import java.util.UUID
 
-class InvalidCredentialsException : UnauthorizedException("invalid_credentials", "Email o contraseña incorrectos")
+class InvalidCredentialsException : UnauthorizedException(ErrorCode.INVALID_CREDENTIALS, "Email o contraseña incorrectos")
 
-class EmailAlreadyInUseException : ConflictException("email_already_in_use", "Ya existe una cuenta con este email")
+class EmailAlreadyInUseException : ConflictException(ErrorCode.EMAIL_ALREADY_IN_USE, "Ya existe una cuenta con este email")
 
 class AuthService(
     private val accounts: AccountRepository,

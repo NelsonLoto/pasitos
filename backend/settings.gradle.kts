@@ -3,3 +3,6 @@ plugins {
 }
 
 rootProject.name = "backend"
+
+// Módulo compartido con la app, como build compuesto (ADR-01).
+includeBuild("../shared")
