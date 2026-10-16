@@ -1,6 +1,7 @@
 package com.pasitos.backend.auth
 
 import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.server.config.ApplicationConfig
 import java.time.Instant
@@ -23,25 +24,37 @@ data class JwtConfig(
     }
 }
 
-/** Token emitido + su vencimiento, para que la fila de `sesiones` use exactamente el mismo. */
+/** Token emitido y su vencimiento, para que la sesión venza en el mismo momento. */
 data class IssuedToken(val token: String, val expiresAt: Instant)
 
+/** Token de acceso: JWT HS256 con `sub` (cuenta), `sid` (sesión) y `jti` (11 · Backend §3). */
 class JwtService(private val config: JwtConfig) {
 
-    fun generateToken(userId: UUID, email: String): IssuedToken {
-        val now = Instant.now()
-        val expiresAt = now.plus(config.expirationMinutes, ChronoUnit.MINUTES)
+    private val algorithm = Algorithm.HMAC256(config.secret)
+
+    val issuer: String get() = config.issuer
+
+    fun generateToken(accountId: UUID, sessionId: UUID, issuedAt: Instant): IssuedToken {
+        val expiresAt = issuedAt.plus(config.expirationMinutes, ChronoUnit.MINUTES)
         val token = JWT.create()
             .withIssuer(config.issuer)
             .withAudience(config.audience)
-            .withSubject(userId.toString())
-            .withClaim("email", email)
-            .withIssuedAt(now)
+            .withSubject(accountId.toString())
+            .withClaim(SESSION_CLAIM, sessionId.toString())
+            .withIssuedAt(issuedAt)
             .withExpiresAt(expiresAt)
-            // `iat` tiene precisión de segundos: sin un jti único, dos logins del mismo usuario
-            // en el mismo segundo darían el mismo token y chocarían con sesiones.token_hash UNIQUE.
             .withJWTId(UUID.randomUUID().toString())
-            .sign(Algorithm.HMAC256(config.secret))
+            .sign(algorithm)
         return IssuedToken(token, expiresAt)
+    }
+
+    /** Verifica firma, emisor, audiencia y vencimiento. La sesión la verifica [AuthService]. */
+    fun verifier(): JWTVerifier = JWT.require(algorithm)
+        .withIssuer(config.issuer)
+        .withAudience(config.audience)
+        .build()
+
+    companion object {
+        const val SESSION_CLAIM = "sid"
     }
 }

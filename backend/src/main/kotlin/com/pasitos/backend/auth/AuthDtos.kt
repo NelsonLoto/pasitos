@@ -1,10 +1,14 @@
 package com.pasitos.backend.auth
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+// Contrato heredado que usa la app actual, con claves JSON en español. Los endpoints nuevos bajo
+// /api/v1 (I0-05) usan los DTOs de `shared`, en inglés (ADR-21).
 
 @Serializable
 data class RegisterRequest(
-    val nombre: String,
+    @SerialName("nombre") val name: String,
     val email: String,
     val password: String,
 )
@@ -19,12 +23,6 @@ data class LoginRequest(
 data class AuthResponse(
     val userId: String,
     val email: String,
-    val nombre: String,
+    @SerialName("nombre") val name: String,
     val token: String,
-)
-
-@Serializable
-data class ErrorResponse(
-    val error: String,
-    val message: String,
 )

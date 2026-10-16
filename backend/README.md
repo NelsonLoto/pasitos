@@ -64,8 +64,45 @@ instalar PostgreSQL nativo en Windows en su lugar: creá a mano la base
 
 ## Schema
 
-El schema versionado en Flyway (`V1__esquema_inicial.sql`) es el mismo que
-`D:\Pasitos\Pasitos_base_de_datos.sql` (fuente editable en
-`D:\Pasitos\App_Nino_Sano_BD.dbml`). Cambios al modelo de datos van como
-nuevas migraciones `V2__...`, `V3__...`, nunca editando `V1` una vez
-mergeado.
+El esquema está definido en
+[13 · Base de datos](../docs/spec-tecnica/13-base-de-datos.md) y se versiona con
+Flyway en `src/main/resources/db/migration`.
+
+- La línea base es `V2026_10_16_0954__create_baseline.sql` (I0-04). Reemplazó
+  a `V1` y `V2` (`personas`, `usuarios`, `sesiones`).
+- Cada migración nueva lleva la fecha y hora en que se crea:
+  `V2026_10_20_1530__create_care_links.sql` (ADR-23). Flyway corre con
+  `outOfOrder`, así que no importa en qué orden se mergeen las ramas.
+- Una migración ya mergeada **nunca se edita**: se corrige con otra nueva.
+- Si una migración borra una columna, en el mismo PR se actualiza el objeto
+  `Table` de Exposed.
+
+### Borrar la base local (una sola vez, después de I0-04)
+
+Si tu base local tiene las migraciones viejas, el backend no arranca y avisa
+con "La base tiene migraciones que no coinciden con las del código". Borrala y
+volvé a levantarla (desde la raíz del repo):
+
+```
+docker compose --env-file backend/.env down -v
+docker compose --env-file backend/.env up -d
+```
+
+`-v` borra el volumen con los datos. Solo hay datos de prueba.
+
+## Estructura
+
+Un paquete por dominio (`auth`, `child`, `guardianship`, `measurement`), cada
+uno con rutas, servicio, repositorio y tablas
+([11 · Backend](../docs/spec-tecnica/11-backend.md#1-capas)). Lo transversal
+está en `common/` y `config/`; los servicios se crean en `Dependencies.kt`.
+
+## Pruebas
+
+```
+./gradlew test
+```
+
+Las pruebas de integración levantan un PostgreSQL 16 real con
+[Testcontainers](https://testcontainers.com/), así que **Docker tiene que estar
+corriendo**. No usan la base local ni el archivo `.env`.

@@ -96,7 +96,7 @@ class MeasurementApiRepository @Inject constructor(
     }
 
     private fun MeasurementResponseDto.toDomain(childId: String) = Measurement(
-        id = id.toString(),
+        id = id,
         childId = childId,
         date = LocalDate.parse(fechaMedicion),
         weightKg = pesoKg,
