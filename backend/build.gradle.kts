@@ -11,11 +11,15 @@ repositories {
     mavenCentral()
 }
 
-val ktorVersion = "3.2.0"
+// Misma versión que el cliente de la app (P-12).
+val ktorVersion = "3.6.0"
 val exposedVersion = "0.61.0"
 val flywayVersion = "11.8.2"
 
 dependencies {
+    // Motor de crecimiento, formato de edades y contratos de la API compartidos con la app
+    implementation("com.pasitos:shared")
+
     // Ktor server
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
