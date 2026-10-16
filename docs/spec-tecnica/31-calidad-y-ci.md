@@ -6,7 +6,7 @@
 |---|---|---|---|
 | 1. Motor de crecimiento y vacunas | Casos de control OMS y SAP, bordes, propiedades ([10](10-modulo-compartido.md#6-pruebas)) | kotlin.test, JUnit 5 | CI en cada PR |
 | 2. Backend | Un test por criterio de aceptación de cada RF con API; **matriz de permisos** (cada rol contra cada acción sobre datos de un niño); sincronización (idempotencia, lápidas, revocaciones) | Ktor `testApplication`, Testcontainers con PostgreSQL 16 real | CI en cada PR |
-| 3. App Android | ViewModels con repositorios falsos; DAOs de Room; flujos críticos de interfaz: alta de hijo, carga de medición, consulta guiada | JUnit 4, kotlinx-coroutines-test, Turbine, Room in-memory, Compose UI Test | Unitarias en CI; de interfaz en emulador local antes de cerrar el incremento |
+| 3. App Android | ViewModels con repositorios falsos; DAOs de Room; flujos críticos de interfaz: alta de hijo, carga de medición, consulta guiada | JUnit 4, kotlinx-coroutines-test, Turbine, Room in-memory con Robolectric, Compose UI Test | Unitarias en CI; de interfaz y las que usan el Android Keystore (cifrado de la base) en emulador local antes de cerrar el incremento |
 | 4. Aceptación manual | Lista de verificación por incremento generada desde los criterios de la SPEC; se ejecuta en un dispositivo real | Checklist en el issue del incremento | Antes de dar por cerrado cada incremento |
 
 ### Nombres de pruebas trazables

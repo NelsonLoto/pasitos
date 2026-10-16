@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.4 |
+| **Versión** | 1.2.5 |
 | **Fecha** | 16/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.3.0](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.5 | 16/10/2026 | Base local cifrada: dónde viven la clave y el keyset, clave cruda de SQLCipher, `LocalDatabase` y su borrado, base fuera de las copias de seguridad, y los repositorios piden el DAO en cada uso ([15](15-android.md)); trabajos únicos de sincronización, acelerados solo desde Android 12 ([14](14-sincronizacion.md)); versiones de Room, SQLCipher, WorkManager, DataStore, Tink y Robolectric ([01](01-stack.md), [31](31-calidad-y-ci.md)) | Decisiones tomadas al implementar la base local y el esqueleto de sincronización (#35) |
 | 1.2.4 | 16/10/2026 | Detalles de la rotación del token de renovación y variable `TERMS_VERSION` ([11](11-backend.md)); límites de `/auth/register` y `/auth/refresh` como supuestos y P-13 para el límite general por cuenta ([92](92-pendientes.md)) | Decisiones tomadas al implementar la sesión persistente (#33) |
 | 1.2.3 | 16/10/2026 | Ktor Server 3.6.0 y kotlinx.serialization 1.11.0 en los tres builds (P-12 resuelto); firma de `formatAge`, que antes de la fecha de término informa cuánto falta (SPEC funcional 1.3.0, D-66); `ErrorCode` tolera códigos desconocidos ([01](01-stack.md), [10](10-modulo-compartido.md), [92](92-pendientes.md)) | Decisiones tomadas al implementar el módulo `shared` (#30) |
 | 1.2.2 | 16/10/2026 | `author_account_id` sin FK a `accounts`; las FK hacia tablas de incrementos posteriores se agregan con esas tablas ([13](13-base-de-datos.md)) | Decisiones tomadas al implementar la línea base (#32) |
