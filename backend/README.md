@@ -6,9 +6,9 @@ PostgreSQL y Flyway para versionar el schema.
 ## Requisitos
 
 - JDK 21
-- Docker (para levantar PostgreSQL) — necesita virtualización habilitada en
-  la BIOS (Intel VT-x / AMD-V). Si tu máquina no la soporta, ver la sección
-  "Alternativa sin Docker" más abajo.
+- Docker (para levantar PostgreSQL y Mailpit) — necesita virtualización
+  habilitada en la BIOS (Intel VT-x / AMD-V). Si tu máquina no la soporta, ver
+  la sección "Alternativa sin Docker" más abajo.
 
 ## Setup
 
@@ -23,7 +23,7 @@ PostgreSQL y Flyway para versionar el schema.
    nombre de base, usuario y contraseña de conexión (por defecto
    `localhost:5433`, base `pasitos`, usuario `pasitos_dev`).
 
-2. Levantar PostgreSQL con Docker (desde la raíz del repo), usando
+2. Levantar PostgreSQL y Mailpit con Docker (desde la raíz del repo), usando
    `backend/.env` como archivo de variables:
 
    ```
@@ -31,16 +31,23 @@ PostgreSQL y Flyway para versionar el schema.
    ```
 
    **Importante:** Docker Compose por defecto solo lee un archivo `.env` en
-   la raíz del repo (al lado de `docker-compose.yml`), no `backend/.env`. Si
-   corrés `docker compose up -d` sin `--env-file`, `DB_PORT` no se toma de
-   `backend/.env` y el contenedor usa el default `5432`, lo que puede chocar
-   con una instalación nativa de Postgres en el mismo puerto. Usá siempre
-   `--env-file backend/.env` para evitar esto.
+   la raíz del repo (al lado de `docker-compose.yml`), no `backend/.env`. Sin
+   `--env-file` usa los valores por defecto de `docker-compose.yml`, que son
+   los de `.env.example`: si cambiaste algo en tu `backend/.env` (por ejemplo,
+   el puerto), no se toma. Usá siempre `--env-file backend/.env`.
 
    Esto crea la base `pasitos` con las credenciales de desarrollo definidas en
    `backend/.env`. El contenedor expone el puerto **5433** en el host (no
    5432), para no chocar con una instalación nativa de Postgres que ya exista
    en tu máquina.
+
+   Mailpit captura los emails que manda el backend, sin enviarlos: se ven en
+   http://localhost:8025. El backend los manda por SMTP a `localhost:1025`
+   desde que envía emails (I1-B1).
+
+   Los puertos se publican solo en `127.0.0.1`, así no quedan abiertos a otras
+   computadoras de la red. Si tu base es anterior a este cambio, el primer `up`
+   la recrea para cambiar el puerto; los datos se conservan.
 
 3. Levantar el backend:
 
@@ -53,6 +60,28 @@ PostgreSQL y Flyway para versionar el schema.
    abre el pool de conexiones (HikariCP) que usa Exposed.
 
 4. Verificar: `GET http://localhost:8080/health` debería responder `OK`.
+
+## Todo con Docker, backend incluido
+
+Para correr el backend sin IntelliJ ni JDK (por ejemplo, si trabajás solo en la
+app), el perfil `full` también lo levanta en Docker:
+
+```
+docker compose --env-file backend/.env --profile full up -d
+```
+
+- La imagen se construye con [`Dockerfile`](Dockerfile) y se reconstruye en
+  cada `up`, así siempre corre el código actual. La primera vez tarda unos
+  minutos; después, sin cambios, unos segundos.
+- El backend responde en `http://localhost:8080`, el mismo puerto que
+  `./gradlew run`: no corras los dos a la vez. Para usarlo desde el emulador,
+  `adb reverse tcp:8080 tcp:8080`, como siempre.
+- Logs: `docker compose logs -f backend`. Para frenar todo:
+  `docker compose --profile full down` (sin `-v`, conserva la base).
+- La imagen no lleva `backend/.env` ni ningún secreto: la configuración le
+  llega por variables de entorno desde `docker-compose.yml`. Es la misma
+  imagen que se usará en el piloto
+  ([30 · Infraestructura](../docs/spec-tecnica/30-infraestructura.md#imagen-del-backend)).
 
 ## Alternativa sin Docker
 

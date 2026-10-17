@@ -23,7 +23,8 @@ pasitos/                      ← github.com/NelsonLoto/pasitos (antes control-n
 │   ├── workflows/ci.yml
 │   ├── dependabot.yml
 │   └── PULL_REQUEST_TEMPLATE.md
-├── docker-compose.yml
+├── docker-compose.yml        ← base, Mailpit y, con el perfil full, el backend
+├── .dockerignore             ← solo backend/ y shared/ entran a la imagen
 ├── CONTRIBUTING.md
 └── README.md
 ```

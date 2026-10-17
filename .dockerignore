@@ -1,0 +1,22 @@
+# Contexto de la imagen del backend (backend/Dockerfile): solo entra lo que necesita para
+# compilar. Todo lo demás queda afuera, en particular los .env con secretos, que nunca llegan
+# a la imagen.
+*
+!backend/
+!shared/
+
+# Los mismos secretos que .gitignore: lo que no se sube al repositorio tampoco entra a la imagen
+**/.env
+**/.env.*
+**/*.pem
+**/*.jks
+**/*.keystore
+
+**/build/
+**/.gradle/
+**/.kotlin/
+**/.idea/
+**/*.iml
+**/local.properties
+**/src/test/
+**/*.md
