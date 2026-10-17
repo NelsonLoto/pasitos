@@ -47,6 +47,27 @@ updates:
         patterns: ["*"]
         update-types: [minor, patch]
 
+  # Imágenes base del backend (backend/Dockerfile), fijadas por digest: sin esto no recibirían
+  # los parches de seguridad del sistema y del JRE
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+    ignore:
+      # Java 21 es el de todo el proyecto (01 · Stack): cambiar de versión mayor se decide aparte
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker:
+        patterns: ["*"]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
