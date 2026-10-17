@@ -1,6 +1,8 @@
 plugins {
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.serialization") version "2.2.10"
+    // Con el id completo y no con `kotlin("jvm")`: así Dependabot reconoce que es Kotlin y lo sube
+    // en el mismo PR que la app y shared (31 · Calidad e integración continua)
+    id("org.jetbrains.kotlin.jvm") version "2.2.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
     application
 }
 
