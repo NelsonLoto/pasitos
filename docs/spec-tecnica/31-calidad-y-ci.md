@@ -78,6 +78,13 @@ prefijo `chore:`.
 - Para que Dependabot reconozca a Kotlin en el backend y en `shared`, el plugin se declara con su
   id completo (`id("org.jetbrains.kotlin.jvm")`), no con `kotlin("jvm")`: con la forma corta
   queda fuera del grupo y llega en otro PR, con una versión distinta de la de la app.
+- **El Kotlin del backend se sube a mano en el PR de Kotlin.** Dependabot actualiza cada
+  dependencia una sola vez por grupo. Al revisar `app/` también actualiza `shared/`, porque la app
+  lo incluye como build compuesto, y en `backend/` la saltea porque ya la dio por resuelta. Antes
+  de mergear ese PR se le suma un commit que lleva `backend/build.gradle.kts` a la misma versión.
+  Si se olvida, el job `backend` falla, porque no puede leer `shared` compilado con un Kotlin más
+  nuevo. Tener la versión en un solo archivo, para no depender de este paso, queda como
+  [P-16](92-pendientes.md).
 - Las demás versiones menores y parches van agrupados en otro PR. Cada versión mayor llega en su
   propio PR, porque se evalúa aparte. Las versiones mayores de Exposed se ignoran hasta evaluarlas
   ([P-15](92-pendientes.md)).
