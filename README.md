@@ -27,3 +27,16 @@ en el código.
 - `docs/` — SPEC funcional, SPEC técnica y plan de implementación.
 
 El stack con sus versiones está en [01 · Stack](docs/spec-tecnica/01-stack.md).
+
+## Entorno local
+
+La base de datos, Mailpit (captura los emails) y, si querés, el backend se levantan con Docker
+Compose desde la raíz del repositorio:
+
+```
+cp backend/.env.example backend/.env
+docker compose --env-file backend/.env --profile full up -d
+```
+
+Sin `--profile full` levanta solo la base y Mailpit, para correr el backend desde IntelliJ. El
+detalle está en [backend/README.md](backend/README.md).

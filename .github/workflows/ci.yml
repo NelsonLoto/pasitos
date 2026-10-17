@@ -31,6 +31,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       android: ${{ steps.filter.outputs.android }}
       docs: ${{ steps.filter.outputs.docs }}
+      docker: ${{ steps.filter.outputs.docker }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -52,6 +53,12 @@ jobs:
               - '.github/workflows/ci.yml'
             docs:
               - '**/*.md'
+              - '.github/workflows/ci.yml'
+            docker:
+              - 'backend/**'
+              - 'shared/**'
+              - 'docker-compose.yml'
+              - '.dockerignore'
               - '.github/workflows/ci.yml'
 
   shared:
@@ -132,6 +139,34 @@ jobs:
             app/app/build/reports/tests/
             app/app/build/reports/lint-results-debug.html
           retention-days: 7
+
+  # Construye la imagen del backend y levanta el entorno local completo, como lo hace el equipo
+  docker:
+    name: docker
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Un .env como el de cualquier integrante: la prueba de abajo verifica que no llegue a la imagen
+      - name: Simular un backend/.env local
+        run: printf 'JWT_SECRET=no-tiene-que-llegar-a-la-imagen\n' > backend/.env
+      - name: Levantar base, Mailpit y backend
+        run: docker compose --profile full up --detach --wait --wait-timeout 180
+      - name: El backend responde /health
+        run: curl --fail --silent --show-error http://localhost:8080/health
+      - name: La imagen no tiene archivos .env
+        run: |
+          found=$(docker run --rm --entrypoint sh pasitos-backend:local \
+            -c 'find / -xdev \( -name ".env" -o -name ".env.*" \) 2>/dev/null')
+          if [ -n "$found" ]; then
+            echo "::error::La imagen tiene archivos .env: $found"
+            exit 1
+          fi
+      - name: Logs de los servicios
+        if: failure()
+        run: docker compose --profile full logs
 
   docs:
     name: docs
