@@ -70,10 +70,15 @@ las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
 - Los tres builds de Gradle (app, backend y `shared`) se actualizan en los mismos PRs, porque
   Kotlin y kotlinx.serialization tienen que tener la misma versión en los tres
   ([01](01-stack.md)).
-- Kotlin y KSP van en un PR propio: antes de subirlos hay que verificar KSP, Hilt, Room y AGP, y
-  si se traban no frenan al resto.
+- Kotlin, KSP y Hilt van en un PR propio: cada versión de Kotlin necesita una de KSP y una de
+  Hilt que la soporten, así que suben juntas. Antes de mergearlo hay que verificar también Room y
+  AGP, y si se traba no frena al resto.
+- Para que Dependabot reconozca a Kotlin en el backend y en `shared`, el plugin se declara con su
+  id completo (`id("org.jetbrains.kotlin.jvm")`), no con `kotlin("jvm")`: con la forma corta
+  queda fuera del grupo y llega en otro PR, con una versión distinta de la de la app.
 - Las demás versiones menores y parches van agrupados en otro PR. Cada versión mayor llega en su
-  propio PR, porque se evalúa aparte.
+  propio PR, porque se evalúa aparte. Las versiones mayores de Exposed se ignoran hasta evaluarlas
+  ([P-15](92-pendientes.md)).
 - Una versión se propone recién 14 días después de publicada (`cooldown`), para dar tiempo a que
   se detecte una versión maliciosa o rota. Las actualizaciones de seguridad no esperan.
 
