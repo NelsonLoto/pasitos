@@ -28,6 +28,7 @@ y los PRs encadenados) y en cada push a `develop`:
 | `shared` | `shared/**` | `./gradlew test` |
 | `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
 | `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
+| `docker` | `backend/**`, `shared/**`, `docker-compose.yml` o `.dockerignore` | `docker compose --profile full up` construye la imagen del backend y levanta base, Mailpit y backend; verifica que `/health` responda y que la imagen no tenga archivos `.env` (en ningún lugar) ni claves (`*.pem`, `*.jks`, `*.keystore`) en la aplicación ni dentro de los jars del backend y de `shared`, con un `backend/.env` de prueba en el contexto. Las claves no se buscan en el resto del sistema porque la imagen base trae certificados públicos `.pem` ([30](30-infraestructura.md#imagen-del-backend)) |
 | `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
 - Un cambio en `ci.yml` corre todos los jobs, para probar el cambio. Un PR que solo toca
@@ -64,8 +65,9 @@ equipo, igual que la regla de no pushear directo a `develop`.
 
 ### Dependabot
 
-`.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle y de
-las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
+`.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle, de
+las imágenes base del backend y de las acciones de GitHub, con PRs agrupados por ecosistema y el
+prefijo `chore:`.
 
 - Los tres builds de Gradle (app, backend y `shared`) se actualizan en los mismos PRs, porque
   Kotlin y kotlinx.serialization tienen que tener la misma versión en los tres
@@ -86,6 +88,11 @@ las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
 - Las demás versiones menores y parches van agrupados en otro PR. Cada versión mayor llega en su
   propio PR, porque se evalúa aparte. Las versiones mayores de Exposed se ignoran hasta evaluarlas
   ([P-15](92-pendientes.md)).
+- Las imágenes base de `backend/Dockerfile` van fijadas por digest, así que dependen de Dependabot
+  para recibir los parches de seguridad del sistema y del JRE. Se ignora el cambio de versión
+  mayor de Java, que es la 21 en todo el proyecto ([01](01-stack.md)). Las imágenes de
+  `docker-compose.yml` (PostgreSQL y Mailpit) son solo para desarrollo local y se actualizan a
+  mano.
 - Una versión se propone recién 14 días después de publicada (`cooldown`), para dar tiempo a que
   se detecte una versión maliciosa o rota. Las actualizaciones de seguridad no esperan.
 

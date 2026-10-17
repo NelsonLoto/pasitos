@@ -16,9 +16,15 @@ No se define un entorno de producción para la tesis: el piloto cumple ese rol.
 
 | Servicio | Imagen | Uso |
 |---|---|---|
-| `db` | `postgres:16-alpine` | Base de desarrollo (ya existe). Puerto configurable con `DB_PORT` |
-| `mailpit` | `axllent/mailpit` | Captura los emails; se ven en `http://localhost:8025` |
-| `backend` | Imagen propia | Opcional, con el perfil `full`. Lo habitual es correr el backend desde IntelliJ |
+| `db` | `postgres:16-alpine` | Base de desarrollo. Puerto configurable con `DB_PORT` (5433 por defecto, igual que `backend/.env.example`) |
+| `mailpit` | `axllent/mailpit`, versión fija | Captura los emails sin enviarlos; se ven en `http://localhost:8025`. SMTP en el puerto 1025 |
+| `backend` | Imagen propia | Opcional, con el perfil `full` (`docker compose --profile full up`). Se reconstruye en cada `up` para correr el código actual. Lo habitual es correr el backend desde IntelliJ |
+
+- Los puertos se publican solo en `127.0.0.1`: la base, con su contraseña de desarrollo, y los
+  emails capturados no quedan abiertos a otras computadoras de la red.
+- Dentro de Docker, el backend se conecta a `db:5432` y a `mailpit:1025`. Las variables de
+  `backend/.env` le llegan con `--env-file backend/.env`; sin ese archivo, los valores por
+  defecto de `docker-compose.yml` son los de `.env.example`.
 
 Para usar la app en un teléfono o emulador contra el backend local:
 `adb reverse tcp:8080 tcp:8080` (práctica vigente del proyecto).
@@ -27,13 +33,25 @@ Para usar la app en un teléfono o emulador contra el backend local:
 
 `backend/Dockerfile` en dos etapas:
 
-1. **Build:** imagen con JDK 21 que compila `shared` y `backend` y genera la distribución con
-   `./gradlew installDist`.
-2. **Ejecución:** imagen JRE 21 mínima, usuario sin privilegios, puerto 8080, `HEALTHCHECK` sobre
-   `/health`.
+1. **Build:** `eclipse-temurin:21-jdk-noble` compila `shared` y `backend` y genera la
+   distribución con `./gradlew installDist`. Se construye desde la raíz del repositorio, porque
+   el backend incluye a `shared` como build compuesto.
+2. **Ejecución:** `eclipse-temurin:21-jre-alpine` con la distribución del backend (unos 200 MB en
+   total). Corre con un usuario sin privilegios (`pasitos`, uid 10001) que no puede modificar los
+   archivos de la aplicación, en el puerto 8080, con `HEALTHCHECK` sobre `/health`. La JVM usa
+   hasta el 75 % de la memoria del contenedor.
 
-Toda la configuración llega por variables de entorno ([11](11-backend.md#7-configuración)). La
-misma imagen corre en cualquier proveedor que ejecute contenedores (ADR-05).
+- **Sin secretos:** `.dockerignore`, en la raíz, deja entrar al contexto de construcción solo
+  `backend/` y `shared/`. De ahí saca los mismos secretos que `.gitignore` (`.env`, `*.pem`,
+  `*.jks` y `*.keystore`), las carpetas `build/` y las pruebas. Toda la configuración llega por
+  variables de entorno ([11](11-backend.md#7-configuración)).
+- **Imágenes base fijadas por digest**, con la etiqueta como referencia, para que una etiqueta
+  movida no cambie lo que se construye. Dependabot las actualiza
+  ([31](31-calidad-y-ci.md#dependabot)).
+- La integración continua construye la imagen y levanta el entorno local completo
+  ([31](31-calidad-y-ci.md#2-integración-continua-adr-14)).
+
+La misma imagen corre en cualquier proveedor que ejecute contenedores (ADR-05).
 
 ## Piloto
 
@@ -63,6 +81,9 @@ flowchart LR
 ```
 
 - `docker compose` con `caddy`, `backend`, `db` y `backup`.
+- El contenedor del backend lleva un límite de memoria (`mem_limit`). La JVM usa hasta el 75 %
+  de la memoria de su contenedor; sin límite, ese 75 % se calcularía sobre toda la del servidor
+  y podría quitarle memoria a PostgreSQL.
 - Solo el puerto 443 (y el 80 para la renovación de certificados) abierto al exterior. Acceso de
   administración por SSH con clave, sin contraseña.
 - Despliegue: GitHub Actions construye la imagen al crear una etiqueta `pilot-vX.Y.Z`, la publica
