@@ -156,13 +156,25 @@ jobs:
         run: docker compose --profile full up --detach --wait --wait-timeout 180
       - name: El backend responde /health
         run: curl --fail --silent --show-error http://localhost:8080/health
-      # Como root, para revisar también las carpetas que el usuario de la imagen no puede leer
-      - name: La imagen no tiene archivos .env
+      # Como root, para revisar también las carpetas que el usuario de la imagen no puede leer.
+      # Los .env se buscan en todo el sistema. Las claves, solo en /app (donde el Dockerfile copia
+      # la aplicación) y dentro de los jars propios, donde terminaría lo que esté en
+      # src/main/resources: la imagen base trae certificados públicos que también son .pem
+      - name: La imagen no tiene archivos .env ni claves
         run: |
-          found=$(docker run --rm --user root --entrypoint sh pasitos-backend:local \
-            -c 'find / -xdev \( -name ".env" -o -name ".env.*" \)')
+          found=$(docker run --rm -i --user root --entrypoint sh pasitos-backend:local -s <<'EOF'
+          set -eu -o pipefail
+          env='(^|/)[.]env([.][^/]*)?$'
+          claves='[.](pem|jks|keystore)$'
+          find / -xdev -type f | awk -v p="$env" '$0 ~ p'
+          find /app -type f | awk -v p="$claves" '$0 ~ p'
+          for jar in /app/lib/backend-*.jar /app/lib/shared-*.jar; do
+            unzip -l "$jar" | awk -v p="$env|$claves" -v j="$jar" 'NR > 3 && $4 ~ p { print j "!/" $4 }'
+          done
+          EOF
+          )
           if [ -n "$found" ]; then
-            echo "::error::La imagen tiene archivos .env: $found"
+            echo "::error::La imagen tiene archivos .env o claves: $found"
             exit 1
           fi
       - name: Logs de los servicios

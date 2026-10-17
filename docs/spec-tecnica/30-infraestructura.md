@@ -42,8 +42,9 @@ Para usar la app en un teléfono o emulador contra el backend local:
    hasta el 75 % de la memoria del contenedor.
 
 - **Sin secretos:** `.dockerignore`, en la raíz, deja entrar al contexto de construcción solo
-  `backend/` y `shared/`, y saca de ahí los `.env`, las carpetas `build/` y las pruebas. Toda la
-  configuración llega por variables de entorno ([11](11-backend.md#7-configuración)).
+  `backend/` y `shared/`. De ahí saca los mismos secretos que `.gitignore` (`.env`, `*.pem`,
+  `*.jks` y `*.keystore`), las carpetas `build/` y las pruebas. Toda la configuración llega por
+  variables de entorno ([11](11-backend.md#7-configuración)).
 - **Imágenes base fijadas por digest**, con la etiqueta como referencia, para que una etiqueta
   movida no cambie lo que se construye. Dependabot las actualiza
   ([31](31-calidad-y-ci.md#dependabot)).
@@ -80,6 +81,9 @@ flowchart LR
 ```
 
 - `docker compose` con `caddy`, `backend`, `db` y `backup`.
+- El contenedor del backend lleva un límite de memoria (`mem_limit`). La JVM usa hasta el 75 %
+  de la memoria de su contenedor; sin límite, ese 75 % se calcularía sobre toda la del servidor
+  y podría quitarle memoria a PostgreSQL.
 - Solo el puerto 443 (y el 80 para la renovación de certificados) abierto al exterior. Acceso de
   administración por SSH con clave, sin contraseña.
 - Despliegue: GitHub Actions construye la imagen al crear una etiqueta `pilot-vX.Y.Z`, la publica

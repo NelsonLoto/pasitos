@@ -5,8 +5,13 @@
 !backend/
 !shared/
 
+# Los mismos secretos que .gitignore: lo que no se sube al repositorio tampoco entra a la imagen
 **/.env
 **/.env.*
+**/*.pem
+**/*.jks
+**/*.keystore
+
 **/build/
 **/.gradle/
 **/.kotlin/

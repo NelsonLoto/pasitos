@@ -28,7 +28,7 @@ y los PRs encadenados) y en cada push a `develop`:
 | `shared` | `shared/**` | `./gradlew test` |
 | `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
 | `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
-| `docker` | `backend/**`, `shared/**`, `docker-compose.yml` o `.dockerignore` | `docker compose --profile full up` construye la imagen del backend y levanta base, Mailpit y backend; verifica que `/health` responda y que la imagen no tenga archivos `.env`, con un `backend/.env` de prueba en el contexto ([30](30-infraestructura.md#imagen-del-backend)) |
+| `docker` | `backend/**`, `shared/**`, `docker-compose.yml` o `.dockerignore` | `docker compose --profile full up` construye la imagen del backend y levanta base, Mailpit y backend; verifica que `/health` responda y que la imagen no tenga archivos `.env` (en ningún lugar) ni claves (`*.pem`, `*.jks`, `*.keystore`) en la aplicación ni dentro de los jars del backend y de `shared`, con un `backend/.env` de prueba en el contexto. Las claves no se buscan en el resto del sistema porque la imagen base trae certificados públicos `.pem` ([30](30-infraestructura.md#imagen-del-backend)) |
 | `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
 - Un cambio en `ci.yml` corre todos los jobs, para probar el cambio. Un PR que solo toca
