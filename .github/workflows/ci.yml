@@ -156,10 +156,11 @@ jobs:
         run: docker compose --profile full up --detach --wait --wait-timeout 180
       - name: El backend responde /health
         run: curl --fail --silent --show-error http://localhost:8080/health
+      # Como root, para revisar también las carpetas que el usuario de la imagen no puede leer
       - name: La imagen no tiene archivos .env
         run: |
-          found=$(docker run --rm --entrypoint sh pasitos-backend:local \
-            -c 'find / -xdev \( -name ".env" -o -name ".env.*" \) 2>/dev/null')
+          found=$(docker run --rm --user root --entrypoint sh pasitos-backend:local \
+            -c 'find / -xdev \( -name ".env" -o -name ".env.*" \)')
           if [ -n "$found" ]; then
             echo "::error::La imagen tiene archivos .env: $found"
             exit 1
