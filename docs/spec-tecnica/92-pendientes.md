@@ -17,6 +17,7 @@
 | P-11 | ✅ **Resuelto 14/10/2026.** La nota para agentes de IA y las verificaciones previas a tomar una tarea están en [`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia) | — | — | ADR-22 |
 | P-12 | ✅ **Resuelto 16/10/2026.** Ktor Server pasó de 3.2.0 a 3.6.0, la misma versión que el cliente de la app (I0-02) | — | — | [01](01-stack.md) |
 | P-13 | Límite general de 120 requests por minuto por cuenta (RNF-SEG-07). I0-05 implementó solo los de `/auth`; falta asignarlo a una tarea, por ejemplo con el primer dominio de I1 | Equipo | I1 | [20](20-seguridad.md) |
+| P-14 | Crear `openapi.yaml` y su validación en la integración continua: ninguna tarea del plan lo hace, y `/api/v1/auth` y `/me` (I0-05) ya están sin documentar. Sugerencia: que lo haga I1-B1 (#39), la primera tarea de backend de I1, con todo `/api/v1/auth`; desde ahí, cada tarea de backend actualiza el archivo con sus endpoints | Equipo | I1 | [11](11-backend.md#9-documentación-de-la-api), [31](31-calidad-y-ci.md) |
 
 ## Supuestos técnicos
 

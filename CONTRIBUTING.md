@@ -15,13 +15,34 @@
 2. Crear la rama de la tarea: `git checkout -b feature/nombre-de-la-tarea`.
 3. Commitear y pushear: `git push -u origin feature/nombre-de-la-tarea`.
 4. Abrir un Pull Request contra `develop` (no contra `main`) y completar el template.
-5. Esperar al menos 1 aprobación antes de mergear.
+5. Esperar al menos 1 aprobación y la integración continua en verde antes de mergear.
 6. Borrar la rama una vez mergeada (GitHub lo ofrece automáticamente al cerrar el PR).
 
 Cada tarea es un issue de GitHub. La rama lleva el número del issue
 (`feature/42-alta-de-hijo`), el PR incluye `Closes #42` y se abre como borrador apenas se
 empieza, para que el resto del equipo vea qué está en curso. Detalle del proceso en
 [`docs/spec-tecnica/32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md).
+
+## Integración continua
+
+Cada PR corre la integración continua (`.github/workflows/ci.yml`): pruebas de `shared`, del
+backend y de la app, lint y los links de la documentación. Solo corren los jobs de las carpetas
+que cambiaron. Detalle en
+[`31-calidad-y-ci.md`](docs/spec-tecnica/31-calidad-y-ci.md#2-integración-continua-adr-14).
+
+- **No se mergea un PR con la integración continua en rojo.** En un repositorio privado de
+  GitHub Free no se puede bloquear técnicamente: depende del equipo, igual que no pushear directo
+  a `develop`.
+- Si un job falla, el detalle está en la pestaña *Checks* del PR, y los informes de pruebas
+  quedan como artefacto. Si falla por algo ajeno al PR (por ejemplo, una descarga que se cortó),
+  primero probá *Re-run failed jobs*.
+- La app no puede usar la zona horaria del teléfono (`LocalDate.now()`,
+  `ZoneId.systemDefault()` y similares): "hoy" es `ArgentinaClock.today()` (ADR-26). Si tu tarea
+  reescribe un archivo de `.github/scripts/local-date-now-allowlist.txt`, sacalo de la lista. Lo
+  podés verificar antes de pushear con `.github/scripts/check-local-date-now.sh`.
+- Dependabot abre los lunes PRs con actualizaciones de dependencias. Se revisan y mergean como
+  cualquier otro, siguiendo la
+  [política de versiones](docs/spec-tecnica/01-stack.md#política-de-versiones).
 
 ## Tablero
 
