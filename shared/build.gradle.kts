@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // Biblioteca Kotlin/JVM pura que usan la app y el backend como build compuesto (ADR-01). No
 // depende de Android, Ktor, Exposed ni de ninguna librería de plataforma.
 plugins {
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.serialization") version "2.2.10"
+    kotlin("jvm") version "2.4.20"
+    kotlin("plugin.serialization") version "2.4.20"
     `java-library`
 }
 
