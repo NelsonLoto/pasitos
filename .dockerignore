@@ -1,0 +1,17 @@
+# Contexto de la imagen del backend (backend/Dockerfile): solo entra lo que necesita para
+# compilar. Todo lo demás queda afuera, en particular los .env con secretos, que nunca llegan
+# a la imagen.
+*
+!backend/
+!shared/
+
+**/.env
+**/.env.*
+**/build/
+**/.gradle/
+**/.kotlin/
+**/.idea/
+**/*.iml
+**/local.properties
+**/src/test/
+**/*.md
