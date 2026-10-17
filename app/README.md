@@ -60,7 +60,8 @@ Android Keystore reales, que no existen en la JVM. Al terminar, Gradle desinstal
   dominio provee los suyos en `data/x/di/`. Al cerrar sesión se borran la base y su clave, y la
   app se reinicia.
 - `core/security`: clave de la base cifrada con Tink y el Android Keystore.
-- `core/time`: `ArgentinaClock.today()` para "hoy". No usar `LocalDate.now()`.
+- `core/time`: `ArgentinaClock.today()` para "hoy". No usar `LocalDate.now()` ni nada que tome la
+  zona horaria del teléfono: la integración continua lo verifica.
 - `core/sync`: `SyncWorker` con WorkManager. Corre al abrir la app o volver a ella, después de
   cada escritura local y cada 15 minutos con red. En I0 solo registra la ejecución en Logcat
   (etiqueta `SyncWorker`).
