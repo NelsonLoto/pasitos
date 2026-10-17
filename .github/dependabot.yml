@@ -31,7 +31,10 @@ updates:
       # Kotlin, KSP y Hilt en su propio PR: cada versión de Kotlin necesita una de KSP y una de
       # Hilt que la soporten, así que suben juntas. Piden verificar también Room y AGP, y si se
       # traban no frenan al resto. El plugin de Kotlin se declara con su id completo
-      # (org.jetbrains.kotlin.jvm), porque `kotlin("jvm")` no coincide con estos patrones
+      # (org.jetbrains.kotlin.jvm), porque `kotlin("jvm")` no coincide con estos patrones.
+      # Dependabot actualiza cada dependencia una sola vez por grupo: el Kotlin de
+      # backend/build.gradle.kts se sube a mano en el mismo PR antes de mergearlo (31 · Calidad e
+      # integración continua, P-16)
       kotlin:
         patterns:
           - "org.jetbrains.kotlin:*"
