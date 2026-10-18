@@ -27,6 +27,7 @@ const val AUTH_JWT = "auth-jwt"
 
 private val LOGIN_LIMIT = RateLimitName("auth-login")
 private val REGISTER_LIMIT = RateLimitName("auth-register")
+private val EMAIL_LIMIT = RateLimitName("auth-email")
 
 fun Application.configureAuthentication(jwt: JwtService, authService: AuthService) {
     install(Authentication) {
@@ -61,6 +62,10 @@ fun Application.configureAuthentication(jwt: JwtService, authService: AuthServic
             rateLimiter(limit = 10, refillPeriod = 1.minutes)
             requestKey { call -> call.request.origin.remoteAddress }
         }
+        register(EMAIL_LIMIT) {
+            rateLimiter(limit = 10, refillPeriod = 1.minutes)
+            requestKey { call -> call.request.origin.remoteAddress }
+        }
     }
 }
 
@@ -81,6 +86,18 @@ fun Route.authRoutes(authService: AuthService) {
     // Requiere el token de renovación, que no se puede adivinar: no necesita un límite propio.
     post("/auth/refresh") {
         call.respond(HttpStatusCode.OK, authService.refresh(call.receive()))
+    }
+
+    rateLimit(EMAIL_LIMIT) {
+        post("/auth/email-verification") {
+            authService.resendEmailVerification(call.receive())
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        post("/auth/password-reset") {
+            authService.requestPasswordReset(call.receive())
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 
     authenticate(AUTH_JWT) {

@@ -54,6 +54,12 @@ dependencies {
     // variables de entorno ya vienen seteadas y esto no hace nada.
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 
+    // Plantillas HTML/texto de emails y páginas públicas (ADR-09, ADR-27)
+    implementation("io.ktor:ktor-server-thymeleaf-jvm:$ktorVersion")
+
+    // Envío de emails por SMTP (ADR-07)
+    implementation("org.simplejavamail:simple-java-mail:8.12.6")
+
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
     testImplementation(kotlin("test"))
@@ -62,6 +68,8 @@ dependencies {
 
     // Pruebas de integración contra PostgreSQL 16 real en Docker (ADR-19)
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
+    // Servidor SMTP de prueba real para verificar los emails enviados (17 · Notificaciones y emails)
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
 }
 
 kotlin {

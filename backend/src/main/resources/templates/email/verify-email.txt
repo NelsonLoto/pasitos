@@ -1,0 +1,7 @@
+Hola [(${firstName})],
+
+Para empezar a usar Pasitos, confirmá tu email entrando a este link:
+
+[(${link})]
+
+Este link vence en 24 horas. Si no creaste una cuenta en Pasitos, podés ignorar este email.

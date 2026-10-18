@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.15 |
+| **Versión** | 1.2.16 |
 | **Fecha** | 18/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.5.0](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.16 | 18/10/2026 | Registro con verificación de email y recuperación de contraseña: envío por SMTP con Simple Java Mail, plantillas HTML y texto plano con un solo motor Thymeleaf compartido por los emails y las páginas públicas; `email_not_verified` como código específico de `POST /auth/login` (RF-CTA-02, CA1), sin contar como intento fallido; páginas `/web/verify-email` y `/web/reset-password` que responden 400 cuando el link venció o ya se usó; `ForbiddenException` como excepción base de 403, para que la quede lista también para la matriz de permisos de I1-B4; pruebas de backend contra un Mailpit real levantado con Testcontainers, igual versión que el de desarrollo local ([01](01-stack.md), [11](11-backend.md), [31](31-calidad-y-ci.md)) | Decisiones tomadas al implementar el registro y la recuperación de contraseña, revisadas una por una con el equipo (#39) |
 | 1.2.15 | 18/10/2026 | Motor genérico de sincronización en el backend: interfaz `SyncEntity` (nombre, cambios desde un cursor, foto completa, aplicar una mutación) que cada dominio implementa para enchufarse, sin entidades registradas todavía; paginación de 500 filas fusionando lo que devuelve cada entidad registrada, ordenado por `sync_version`; `newChildIds`/`revokedChildIds` contra `guardianships`/`access_revocations`; `kotlinx-serialization-json` pasa a dependencia principal de `shared` (antes solo de prueba) porque las filas de sincronización son de forma variable según la entidad ([14](14-sincronizacion.md), [11](11-backend.md), [01](01-stack.md)) | Decisiones tomadas al implementar la sincronización en el backend, revisadas una por una con el equipo (#36) |
 | 1.2.14 | 18/10/2026 | Estados de vacunas en `shared/vaccination`: tipos de dominio, edad en meses, dosis por cohorte, `otherApplied` para las aplicadas fuera del calendario vigente, tabla de bordes de cada estado y `calendarProblems()` ([10](10-modulo-compartido.md#3-estados-de-vacunas)); `calendar_doses` con `age_months`, `born_from` y `born_until`, a cambiar con una migración en I1-B7, y el calendario en `backend/seed/calendar/` ([13](13-base-de-datos.md)); implementa la SPEC funcional 1.5.0 | Decisiones tomadas al implementar los estados de vacunas, revisadas una por una con el equipo (#45); SPEC funcional 1.5.0 (D-68, RN-VAC-10) |
 | 1.2.13 | 18/10/2026 | El workflow `dependencias.yml` envía solo las dependencias que se ejecutan en producción (`runtimeClasspath` del backend y de `shared`, `debugRuntimeClasspath` y `releaseRuntimeClasspath` de la app); quedan fuera las herramientas de compilación y las pruebas ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | 8 alertas venían de AGP y de lint, no llegaban a la app ni al servidor, y Dependabot no las podía corregir (#103) |

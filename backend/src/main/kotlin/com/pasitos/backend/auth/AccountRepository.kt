@@ -60,6 +60,20 @@ class AccountRepository {
         }
     }
 
+    /** RF-CTA-02, CA2: el link de verificación vigente marca el email como verificado. */
+    fun markEmailVerified(id: UUID, at: Instant) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[emailVerifiedAt] = at.toUtc()
+        }
+    }
+
+    /** RF-CTA-05, CA2: la recuperación de contraseña reemplaza el hash guardado. */
+    fun updatePassword(id: UUID, passwordHash: String) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[Accounts.passwordHash] = passwordHash
+        }
+    }
+
     private fun ResultRow.toAccount() = Account(
         id = this[Accounts.id],
         email = this[Accounts.email],

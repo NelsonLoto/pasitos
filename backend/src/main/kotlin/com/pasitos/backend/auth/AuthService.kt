@@ -3,15 +3,19 @@ package com.pasitos.backend.auth
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.Caller
 import com.pasitos.backend.common.ConflictException
+import com.pasitos.backend.common.ForbiddenException
 import com.pasitos.backend.common.InvalidInputException
 import com.pasitos.backend.common.LockedException
 import com.pasitos.backend.common.UnauthorizedException
 import com.pasitos.backend.common.tx
+import com.pasitos.backend.mail.MailService
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.auth.AccountDto
 import com.pasitos.shared.api.auth.AuthResponse
+import com.pasitos.shared.api.auth.EmailVerificationRequest
 import com.pasitos.shared.api.auth.LoginRequest
 import com.pasitos.shared.api.auth.MeResponse
+import com.pasitos.shared.api.auth.PasswordResetRequest
 import com.pasitos.shared.api.auth.RefreshRequest
 import com.pasitos.shared.api.auth.RegisterRequest
 import com.pasitos.shared.api.auth.TokenPair
@@ -31,12 +35,24 @@ class AccountLockedException(minutes: Long) : LockedException(
     "Hubo demasiados intentos fallidos. Probá de nuevo en $minutes ${if (minutes == 1L) "minuto" else "minutos"}",
 )
 
+/** RF-CTA-02, CA1: credenciales correctas, pero hay que verificar el email antes de entrar. */
+class EmailNotVerifiedException : ForbiddenException(ErrorCode.EMAIL_NOT_VERIFIED, "Tenés que verificar tu email antes de continuar")
+
+/** `POST /web/reset-password` (RF-CTA-05). */
+sealed interface ResetPasswordResult {
+    data object Success : ResetPasswordResult
+    data object WeakPassword : ResetPasswordResult
+    data object InvalidToken : ResetPasswordResult
+}
+
 /** Autenticación de las cuentas de la app (11 · Backend §3, ADR-11). */
 class AuthService(
     private val accounts: AccountRepository,
     private val sessions: SessionRepository,
     private val consents: ConsentRepository,
+    private val emailTokens: EmailTokenRepository,
     private val jwt: JwtService,
+    private val mail: MailService,
     private val clock: ArgentinaClock,
     private val termsVersion: String,
 ) {
@@ -49,19 +65,24 @@ class AuthService(
         val email = request.email.trim().lowercase()
         if (firstName.isBlank() || lastName.isBlank()) throw InvalidInputException("Completá nombre y apellido")
         if (!EMAIL_FORMAT.matches(email)) throw InvalidInputException("Ingresá un email válido")
-        validatePassword(request.password)
+        requireValidPassword(request.password)
         if (!request.acceptTerms) {
             throw InvalidInputException("Para crear la cuenta tenés que aceptar los términos y la política de privacidad")
         }
         // bcrypt tarda unos 250 ms: se calcula antes de tomar una conexión de la base.
         val passwordHash = PasswordHasher.hash(request.password)
+        val verificationToken = OpaqueToken.generate()
 
-        return tx {
+        val result = tx {
             if (accounts.findByEmail(email) != null) throw EmailAlreadyInUseException()
             val account = accounts.insertGuardian(email, firstName, lastName, passwordHash)
             consents.insertTerms(account.id, termsVersion, clock.now())
+            emailTokens.insert(account.id, EmailTokenPurpose.VERIFY_EMAIL, OpaqueToken.hash(verificationToken), clock.now().plus(VERIFY_EMAIL_LIFETIME))
             AuthResponse(account.toDto(), openSession(account.id))
         }
+        // RF-CTA-01, CA1: el envío va fuera de la transacción (17 · Notificaciones y emails §3).
+        mail.sendVerificationEmail(email, firstName, verificationToken)
+        return result
     }
 
     suspend fun login(request: LoginRequest): AuthResponse =
@@ -69,7 +90,63 @@ class AuthService(
             is LoginResult.Success -> AuthResponse(result.account.toDto(), result.tokens)
             LoginResult.InvalidCredentials -> throw InvalidCredentialsException()
             is LoginResult.Locked -> throw AccountLockedException(result.minutesLeft)
+            LoginResult.EmailNotVerified -> throw EmailNotVerifiedException()
         }
+
+    /** RF-CTA-02, CA1: reenvía el link de verificación si la cuenta existe y no está verificada. */
+    suspend fun resendEmailVerification(request: EmailVerificationRequest) {
+        val email = request.email.trim().lowercase()
+        val token = OpaqueToken.generate()
+        val toSend = tx {
+            val account = accounts.findByEmail(email) ?: return@tx null
+            if (account.emailVerifiedAt != null) return@tx null
+            emailTokens.insert(account.id, EmailTokenPurpose.VERIFY_EMAIL, OpaqueToken.hash(token), clock.now().plus(VERIFY_EMAIL_LIFETIME))
+            account
+        } ?: return
+        mail.sendVerificationEmail(toSend.email, toSend.firstName, token)
+    }
+
+    /** RF-CTA-05, CA1: misma respuesta exista o no la cuenta, para no revelar qué emails están registrados. */
+    suspend fun requestPasswordReset(request: PasswordResetRequest) {
+        val email = request.email.trim().lowercase()
+        val token = OpaqueToken.generate()
+        val toSend = tx {
+            val account = accounts.findByEmail(email) ?: return@tx null
+            emailTokens.insert(account.id, EmailTokenPurpose.RESET_PASSWORD, OpaqueToken.hash(token), clock.now().plus(RESET_PASSWORD_LIFETIME))
+            account
+        } ?: return
+        mail.sendPasswordResetEmail(toSend.email, toSend.firstName, token)
+    }
+
+    /** `GET /web/verify-email` (RF-CTA-02, CA2 y CA3). */
+    suspend fun verifyEmail(token: String): Boolean = tx {
+        val now = clock.now()
+        val row = emailTokens.findActive(OpaqueToken.hash(token), EmailTokenPurpose.VERIFY_EMAIL, now) ?: return@tx false
+        emailTokens.markUsed(row.id, now)
+        accounts.markEmailVerified(row.accountId, now)
+        true
+    }
+
+    /** `GET /web/reset-password`: si el link sigue vigente, antes de mostrar el formulario. */
+    suspend fun isPasswordResetTokenValid(token: String): Boolean = tx {
+        emailTokens.findActive(OpaqueToken.hash(token), EmailTokenPurpose.RESET_PASSWORD, clock.now()) != null
+    }
+
+    /** `POST /web/reset-password` (RF-CTA-05, CA2 y CA3). */
+    suspend fun resetPassword(token: String, newPassword: String): ResetPasswordResult {
+        if (!isPasswordValid(newPassword)) return ResetPasswordResult.WeakPassword
+        // bcrypt tarda unos 250 ms: se calcula antes de tomar una conexión de la base.
+        val passwordHash = PasswordHasher.hash(newPassword)
+        val now = clock.now()
+        return tx {
+            val row = emailTokens.findActive(OpaqueToken.hash(token), EmailTokenPurpose.RESET_PASSWORD, now)
+                ?: return@tx ResetPasswordResult.InvalidToken
+            emailTokens.markUsed(row.id, now)
+            accounts.updatePassword(row.accountId, passwordHash)
+            sessions.deleteAllForAccount(row.accountId)
+            ResetPasswordResult.Success
+        }
+    }
 
     /**
      * Entrega un par de tokens nuevo e invalida el token de renovación recibido (rotación). Si llega
@@ -123,13 +200,15 @@ class AuthService(
         data class Success(val account: Account, val tokens: TokenPair) : LoginResult
         data object InvalidCredentials : LoginResult
         data class Locked(val minutesLeft: Long) : LoginResult
+        data object EmailNotVerified : LoginResult
     }
 
     /**
      * Verifica email y contraseña con el bloqueo de RN-CTA-05: el quinto intento fallido seguido
      * bloquea el inicio con contraseña por 15 minutos. Los intentos fallidos se guardan aunque el
      * login falle, por eso el resultado se devuelve en vez de lanzar la excepción dentro de la
-     * transacción. Con las credenciales correctas abre la sesión.
+     * transacción. Con las credenciales correctas y el email verificado abre la sesión; sin
+     * verificar (RF-CTA-02, CA1) no abre sesión, pero tampoco cuenta como intento fallido.
      */
     private suspend fun checkCredentials(rawEmail: String, password: String): LoginResult {
         val email = rawEmail.trim().lowercase()
@@ -145,6 +224,7 @@ class AuthService(
                 if (account.failedLoginCount > 0 || lockedUntil != null) {
                     accounts.updateLoginFailures(account.id, failedLoginCount = 0, lockedUntil = null)
                 }
+                if (account.emailVerifiedAt == null) return@tx LoginResult.EmailNotVerified
                 return@tx LoginResult.Success(account, openSession(account.id))
             }
             val failures = account.failedLoginCount + 1
@@ -171,12 +251,15 @@ class AuthService(
         return TokenPair(access.token, access.expiresAt, refreshToken)
     }
 
-    private fun validatePassword(password: String) {
-        // RN-CTA-01
-        if (password.length < 8 || password.none { it.isLetter() } || password.none { it.isDigit() }) {
+    private fun requireValidPassword(password: String) {
+        if (!isPasswordValid(password)) {
             throw InvalidInputException("La contraseña tiene que tener al menos 8 caracteres, con letras y números")
         }
     }
+
+    /** RN-CTA-01. */
+    private fun isPasswordValid(password: String): Boolean =
+        password.length >= 8 && password.any { it.isLetter() } && password.any { it.isDigit() }
 
     private fun Account.toDto() = AccountDto(
         id = id.toString(),
@@ -201,7 +284,11 @@ class AuthService(
         const val MAX_FAILED_LOGINS = 5
         val LOCK_DURATION: Duration = Duration.ofMinutes(15)
 
-        /** Solo descarta lo que claramente no es un email; la verificación real llega por correo (I1-B1). */
+        /** RN-CTA-06 (valores propuestos en SUP-04). */
+        val VERIFY_EMAIL_LIFETIME: Duration = Duration.ofHours(24)
+        val RESET_PASSWORD_LIFETIME: Duration = Duration.ofMinutes(60)
+
+        /** Solo descarta lo que claramente no es un email; la verificación real llega por correo. */
         private val EMAIL_FORMAT = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
     }
 }

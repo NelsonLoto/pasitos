@@ -36,6 +36,23 @@ object Sessions : Table("sessions") {
     override val primaryKey = PrimaryKey(id)
 }
 
+enum class EmailTokenPurpose { VERIFY_EMAIL, RESET_PASSWORD, CHANGE_EMAIL }
+
+/** Tokens de un solo uso de los links de email (RN-CTA-06). Solo se guarda su hash. */
+object EmailTokens : Table("email_tokens") {
+    val id = uuid("id")
+    val accountId = uuid("account_id")
+    val purpose = enumerationByName<EmailTokenPurpose>("purpose", 32)
+    val tokenHash = text("token_hash")
+    val newEmail = text("new_email").nullable()
+    val expiresAt = timestampWithTimeZone("expires_at")
+    val usedAt = timestampWithTimeZone("used_at").nullable()
+    val createdAt = timestampWithTimeZone("created_at").databaseGenerated()
+    val updatedAt = timestampWithTimeZone("updated_at").nullable()
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 enum class ConsentType { TERMS, GUARDIAN_DECLARATION, CONFIDENTIALITY }
 
 /** Consentimientos con su versión y momento de aceptación (RN-CTA-02). */
