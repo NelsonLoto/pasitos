@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.10 |
-| **Fecha** | 17/10/2026 |
+| **Versión** | 1.2.11 |
+| **Fecha** | 18/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.4.0](../spec/README.md) |
 
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.11 | 18/10/2026 | Alertas de Dependabot, actualizaciones de seguridad y envío automático de dependencias activados: cómo llegan a GitHub las dependencias de Gradle, qué vulnerabilidades generan un PR sin esperar los 14 días y qué queda fuera, como las correcciones sin aviso publicado y las imágenes de Docker ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | La SPEC decía que las actualizaciones de seguridad no esperaban, pero las alertas estaban desactivadas y GitHub no veía las dependencias de Gradle (#96) |
 | 1.2.10 | 17/10/2026 | Dependabot actualiza cada dependencia una sola vez por grupo, así que el Kotlin del backend se sube a mano en el PR de Kotlin antes de mergearlo ([31](31-calidad-y-ci.md#dependabot)); P-16: tener la versión de Kotlin en un solo archivo ([92](92-pendientes.md)) | El PR de Kotlin que abrió Dependabot después de 1.2.8 no actualizó el backend (#90) |
 | 1.2.9 | 17/10/2026 | Imagen del backend: imágenes base (JDK 21 Ubuntu para compilar, JRE 21 Alpine para ejecutar) fijadas por digest, usuario `pasitos` sin permiso para modificar la aplicación, `.dockerignore` que solo deja entrar `backend/` y `shared/` y excluye los mismos secretos que `.gitignore`, límite de memoria para el contenedor del backend en el piloto; entorno local con Mailpit, el backend en el perfil `full` reconstruido en cada `up`, puertos solo en `127.0.0.1` y la base en el 5433 por defecto ([30](30-infraestructura.md)); job `docker` en la integración continua, que busca `.env` y claves también dentro de los jars, y Dependabot para las imágenes base ([31](31-calidad-y-ci.md)); `.dockerignore` en la estructura ([02](02-estructura-del-repo.md)) | Decisiones tomadas al implementar la imagen Docker y el entorno local, revisadas una por una con el equipo (#37) |
 | 1.2.8 | 17/10/2026 | Dependabot: Hilt viaja en el PR de Kotlin y KSP, el plugin de Kotlin se declara con su id completo en el backend y en `shared`, y las versiones mayores de Exposed se ignoran hasta evaluarlas ([31](31-calidad-y-ci.md#dependabot)); P-15: evaluar Exposed 1.x ([92](92-pendientes.md)) | La primera corrida de Dependabot partió Kotlin en dos PRs que no compilaban (#90) |
