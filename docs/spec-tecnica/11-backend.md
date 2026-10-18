@@ -70,11 +70,16 @@ Toda operación sobre datos de un niño pasa por `AccessPolicy`, que implementa 
 ```kotlin
 enum class ChildAccess { NONE, GUARDIAN, PRINCIPAL_GUARDIAN, CURRENT_PEDIATRICIAN }
 
-class AccessPolicy(private val repo: AccessRepository) {
+class AccessPolicy(private val guardianships: GuardianshipRepository) {
     fun accessTo(caller: Caller, childId: UUID): ChildAccess
-    fun require(caller: Caller, childId: UUID, action: ChildAction)   // lanza ForbiddenException
+    fun require(caller: Caller, childId: UUID): ChildAccess   // lanza ChildNotFoundException (404)
 }
 ```
+
+`CURRENT_PEDIATRICIAN` queda reservado hasta que exista el vínculo con pediatras (I3): ningún
+código lo devuelve todavía. `require` no distingue acciones (I1-B4 no lo necesitó: `GET`, `PATCH`
+y `DELETE` de un niño alcanzan con "es tutor, de cualquier rol"); un parámetro de acción se agrega
+cuando una tarea futura lo necesite.
 
 Reglas transversales:
 

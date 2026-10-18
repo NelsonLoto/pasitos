@@ -7,60 +7,77 @@ import com.pasitos.backend.support.createChild
 import com.pasitos.backend.support.register
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.ErrorResponse
+import com.pasitos.shared.api.child.ChildResponse
+import com.pasitos.shared.api.child.CreateChildRequest
+import com.pasitos.shared.api.child.DeletionPreviewResponse
+import com.pasitos.shared.api.child.PatchChildRequest
+import com.pasitos.shared.api.child.Sex
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
+/** Rutas de `/api/v1/children` (I1-B4: RF-HIJ-01 a 03, 09; RN-HIJ-01 a 08, 10, 11). */
 class ChildRoutesTest {
 
     @Test
-    fun `RF-HIJ-01 quien da de alta al hijo queda como su tutor principal`() = apiTest { client ->
+    fun `RF-HIJ-01 CA1 el alta crea el perfil y deja al tutor como principal, con la declaración registrada`() = apiTest { client ->
         val token = client.register().tokens.accessToken
 
-        val child = client.createChild(token, name = "Sofi", birthDate = "2026-06-15", sex = "F")
+        val response = client.postChild(token, createRequest(gestationalWeeks = 38))
 
-        assertEquals(ChildResponse(child.id, "Sofi", "2026-06-15", "F"), child)
-        val childId = UUID.fromString(child.id)
+        assertEquals(HttpStatusCode.Created, response.status)
+        val body = response.body<ChildResponse>()
+        assertEquals("Sofi", body.firstName)
+        assertEquals("Pérez", body.lastName)
+        assertEquals(Sex.FEMALE, body.sex)
+        assertEquals(38, body.gestationalWeeks)
+        assertEquals(false, body.gestationalWeeksUnknown)
+        val childId = UUID.fromString(body.id)
         assertEquals(listOf("PRINCIPAL"), TestDatabase.column<String>("SELECT role FROM guardianships WHERE child_id = ?", childId))
-        assertEquals(listOf("FEMALE"), TestDatabase.column<String>("SELECT sex FROM children WHERE id = ?", childId))
-        // RN-HIJ-03: la app actual no pide semanas de gestación, quedan como "No lo sé".
-        assertEquals(listOf(true), TestDatabase.column<Boolean>("SELECT gestational_weeks_unknown FROM children WHERE id = ?", childId))
+        assertEquals(
+            listOf("GUARDIAN_DECLARATION ${TestDatabase.DECLARATION_VERSION}"),
+            TestDatabase.column<String>("SELECT type || ' ' || version FROM consents WHERE child_id = ?", childId),
+        )
     }
 
     @Test
-    fun `cada tutor ve solo sus hijos, en orden de alta`() = apiTest { client ->
-        val ana = client.register(email = "ana@example.com").tokens.accessToken
-        val beto = client.register(email = "beto@example.com").tokens.accessToken
-        client.createChild(ana, name = "Sofi")
-        client.createChild(beto, name = "Tomi", sex = "M")
-        client.createChild(ana, name = "Juli", sex = "M")
-
-        val response = client.get("/children") { bearerAuth(ana) }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(listOf("Sofi", "Juli"), response.body<List<ChildResponse>>().map { it.name })
-    }
-
-    @Test
-    fun `el alta con nombre vacío, fecha futura o inválida, o sexo desconocido responde 400`() = apiTest { client ->
+    fun `RF-HIJ-01 CA5 sin semanas de gestación el niño queda con No lo sé`() = apiTest { client ->
         val token = client.register().tokens.accessToken
-        val tomorrow = ArgentinaClock().today().plusDays(1).toString()
+
+        val response = client.postChild(token, createRequest(gestationalWeeks = null))
+
+        val body = response.body<ChildResponse>()
+        assertEquals(null, body.gestationalWeeks)
+        assertEquals(true, body.gestationalWeeksUnknown)
+    }
+
+    @Test
+    fun `RN-HIJ-01 y RN-HIJ-03 el alta exige fecha válida, menos de 15 años y semanas entre 22 y 42`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+        val today = ArgentinaClock().today()
 
         val invalid = listOf(
-            CreateChildRequest(name = " ", birthDate = "2026-06-15", sex = "F"),
-            CreateChildRequest(name = "Sofi", birthDate = tomorrow, sex = "F"),
-            CreateChildRequest(name = "Sofi", birthDate = "15/06/2026", sex = "F"),
-            CreateChildRequest(name = "Sofi", birthDate = "2026-06-15", sex = "X"),
+            createRequest(birthDate = today.plusDays(1).toString()),
+            createRequest(birthDate = today.minusYears(15).toString()),
+            createRequest(birthDate = "15/06/2026"),
+            createRequest(gestationalWeeks = 21),
+            createRequest(gestationalWeeks = 43),
+            createRequest(firstName = " "),
+            createRequest(representationDeclared = false),
         )
 
         invalid.forEach { request ->
@@ -72,20 +89,177 @@ class ChildRoutesTest {
     }
 
     @Test
-    fun `un pedido con JSON mal formado responde 400`() = apiTest { client ->
+    fun `RF-HIJ-02 y RF-HIJ-03 PATCH actualiza los datos editables, incluidas alergias y antecedentes`() = apiTest { client ->
         val token = client.register().tokens.accessToken
+        val child = client.createChild(token)
 
-        val response = client.post("/children") {
+        val response = client.patch("/api/v1/children/${child.id}") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody("""{"nombre": "Sofi"""")
+            setBody(
+                PatchChildRequest(
+                    firstName = "Sofía",
+                    lastName = "Gómez",
+                    sex = Sex.FEMALE,
+                    birthDate = "2026-05-01",
+                    gestationalWeeks = 40,
+                    allergies = "Polen",
+                    relevantHistory = "Ninguno",
+                ),
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = response.body<ChildResponse>()
+        assertEquals("Sofía", body.firstName)
+        assertEquals("2026-05-01", body.birthDate)
+        assertEquals("Polen", body.allergies)
+        assertEquals("Ninguno", body.relevantHistory)
+    }
+
+    @Test
+    fun `RN-HIJ-10 alergias y antecedentes tienen un máximo de 280 caracteres`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+        val child = client.createChild(token)
+        val tooLong = "a".repeat(281)
+
+        val response = client.patch("/api/v1/children/${child.id}") {
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(patchRequest(allergies = tooLong))
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
         assertEquals(ErrorCode.INVALID_INPUT, response.body<ErrorResponse>().code)
     }
 
-    private suspend fun HttpClient.postChild(token: String, request: CreateChildRequest): HttpResponse = post("/children") {
+    @Test
+    fun `matriz de permisos otro tutor recibe 404 en GET, PATCH y DELETE`() = apiTest { client ->
+        val ana = client.register(email = "ana@example.com").tokens.accessToken
+        val beto = client.register(email = "beto@example.com").tokens.accessToken
+        val child = client.createChild(ana)
+
+        val get = client.get("/api/v1/children/${child.id}") { bearerAuth(beto) }
+        val patch = client.patch("/api/v1/children/${child.id}") {
+            bearerAuth(beto)
+            contentType(ContentType.Application.Json)
+            setBody(patchRequest())
+        }
+        val delete = client.delete("/api/v1/children/${child.id}") { bearerAuth(beto) }
+        val unknownId = client.get("/api/v1/children/${UUID.randomUUID()}") { bearerAuth(ana) }
+
+        assertEquals(HttpStatusCode.NotFound, get.status)
+        assertEquals(ErrorCode.CHILD_NOT_FOUND, get.body<ErrorResponse>().code)
+        assertEquals(HttpStatusCode.NotFound, patch.status)
+        assertEquals(HttpStatusCode.NotFound, delete.status)
+        assertEquals(HttpStatusCode.NotFound, unknownId.status)
+    }
+
+    @Test
+    fun `RF-HIJ-09 CA1 el único tutor elimina el perfil entero`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+        val child = client.createChild(token)
+
+        val preview = client.get("/api/v1/children/${child.id}/deletion-preview") { bearerAuth(token) }
+        val delete = client.delete("/api/v1/children/${child.id}") { bearerAuth(token) }
+        val afterDelete = client.get("/api/v1/children/${child.id}") { bearerAuth(token) }
+
+        assertEquals(true, preview.body<DeletionPreviewResponse>().onlyGuardian)
+        assertEquals(HttpStatusCode.NoContent, delete.status)
+        assertEquals(HttpStatusCode.NotFound, afterDelete.status)
+        assertTrue(TestDatabase.column<Boolean>("SELECT deleted_at IS NOT NULL FROM children WHERE id = '${child.id}'").single())
+    }
+
+    @Test
+    fun `RF-HIJ-09 CA2 con otros tutores, el perfil sigue existiendo y el rol principal pasa al secundario más antiguo`() = apiTest { client ->
+        val principal = client.register(email = "ana@example.com").tokens.accessToken
+        val child = client.createChild(principal)
+        val secondaryAccountId = client.register(email = "beto@example.com").account.id
+        seedSecondaryGuardianship(child.id, secondaryAccountId)
+
+        val preview = client.get("/api/v1/children/${child.id}/deletion-preview") { bearerAuth(principal) }
+        val delete = client.delete("/api/v1/children/${child.id}") { bearerAuth(principal) }
+
+        assertEquals(false, preview.body<DeletionPreviewResponse>().onlyGuardian)
+        assertEquals(HttpStatusCode.NoContent, delete.status)
+        assertEquals(
+            listOf(false),
+            TestDatabase.column<Boolean>("SELECT deleted_at IS NOT NULL FROM children WHERE id = '${child.id}'"),
+        )
+        assertEquals(
+            listOf("PRINCIPAL"),
+            TestDatabase.column<String>(
+                "SELECT role FROM guardianships WHERE child_id = '${child.id}' AND account_id = '$secondaryAccountId' AND deleted_at IS NULL",
+            ),
+        )
+    }
+
+    @Test
+    fun `un tutor secundario no puede eliminar el perfil para todos, solo deja de ser tutor`() = apiTest { client ->
+        val principal = client.register(email = "ana@example.com").tokens.accessToken
+        val child = client.createChild(principal)
+        val secondary = client.register(email = "beto@example.com")
+        seedSecondaryGuardianship(child.id, secondary.account.id)
+
+        val delete = client.delete("/api/v1/children/${child.id}") { bearerAuth(secondary.tokens.accessToken) }
+
+        assertEquals(HttpStatusCode.NoContent, delete.status)
+        // El perfil sigue entero para el principal: no se eliminó para todos.
+        assertEquals(HttpStatusCode.OK, client.get("/api/v1/children/${child.id}") { bearerAuth(principal) }.status)
+        assertEquals(
+            listOf("PRINCIPAL"),
+            TestDatabase.column<String>("SELECT role FROM guardianships WHERE child_id = '${child.id}' AND deleted_at IS NULL"),
+        )
+    }
+
+    @Test
+    fun `children y guardianships llegan por sincronización`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+        val child = client.createChild(token)
+
+        val response = client.get("/api/v1/sync/changes?cursor=0") { bearerAuth(token) }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = response.bodyAsText()
+        assertTrue(body.contains("\"CHILD\""), "No llegó CHILD en /sync/changes: $body")
+        assertTrue(body.contains("\"GUARDIANSHIP\""), "No llegó GUARDIANSHIP en /sync/changes: $body")
+        assertTrue(body.contains(child.id))
+    }
+
+    private fun seedSecondaryGuardianship(childId: String, accountId: String) {
+        TestDatabase.connect().use {
+            it.createStatement().execute(
+                "INSERT INTO guardianships (child_id, account_id, role) VALUES ('$childId', '$accountId', 'SECONDARY')",
+            )
+        }
+    }
+
+    private fun createRequest(
+        firstName: String = "Sofi",
+        lastName: String = "Pérez",
+        sex: Sex = Sex.FEMALE,
+        birthDate: String = "2026-06-15",
+        gestationalWeeks: Int? = 38,
+        representationDeclared: Boolean = true,
+    ) = CreateChildRequest(
+        firstName = firstName,
+        lastName = lastName,
+        sex = sex,
+        birthDate = birthDate,
+        gestationalWeeks = gestationalWeeks,
+        representationDeclared = representationDeclared,
+    )
+
+    private fun patchRequest(allergies: String? = null) = PatchChildRequest(
+        firstName = "Sofi",
+        lastName = "Pérez",
+        sex = Sex.FEMALE,
+        birthDate = "2026-06-15",
+        gestationalWeeks = 38,
+        allergies = allergies,
+    )
+
+    private suspend fun HttpClient.postChild(token: String, request: CreateChildRequest): HttpResponse = post("/api/v1/children") {
         bearerAuth(token)
         contentType(ContentType.Application.Json)
         setBody(request)

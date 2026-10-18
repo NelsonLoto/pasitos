@@ -28,4 +28,16 @@ class ConsentRepository {
             .orderBy(Consents.acceptedAt to SortOrder.DESC)
             .firstOrNull()
             ?.get(Consents.version)
+
+    /** "Soy madre, padre o representante legal de este niño o niña" (RF-HIJ-01, RNF-PRI-02). */
+    fun insertGuardianDeclaration(accountId: UUID, childId: UUID, version: String, acceptedAt: Instant) {
+        Consents.insert {
+            it[id] = UUID.randomUUID()
+            it[Consents.accountId] = accountId
+            it[type] = ConsentType.GUARDIAN_DECLARATION
+            it[Consents.version] = version
+            it[Consents.childId] = childId
+            it[Consents.acceptedAt] = acceptedAt.toUtc()
+        }
+    }
 }
