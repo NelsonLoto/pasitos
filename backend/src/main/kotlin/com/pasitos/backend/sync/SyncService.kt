@@ -1,6 +1,6 @@
 package com.pasitos.backend.sync
 
-import com.pasitos.backend.child.ChildNotFoundException
+import com.pasitos.backend.common.ChildNotFoundException
 import com.pasitos.backend.common.ApiException
 import com.pasitos.backend.common.BusinessRuleException
 import com.pasitos.backend.common.Caller

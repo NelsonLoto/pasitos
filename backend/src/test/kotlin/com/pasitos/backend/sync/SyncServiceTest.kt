@@ -143,7 +143,7 @@ class SyncServiceTest {
 
         val before = sync.changes(caller, cursor = 0, patients = null)
 
-        val newChild = client.createChild(auth.tokens.accessToken, name = "Nuevo")
+        val newChild = client.createChild(auth.tokens.accessToken, firstName = "Nuevo")
         val after = sync.changes(caller, cursor = before.cursor, patients = null)
 
         assertTrue(after.newChildIds.contains(newChild.id))

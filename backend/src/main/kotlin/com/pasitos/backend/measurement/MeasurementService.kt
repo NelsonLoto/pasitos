@@ -1,6 +1,6 @@
 package com.pasitos.backend.measurement
 
-import com.pasitos.backend.child.ChildNotFoundException
+import com.pasitos.backend.common.ChildNotFoundException
 import com.pasitos.backend.child.ChildRepository
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.AuthorRole

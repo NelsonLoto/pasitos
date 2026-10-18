@@ -1,10 +1,11 @@
 package com.pasitos.backend.support
 
-import com.pasitos.backend.child.ChildResponse
-import com.pasitos.backend.child.CreateChildRequest
 import com.pasitos.backend.module
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.RegisterRequest
+import com.pasitos.shared.api.child.ChildResponse
+import com.pasitos.shared.api.child.CreateChildRequest
+import com.pasitos.shared.api.child.Sex
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -75,14 +76,25 @@ suspend fun HttpClient.register(
 
 suspend fun HttpClient.createChild(
     token: String,
-    name: String = "Sofi",
+    firstName: String = "Sofi",
+    lastName: String = "Pérez",
     birthDate: String = "2026-06-15",
-    sex: String = "F",
+    sex: Sex = Sex.FEMALE,
+    gestationalWeeks: Int? = null,
 ): ChildResponse {
-    val response = post("/children") {
+    val response = post("/api/v1/children") {
         bearerAuth(token)
         contentType(ContentType.Application.Json)
-        setBody(CreateChildRequest(name = name, birthDate = birthDate, sex = sex))
+        setBody(
+            CreateChildRequest(
+                firstName = firstName,
+                lastName = lastName,
+                sex = sex,
+                birthDate = birthDate,
+                gestationalWeeks = gestationalWeeks,
+                representationDeclared = true,
+            ),
+        )
     }
     assertEquals(HttpStatusCode.Created, response.status)
     return response.body()

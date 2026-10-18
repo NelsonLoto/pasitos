@@ -17,6 +17,9 @@ object TestDatabase {
     /** Versión vigente de los términos en las pruebas. */
     const val TERMS_VERSION = "2026-10"
 
+    /** Versión vigente de la declaración de representación en las pruebas (RF-HIJ-01). */
+    const val DECLARATION_VERSION = "2026-10"
+
     private val container = PostgreSQLContainer("postgres:16-alpine").apply { start() }
 
     init {
@@ -40,6 +43,7 @@ object TestDatabase {
         "jwt.issuer" to "pasitos-backend",
         "jwt.audience" to "pasitos-app",
         "terms.version" to TERMS_VERSION,
+        "declaration.version" to DECLARATION_VERSION,
     )
 
     /** Vacía todas las tablas, salvo la historia de Flyway, para que cada prueba arranque limpia. */
