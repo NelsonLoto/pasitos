@@ -12,6 +12,9 @@ import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.guardianship.GuardianshipRepository
 import com.pasitos.backend.measurement.MeasurementRepository
 import com.pasitos.backend.measurement.MeasurementService
+import com.pasitos.backend.sync.SyncRegistry
+import com.pasitos.backend.sync.SyncRepository
+import com.pasitos.backend.sync.SyncService
 import io.ktor.server.config.ApplicationConfig
 import java.time.Clock
 
@@ -38,4 +41,9 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
     )
     val childService = ChildService(childRepository, GuardianshipRepository(), argentinaClock)
     val measurementService = MeasurementService(MeasurementRepository(), childRepository, argentinaClock)
+
+    // I0 no registra ninguna entidad real todavía (ADR-03); I1 registra "children",
+    // "measurements", etc. a medida que cada dominio se adapta a sincronización (ADR-28).
+    val syncRegistry = SyncRegistry()
+    val syncService = SyncService(syncRegistry, SyncRepository())
 }
