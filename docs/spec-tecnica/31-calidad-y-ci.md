@@ -40,7 +40,9 @@ y los PRs encadenados) y en cada push a `develop`:
   imágenes de Android que descarga Robolectric (`~/.m2/repository/org/robolectric`).
 - **Seguridad del workflow:** permisos de solo lectura y acciones fijadas por SHA del commit, con
   la versión en un comentario, para que una etiqueta movida no cambie el código que corre.
-  Dependabot las actualiza.
+  Dependabot las actualiza. La única excepción de permisos es `dependencias.yml`, un workflow
+  aparte que no corre en PRs ([Alertas y actualizaciones de
+  seguridad](#alertas-y-actualizaciones-de-seguridad)).
 - **Zona horaria del teléfono prohibida en la app (ADR-26):**
   `.github/scripts/check-local-date-now.sh` falla si en `app/app/src/main`, fuera de `core/time`,
   aparece `LocalDate.now()`, `LocalDateTime.now()`, `LocalTime.now()`, `ZonedDateTime.now()`,
@@ -99,13 +101,19 @@ prefijo `chore:`.
 
 #### Alertas y actualizaciones de seguridad
 
-Desde el 18/10/2026, el repositorio tiene activados en *Settings → Advanced Security* las alertas
-de Dependabot, sus actualizaciones de seguridad y el envío automático de dependencias
-(*automatic dependency submission*).
+Desde el 18/10/2026, el repositorio tiene activadas en *Settings → Advanced Security* las alertas
+de Dependabot y sus actualizaciones de seguridad.
 
-- GitHub no lee los `build.gradle.kts`. Conoce las dependencias de Gradle de `app/`, `backend/` y
-  `shared/` solo por el envío automático, que compila los proyectos en cada push a `develop` y
-  usa minutos de Actions. Las acciones de GitHub las lee de los workflows.
+- GitHub no lee los `build.gradle.kts`: hay que enviarle las dependencias de Gradle. Lo hace
+  `.github/workflows/dependencias.yml`, con un job por build (`app`, `backend` y `shared`) y
+  `gradle/actions/dependency-submission`. Las acciones de GitHub las lee solo de los workflows.
+- El workflow corre en cada push a `develop` que cambie dependencias (`*.gradle.kts`,
+  `libs.versions.toml` o el wrapper de Gradle), y también a mano. No hace falta más: GitHub
+  vuelve a evaluar el grafo ya enviado cada vez que se publica una vulnerabilidad.
+- Es el único workflow con permiso de escritura (`contents: write`), que pide la API de envío. No
+  corre en PRs, y valida que el `gradle-wrapper.jar` sea el oficial antes de ejecutarlo.
+- El envío automático de GitHub (*automatic dependency submission*) no sirve en este repositorio:
+  busca un build de Gradle en la raíz, y acá hay tres en subcarpetas.
 - Si una dependencia tiene una vulnerabilidad con aviso publicado en la base de GitHub (*GitHub
   Advisory Database*), aparece una alerta y Dependabot abre un PR de seguridad sin esperar los 14
   días.
