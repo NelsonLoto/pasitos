@@ -38,6 +38,9 @@ enum class ErrorCode(val value: String) {
     /** 403: con acceso al recurso pero sin permiso para esa acción. */
     FORBIDDEN("forbidden"),
 
+    /** 403: credenciales correctas, pero el email todavía no se verificó (RF-CTA-02). */
+    EMAIL_NOT_VERIFIED("email_not_verified"),
+
     /** 404: el niño no existe o quien pide no tiene acceso. */
     CHILD_NOT_FOUND("child_not_found"),
 

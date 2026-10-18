@@ -5,7 +5,9 @@ import com.pasitos.backend.auth.configureAuthentication
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
+import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.measurementRoutes
+import com.pasitos.backend.web.webRoutes
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -17,6 +19,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.server.thymeleaf.Thymeleaf
 import java.time.Clock
 
 fun main(args: Array<String>) {
@@ -45,6 +48,9 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
 
     val dependencies = Dependencies(environment.config, clock)
     configureAuthentication(dependencies.jwtService, dependencies.authService)
+    install(Thymeleaf) {
+        TemplateEngineFactory.configure(this)
+    }
 
     routing {
         get("/health") {
@@ -52,6 +58,7 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         }
         childRoutes(dependencies.childService)
         measurementRoutes(dependencies.measurementService)
+        webRoutes(dependencies.authService)
 
         // API nueva (ADR-04). Los endpoints de arriba se mudan acá a medida que la app los adopta.
         route("/api/v1") {

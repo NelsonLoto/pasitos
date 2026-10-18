@@ -24,6 +24,9 @@ open class UnauthorizedException(code: ErrorCode, message: String) : ApiExceptio
 
 open class NotFoundException(code: ErrorCode, message: String) : ApiException(code, message)
 
+/** Autenticado, con acceso al recurso, pero sin permiso para esa acción (11 · Backend §4). */
+open class ForbiddenException(code: ErrorCode, message: String) : ApiException(code, message)
+
 open class ConflictException(code: ErrorCode, message: String) : ApiException(code, message)
 
 /** Recurso bloqueado por un tiempo, por ejemplo la cuenta tras varios intentos fallidos (RN-CTA-05). */
@@ -63,6 +66,7 @@ private fun ApiException.httpStatus(): HttpStatusCode = when (this) {
     is InvalidInputException -> HttpStatusCode.BadRequest
     is UnauthorizedException -> HttpStatusCode.Unauthorized
     is NotFoundException -> HttpStatusCode.NotFound
+    is ForbiddenException -> HttpStatusCode.Forbidden
     is ConflictException -> HttpStatusCode.Conflict
     is LockedException -> HttpStatusCode.Locked
     is BusinessRuleException -> HttpStatusCode.UnprocessableEntity

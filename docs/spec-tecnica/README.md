@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.11 |
+| **Versión** | 1.2.12 |
 | **Fecha** | 18/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.4.0](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.12 | 18/10/2026 | Registro con verificación de email y recuperación de contraseña: envío por SMTP con Simple Java Mail, plantillas HTML y texto plano con un solo motor Thymeleaf compartido por los emails y las páginas públicas; `email_not_verified` como código específico de `POST /auth/login` (RF-CTA-02, CA1), sin contar como intento fallido; páginas `/web/verify-email` y `/web/reset-password` que responden 400 cuando el link venció o ya se usó; `ForbiddenException` como excepción base de 403, para que la quede lista también para la matriz de permisos de I1-B4; pruebas de backend contra un Mailpit real levantado con Testcontainers, igual versión que el de desarrollo local ([01](01-stack.md), [11](11-backend.md), [31](31-calidad-y-ci.md)) | Decisiones tomadas al implementar el registro y la recuperación de contraseña, revisadas una por una con el equipo (#39) |
 | 1.2.11 | 18/10/2026 | Alertas de Dependabot y actualizaciones de seguridad activadas; workflow `dependencias.yml` que envía a GitHub las dependencias de los tres builds de Gradle cuando cambian, el único con permiso de escritura y que no corre en PRs; qué vulnerabilidades generan un PR sin esperar los 14 días y qué queda fuera, como las correcciones sin aviso publicado y las imágenes de Docker ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | La SPEC decía que las actualizaciones de seguridad no esperaban, pero las alertas estaban desactivadas y GitHub no veía las dependencias de Gradle. Su envío automático no encuentra nuestros builds, porque no hay uno en la raíz (#96) |
 | 1.2.10 | 17/10/2026 | Dependabot actualiza cada dependencia una sola vez por grupo, así que el Kotlin del backend se sube a mano en el PR de Kotlin antes de mergearlo ([31](31-calidad-y-ci.md#dependabot)); P-16: tener la versión de Kotlin en un solo archivo ([92](92-pendientes.md)) | El PR de Kotlin que abrió Dependabot después de 1.2.8 no actualizó el backend (#90) |
 | 1.2.9 | 17/10/2026 | Imagen del backend: imágenes base (JDK 21 Ubuntu para compilar, JRE 21 Alpine para ejecutar) fijadas por digest, usuario `pasitos` sin permiso para modificar la aplicación, `.dockerignore` que solo deja entrar `backend/` y `shared/` y excluye los mismos secretos que `.gitignore`, límite de memoria para el contenedor del backend en el piloto; entorno local con Mailpit, el backend en el perfil `full` reconstruido en cada `up`, puertos solo en `127.0.0.1` y la base en el 5433 por defecto ([30](30-infraestructura.md)); job `docker` en la integración continua, que busca `.env` y claves también dentro de los jars, y Dependabot para las imágenes base ([31](31-calidad-y-ci.md)); `.dockerignore` en la estructura ([02](02-estructura-del-repo.md)) | Decisiones tomadas al implementar la imagen Docker y el entorno local, revisadas una por una con el equipo (#37) |
