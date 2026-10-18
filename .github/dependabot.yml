@@ -21,20 +21,52 @@ updates:
       default-days: 14
     commit-message:
       prefix: chore
+    ignore:
+      # Exposed 1.x cambia los nombres de los paquetes: se evalúa con un PR exploratorio (P-15).
+      # Cuando se haga, se borra esta regla
+      - dependency-name: "org.jetbrains.exposed:*"
+        update-types: ["version-update:semver-major"]
     # Un grupo toma una dependencia si es el primero cuyo patrón coincide
     groups:
-      # Kotlin y KSP en su propio PR: piden verificar KSP, Hilt, Room y AGP antes de subir, y si
-      # se traban no frenan al resto
+      # Kotlin, KSP y Hilt en su propio PR: cada versión de Kotlin necesita una de KSP y una de
+      # Hilt que la soporten, así que suben juntas. Piden verificar también Room y AGP, y si se
+      # traban no frenan al resto. El plugin de Kotlin se declara con su id completo
+      # (org.jetbrains.kotlin.jvm), porque `kotlin("jvm")` no coincide con estos patrones.
+      # Dependabot actualiza cada dependencia una sola vez por grupo: el Kotlin de
+      # backend/build.gradle.kts se sube a mano en el mismo PR antes de mergearlo (31 · Calidad e
+      # integración continua, P-16)
       kotlin:
         patterns:
           - "org.jetbrains.kotlin:*"
           - "org.jetbrains.kotlin.*"
           - "com.google.devtools.ksp*"
+          - "com.google.dagger*"
       # Menores y parches de todo lo demás en un solo PR por semana. Cada versión mayor llega en
-      # su propio PR, porque se evalúa aparte (por ejemplo, Exposed 1.x)
+      # su propio PR, porque se evalúa aparte (por ejemplo, Flyway 13)
       gradle:
         patterns: ["*"]
         update-types: [minor, patch]
+
+  # Imágenes base del backend (backend/Dockerfile), fijadas por digest: sin esto no recibirían
+  # los parches de seguridad del sistema y del JRE
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+    ignore:
+      # Java 21 es el de todo el proyecto (01 · Stack): cambiar de versión mayor se decide aparte
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker:
+        patterns: ["*"]
 
   - package-ecosystem: github-actions
     directory: /
