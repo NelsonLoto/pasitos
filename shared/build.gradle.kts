@@ -32,9 +32,11 @@ kotlin {
 dependencies {
     // Misma versión que usa Ktor 3.6 en la app y el backend.
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
+    // JsonElement: los DTOs de sincronización (14 · Sincronización) representan filas de forma
+    // variable según la entidad -el motor genérico no conoce su forma-.
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     // Gradle 9 ya no agrega solo el launcher de JUnit Platform.
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

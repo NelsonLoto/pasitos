@@ -90,6 +90,28 @@ POST /api/v1/sync/push
 
 Las observaciones privadas solo viajan al dispositivo de su autor.
 
+### 3.1 Implementación en el backend (I0-08)
+
+`GET /sync/changes`, `GET /sync/snapshot/{childId}` y `POST /sync/push` son genéricos: no
+conocen ninguna entidad en particular. Cada dominio sincronizable se enchufa implementando
+`SyncEntity` (`backend/.../sync/`):
+
+| Función | Qué hace |
+|---|---|
+| `changesSince(childIds, cursor, limit)` | Filas de esos niños con `sync_version` mayor al cursor, hasta `limit`, ascendente. Las lápidas van con `"deleted": true` |
+| `snapshot(childId)` | Todas las filas vigentes de un niño, para `newChildIds` |
+| `apply(caller, op, data)` | Aplica un `UPSERT` o `DELETE` del teléfono; idempotente por `id` |
+
+Un `SyncRegistry` (mapa nombre → `SyncEntity`) es la única pieza que sabe qué entidades existen.
+En I0 el registro de producción está vacío (`Dependencies.kt`); I1 registra `children`,
+`measurements`, etc. a medida que cada dominio se adapta (ADR-28).
+
+**Paginación de 500 filas entre varias entidades:** a cada entidad registrada se le pide
+`limit + 1` filas (para detectar si ella sola ya supera el límite), se fusiona todo por
+`sync_version` ascendente y se recortan las primeras 500. `hasMore` es `true` si lo fusionado
+(antes de recortar) supera las 500 - así una sola entidad saturada no se cuenta mal aunque las
+demás aporten pocas filas.
+
 ## 5. Datos de referencia y catálogos
 
 | Datos | Cómo se actualizan |
