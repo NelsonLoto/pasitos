@@ -21,9 +21,12 @@ inicial indicado, porque sus parámetros son configurables (principio P5).
 | PVM-09 | Pesquisas por edad | ¿Qué pesquisas corresponden a cada edad en la consulta guiada? | Sin definir | RF-CON-06 | Abierto |
 | PVM-10 | Textos del estado | ¿Los textos para tutores son claros y no alarmantes? | Sin definir; los carga el administrador | RN-CRE-10 | Abierto |
 | PVM-11 | Contenido de consejos | Revisión del contenido antes de publicarlo | — | RN-CJO-04 | Abierto |
-| PVM-12 | Vacunas | ¿Qué tolerancia corresponde a cada dosis antes de considerarla atrasada? | 30 días; anticipación de 7 días | RN-VAC-01 | Abierto |
+| PVM-12 | Vacunas | ¿Qué tolerancia corresponde a cada dosis antes de considerarla atrasada? | 30 días; anticipación de 7 días. 120 días en las dosis de "15 a 18 meses" y 365 en las de 5 y 11 años | RN-VAC-01 | Abierto |
 | PVM-13 | Cronograma de controles | Confirmar las edades de control contra el cronograma vigente del Ministerio | Cronograma 2025 resumido en RN-NOT-02 | RN-NOT-02 | Abierto |
 | PVM-14 | Formato de las tablas SAP | ¿El libro publica los parámetros L, M y S o solo percentiles? Define si el puntaje Z es exacto o aproximado | Interpolación entre percentiles si no hay L, M y S | RN-CRE-05 | Abierto |
+| PVM-15 | Calendario cargado | ¿Las 27 dosis cargadas (vacunas, edades, cohortes y qué quedó fuera) coinciden con el Calendario Nacional 2026? Revisar `backend/seed/calendar/` | Transcripción de los documentos oficiales del Ministerio de Salud (D-68) | RN-VAC-01, RN-VAC-10 | Abierto |
+| PVM-16 | Rotavirus pasada su edad máxima | Pasadas las 14 semanas y 6 días (1ª dosis) o las 24 semanas (2ª), el rotavirus ya no se aplica. ¿Se muestra "Atrasada" con el mensaje de RN-VAC-05 o un mensaje distinto? | "Atrasada", con el mensaje de RN-VAC-05 | RN-VAC-01, RN-VAC-05 | Abierto |
+| PVM-17 | Dosis incorporadas después del nacimiento | A un niño grande le aparecen dosis que no estaban en el calendario cuando era bebé (por ejemplo, rotavirus o meningococo). ¿Alcanza con la carga retroactiva (RF-VAC-04) o hay que limitar esas dosis por cohorte (RN-VAC-10)? | Carga retroactiva | RN-VAC-03, RN-VAC-10 | Abierto |
 
 ## Supuestos a confirmar
 
