@@ -1,16 +1,19 @@
 # 01 · Stack
 
 Las versiones exactas viven en los archivos de build (`libs.versions.toml` en la app,
-`build.gradle.kts` en backend y `shared`). Esta tabla registra las vigentes al 14/10/2026 y las
-librerías que se incorporan; las nuevas se fijan en I0 con la última versión estable compatible.
+`build.gradle.kts` en backend y `shared`), y Dependabot las cambia todas las semanas
+([31](31-calidad-y-ci.md#dependabot)). Esta tabla es una foto de las vigentes al **18/10/2026**: se
+actualiza al cierre de cada incremento ([32](32-proceso-de-desarrollo.md#6-demos-quincenales)), y
+entre un cierre y otro mandan los archivos de build. Las librerías marcadas como "Nueva" se
+incorporan en el incremento que las necesita, con la última versión estable compatible.
 
 ## Común
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| Kotlin | 2.2.10 | Lenguaje de app, backend y `shared`. Debe ser la **misma versión** en los tres builds. Ktor 3.6 trae `kotlin-stdlib` 2.3.x, que el compilador 2.2 admite |
+| Kotlin | 2.4.20 | Lenguaje de app, backend y `shared`. Debe ser la **misma versión** en los tres builds: el PR de Kotlin de Dependabot no actualiza el backend, que se sube a mano ([31](31-calidad-y-ci.md#dependabot)) |
 | kotlinx.serialization | 1.11.0 | Contratos de la API en `shared`. Es la versión que trae Ktor 3.6 y se fija igual en los tres builds |
-| Gradle | 9.5.0 (wrapper) | Build |
+| Gradle | 9.8.0 (wrapper) | Build |
 | JDK | 21 para compilar; bytecode 17 en `shared` | Backend corre en 21; Android y `shared` apuntan a 17 |
 
 ## Módulo compartido (`shared/`)
@@ -30,9 +33,9 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Plugins Ktor | — | `content-negotiation`, `status-pages`, `auth-jwt`, `rate-limit`, `sessions`, `thymeleaf`, `call-logging` |
 | Exposed (DSL) | 0.61.0 | Acceso a datos |
 | PostgreSQL | 16 | Base de datos |
-| HikariCP | 5.1.0 | Pool de conexiones |
-| Flyway | 11.8.2 | Migraciones |
-| java-jwt (Auth0) | 4.5.0 | Tokens de acceso |
+| HikariCP | 7.1.0 | Pool de conexiones |
+| Flyway | 13.9.0 | Migraciones |
+| java-jwt (Auth0) | 4.6.2 | Tokens de acceso |
 | jwks-rsa (Auth0) | Nueva | Verificación de tokens de Google |
 | bcrypt (at.favre) | 0.10.2 | Contraseñas, costo 12 |
 | db-scheduler | Nueva | Tareas programadas persistidas en PostgreSQL (ADR-18) |
@@ -42,7 +45,7 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | Firebase Admin SDK | Nueva | Envío de avisos FCM |
 | Jakarta Mail (vía Simple Java Mail) | 8.12.6 | Envío de emails por SMTP (ADR-07) |
 | Sentry Java | Nueva | Errores (ADR-08) |
-| Logback | 1.5.18 | Logs |
+| Logback | 1.6.5 | Logs |
 | dotenv-kotlin | 6.5.1 | Variables de entorno en desarrollo local |
 | Testcontainers (PostgreSQL, genérico) | 2.0.5 | Pruebas de integración contra PostgreSQL y Mailpit reales; requiere Docker |
 
@@ -50,12 +53,12 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| Android Gradle Plugin | 9.3.2 | Build, con Kotlin integrado de AGP 9 |
+| Android Gradle Plugin | 9.4.1 | Build, con Kotlin integrado de AGP 9 |
 | `minSdk` / `compileSdk` / `targetSdk` | 26 / 37 / 37 | Android 8.0 o superior (RNF-COM-01) |
-| Jetpack Compose (BOM) | 2026.02.01 | Interfaz, Material 3 |
-| Navigation Compose | 2.9.8 | Navegación con rutas tipadas |
-| Hilt | 2.59.2 | Inyección de dependencias |
-| KSP | 2.2.10-2.0.2 | Procesamiento de anotaciones (Hilt, Room) |
+| Jetpack Compose (BOM) | 2026.09.00 | Interfaz, Material 3 |
+| Navigation Compose | 2.10.2 | Navegación con rutas tipadas |
+| Hilt | 2.60.1 | Inyección de dependencias |
+| KSP | 2.3.12 | Procesamiento de anotaciones (Hilt, Room). Desde la 2.3, su versión ya no sigue a la de Kotlin |
 | Ktor Client (OkHttp) | 3.6.0 | Cliente de la API, con el plugin `Auth` para el token de acceso y su renovación |
 | Room | 2.8.5 | Base local (ADR-02) |
 | SQLCipher for Android | 4.19.1 | Cifrado de la base local (ADR-17) |

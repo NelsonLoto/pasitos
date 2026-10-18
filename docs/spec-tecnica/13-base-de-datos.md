@@ -77,13 +77,19 @@ END $$ LANGUAGE plpgsql;
 |---|---|---|
 | `vaccines` | `name`, `prevents`, `source` | |
 | `calendar_versions` | `effective_from`, `status` | |
-| `calendar_doses` | `version_id`, `vaccine_id`, `dose_code`, `dose_label`, `age_days`, `lead_days`, `tolerance_days`, `sort_order` | Único (`version_id`, `dose_code`) |
+| `calendar_doses` | `version_id`, `vaccine_id`, `dose_code`, `dose_label`, `age_months`, `lead_days`, `tolerance_days`, `born_from`, `born_until`, `sort_order` | Único (`version_id`, `dose_code`, `born_from`); los rangos de nacimiento de un mismo `dose_code` no se superponen (RN-VAC-10, lo verifica `calendarProblems()` al cargar) |
 | `campaigns` | `vaccine_id`, `name`, `age_from_days`, `age_to_days`, `starts_on`, `ends_on` | |
 | `applied_doses` ⟳ | `child_id`, `dose_code` o `campaign_id`, `applied_on` (nulo en carga retroactiva), `lot`, `place`, `consultation_id`, autoría | Único parcial (`child_id`, `dose_code`) sin borrar (RN-VAC-09) |
 | `other_vaccines` ⟳ | `child_id`, `name`, `applied_on`, `lot`, `note`, autoría | |
 
 `applied_doses` y `other_vaccines` son sincronizables para lectura, pero se escriben por REST
 porque requieren conexión (RNF-OFF-06).
+
+La línea base (I0-04) creó `calendar_doses` con `age_days` y la unicidad (`version_id`,
+`dose_code`). I1-B7 la lleva a lo de la tabla de arriba con una **migración nueva**: renombra
+`age_days` a `age_months` (la edad del calendario oficial está en meses), agrega `born_from` y
+`born_until` y cambia la unicidad. La tabla todavía está vacía, así que no hay datos que convertir
+([10](10-modulo-compartido.md#3-estados-de-vacunas)).
 
 ### Consultas
 
@@ -141,5 +147,5 @@ guardan en sus tablas con `consultation_id` y se hacen visibles al cerrar (RN-CO
 | Datos | Cómo se cargan |
 |---|---|
 | Tablas OMS, transcripción SAP, umbrales iniciales | Archivos CSV en `backend/seed/`. En producción, por importación desde el panel (RF-ADM-04). En `local` y `ci`, con la tarea `./gradlew seedReferenceData` |
-| Calendario Nacional, cronograma de controles, hitos, consejos iniciales | Mismo mecanismo, con archivos en `backend/seed/` |
+| Calendario Nacional, cronograma de controles, hitos, consejos iniciales | Mismo mecanismo, con archivos en `backend/seed/`. El calendario está en `backend/seed/calendar/`, un CSV por versión con su fecha de vigencia y un README con las fuentes oficiales y las columnas |
 | Primer administrador | Variable `ADMIN_BOOTSTRAP_EMAIL` al arrancar |
