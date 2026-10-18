@@ -22,6 +22,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import java.time.Duration
+import java.util.Base64
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -254,6 +255,29 @@ class AuthRoutesTest {
     }
 
     @Test
+    fun `un token con una fecha fuera de rango responde 401 y no 500`() = apiTest { client ->
+        // Fechas que no entran en un Instant. java-jwt las lee antes de verificar la firma, así que
+        // cualquiera puede mandarlas sin estar autenticado (#98)
+        val outOfRange = listOf(
+            "31556889864403200", // un segundo más que el máximo de Instant
+            "9223372036854775807", // Long.MAX_VALUE
+            "-9223372036854775808", // Long.MIN_VALUE
+            "1e30",
+            "99999999999999999999999", // no entra en un Long
+        )
+
+        for (exp in outOfRange) {
+            for (claim in listOf("exp", "nbf", "iat")) {
+                val token = unsignedToken("""{"sub":"x","$claim":$exp}""")
+
+                val response = client.get("/api/v1/me") { bearerAuth(token) }
+
+                assertEquals(HttpStatusCode.Unauthorized, response.status, "$claim = $exp")
+            }
+        }
+    }
+
+    @Test
     fun `los endpoints viejos de auth ya no existen`() = apiTest { client ->
         val login = client.postJson("/auth/login", LoginRequest("ana@example.com", PASSWORD))
 
@@ -279,6 +303,13 @@ class AuthRoutesTest {
     private suspend inline fun <reified T> HttpClient.postJson(path: String, body: T): HttpResponse = post(path) {
         contentType(ContentType.Application.Json)
         setBody(body)
+    }
+
+    /** Un JWT bien formado con el [payload] dado y una firma que no es válida. */
+    private fun unsignedToken(payload: String): String {
+        val encoder = Base64.getUrlEncoder().withoutPadding()
+        fun part(text: String) = encoder.encodeToString(text.toByteArray())
+        return "${part("""{"alg":"HS256","typ":"JWT"}""")}.${part(payload)}.${part("firma")}"
     }
 
     private companion object {
