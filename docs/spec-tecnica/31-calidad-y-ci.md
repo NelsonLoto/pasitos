@@ -94,7 +94,26 @@ prefijo `chore:`.
   `docker-compose.yml` (PostgreSQL y Mailpit) son solo para desarrollo local y se actualizan a
   mano.
 - Una versión se propone recién 14 días después de publicada (`cooldown`), para dar tiempo a que
-  se detecte una versión maliciosa o rota. Las actualizaciones de seguridad no esperan.
+  se detecte una versión maliciosa o rota. La espera también vale para los digest de las imágenes
+  base. Las únicas que no esperan son las actualizaciones de seguridad (abajo).
+
+#### Alertas y actualizaciones de seguridad
+
+Desde el 18/10/2026, el repositorio tiene activados en *Settings → Advanced Security* las alertas
+de Dependabot, sus actualizaciones de seguridad y el envío automático de dependencias
+(*automatic dependency submission*).
+
+- GitHub no lee los `build.gradle.kts`. Conoce las dependencias de Gradle de `app/`, `backend/` y
+  `shared/` solo por el envío automático, que compila los proyectos en cada push a `develop` y
+  usa minutos de Actions. Las acciones de GitHub las lee de los workflows.
+- Si una dependencia tiene una vulnerabilidad con aviso publicado en la base de GitHub (*GitHub
+  Advisory Database*), aparece una alerta y Dependabot abre un PR de seguridad sin esperar los 14
+  días.
+- Una corrección sin aviso en GitHub, por ejemplo una que solo figura en el registro de cambios de
+  la librería, no genera alerta: llega con la revisión semanal, después de la espera. Si es
+  urgente, se sube a mano en un PR propio.
+- Las imágenes de Docker no entran en el grafo de dependencias: sus parches llegan solo con la
+  revisión semanal.
 
 ## 3. Definición de terminado
 
