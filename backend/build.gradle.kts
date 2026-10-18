@@ -31,7 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-server-rate-limit-jvm:$ktorVersion")
 
     // Auth: JWT (emisión + validación) + hashing de contraseñas
-    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("com.auth0:java-jwt:4.6.1")
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
@@ -41,14 +41,14 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("com.zaxxer:HikariCP:7.1.0")
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.postgresql:postgresql:42.7.13")
 
     // Migraciones del esquema, versionadas por fecha y hora (ADR-23)
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.18")
+    implementation("ch.qos.logback:logback-classic:1.6.5")
 
     // Carga backend/.env en desarrollo local (no versionado); en Docker/CI las
     // variables de entorno ya vienen seteadas y esto no hace nada.
