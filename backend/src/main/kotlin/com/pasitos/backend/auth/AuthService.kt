@@ -134,7 +134,7 @@ class AuthService(
 
     /** `POST /web/reset-password` (RF-CTA-05, CA2 y CA3). */
     suspend fun resetPassword(token: String, newPassword: String): ResetPasswordResult {
-        if (!isPasswordValid(newPassword)) return ResetPasswordResult.WeakPassword
+        if (!PasswordPolicy.isValid(newPassword)) return ResetPasswordResult.WeakPassword
         // bcrypt tarda unos 250 ms: se calcula antes de tomar una conexión de la base.
         val passwordHash = PasswordHasher.hash(newPassword)
         val now = clock.now()
@@ -252,14 +252,10 @@ class AuthService(
     }
 
     private fun requireValidPassword(password: String) {
-        if (!isPasswordValid(password)) {
+        if (!PasswordPolicy.isValid(password)) {
             throw InvalidInputException("La contraseña tiene que tener al menos 8 caracteres, con letras y números")
         }
     }
-
-    /** RN-CTA-01. */
-    private fun isPasswordValid(password: String): Boolean =
-        password.length >= 8 && password.any { it.isLetter() } && password.any { it.isDigit() }
 
     private fun Account.toDto() = AccountDto(
         id = id.toString(),
