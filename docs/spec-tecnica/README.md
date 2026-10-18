@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.14 |
+| **Versión** | 1.2.15 |
 | **Fecha** | 18/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
-| **Implementa** | [SPEC funcional v1.4.0](../spec/README.md) |
+| **Implementa** | [SPEC funcional v1.5.0](../spec/README.md) |
 
 ## Propósito
 
@@ -60,7 +60,8 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
-| 1.2.14 | 18/10/2026 | Motor genérico de sincronización en el backend: interfaz `SyncEntity` (nombre, cambios desde un cursor, foto completa, aplicar una mutación) que cada dominio implementa para enchufarse, sin entidades registradas todavía; paginación de 500 filas fusionando lo que devuelve cada entidad registrada, ordenado por `sync_version`; `newChildIds`/`revokedChildIds` contra `guardianships`/`access_revocations`; `kotlinx-serialization-json` pasa a dependencia principal de `shared` (antes solo de prueba) porque las filas de sincronización son de forma variable según la entidad ([14](14-sincronizacion.md), [11](11-backend.md), [01](01-stack.md)) | Decisiones tomadas al implementar la sincronización en el backend, revisadas una por una con el equipo (#36) |
+| 1.2.15 | 18/10/2026 | Motor genérico de sincronización en el backend: interfaz `SyncEntity` (nombre, cambios desde un cursor, foto completa, aplicar una mutación) que cada dominio implementa para enchufarse, sin entidades registradas todavía; paginación de 500 filas fusionando lo que devuelve cada entidad registrada, ordenado por `sync_version`; `newChildIds`/`revokedChildIds` contra `guardianships`/`access_revocations`; `kotlinx-serialization-json` pasa a dependencia principal de `shared` (antes solo de prueba) porque las filas de sincronización son de forma variable según la entidad ([14](14-sincronizacion.md), [11](11-backend.md), [01](01-stack.md)) | Decisiones tomadas al implementar la sincronización en el backend, revisadas una por una con el equipo (#36) |
+| 1.2.14 | 18/10/2026 | Estados de vacunas en `shared/vaccination`: tipos de dominio, edad en meses, dosis por cohorte, `otherApplied` para las aplicadas fuera del calendario vigente, tabla de bordes de cada estado y `calendarProblems()` ([10](10-modulo-compartido.md#3-estados-de-vacunas)); `calendar_doses` con `age_months`, `born_from` y `born_until`, a cambiar con una migración en I1-B7, y el calendario en `backend/seed/calendar/` ([13](13-base-de-datos.md)); implementa la SPEC funcional 1.5.0 | Decisiones tomadas al implementar los estados de vacunas, revisadas una por una con el equipo (#45); SPEC funcional 1.5.0 (D-68, RN-VAC-10) |
 | 1.2.13 | 18/10/2026 | El workflow `dependencias.yml` envía solo las dependencias que se ejecutan en producción (`runtimeClasspath` del backend y de `shared`, `debugRuntimeClasspath` y `releaseRuntimeClasspath` de la app); quedan fuera las herramientas de compilación y las pruebas ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | 8 alertas venían de AGP y de lint, no llegaban a la app ni al servidor, y Dependabot no las podía corregir (#103) |
 | 1.2.12 | 18/10/2026 | Versiones de [01](01-stack.md) al 18/10/2026 (Kotlin 2.4.20, Gradle 9.8.0, AGP 9.4.1, Compose BOM 2026.09.00, Navigation 2.10.2, Hilt 2.60.1, KSP 2.3.12, HikariCP 7.1.0, Flyway 13.9.0, java-jwt 4.6.2, logback 1.6.5); la tabla es una foto que se actualiza al cierre de cada incremento y, entre cierres, mandan los archivos de build ([01](01-stack.md), [32](32-proceso-de-desarrollo.md#6-demos-quincenales)) | Dependabot cambia las versiones todas las semanas y la tabla había quedado desactualizada en 11 filas (#101) |
 | 1.2.11 | 18/10/2026 | Alertas de Dependabot y actualizaciones de seguridad activadas; workflow `dependencias.yml` que envía a GitHub las dependencias de los tres builds de Gradle cuando cambian, el único con permiso de escritura y que no corre en PRs; qué vulnerabilidades generan un PR sin esperar los 14 días y qué queda fuera, como las correcciones sin aviso publicado y las imágenes de Docker ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | La SPEC decía que las actualizaciones de seguridad no esperaban, pero las alertas estaban desactivadas y GitHub no veía las dependencias de Gradle. Su envío automático no encuentra nuestros builds, porque no hay uno en la raíz (#96) |
