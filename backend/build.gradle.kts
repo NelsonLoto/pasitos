@@ -1,6 +1,8 @@
 plugins {
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.serialization") version "2.2.10"
+    // Con el id completo y no con `kotlin("jvm")`: así Dependabot reconoce que es Kotlin y lo sube
+    // en el mismo PR que la app y shared (31 · Calidad e integración continua)
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.20"
     application
 }
 
@@ -14,7 +16,7 @@ repositories {
 // Misma versión que el cliente de la app (P-12).
 val ktorVersion = "3.6.0"
 val exposedVersion = "0.61.0"
-val flywayVersion = "11.8.2"
+val flywayVersion = "13.9.0"
 
 dependencies {
     // Motor de crecimiento, formato de edades y contratos de la API compartidos con la app
@@ -29,7 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-server-rate-limit-jvm:$ktorVersion")
 
     // Auth: JWT (emisión + validación) + hashing de contraseñas
-    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("com.auth0:java-jwt:4.6.1")
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
@@ -38,15 +40,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation("com.zaxxer:HikariCP:5.1.0")
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("com.zaxxer:HikariCP:7.1.0")
+    implementation("org.postgresql:postgresql:42.7.13")
 
     // Migraciones del esquema, versionadas por fecha y hora (ADR-23)
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.18")
+    implementation("ch.qos.logback:logback-classic:1.6.5")
 
     // Carga backend/.env en desarrollo local (no versionado); en Docker/CI las
     // variables de entorno ya vienen seteadas y esto no hace nada.

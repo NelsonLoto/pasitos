@@ -26,8 +26,8 @@ empieza, para que el resto del equipo vea qué está en curso. Detalle del proce
 ## Integración continua
 
 Cada PR corre la integración continua (`.github/workflows/ci.yml`): pruebas de `shared`, del
-backend y de la app, lint y los links de la documentación. Solo corren los jobs de las carpetas
-que cambiaron. Detalle en
+backend y de la app, lint, la imagen Docker del backend con el entorno local y los links de la
+documentación. Solo corren los jobs de las carpetas que cambiaron. Detalle en
 [`31-calidad-y-ci.md`](docs/spec-tecnica/31-calidad-y-ci.md#2-integración-continua-adr-14).
 
 - **No se mergea un PR con la integración continua en rojo.** En un repositorio privado de

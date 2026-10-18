@@ -3,8 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // Biblioteca Kotlin/JVM pura que usan la app y el backend como build compuesto (ADR-01). No
 // depende de Android, Ktor, Exposed ni de ninguna librería de plataforma.
 plugins {
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.serialization") version "2.2.10"
+    // Con el id completo y no con `kotlin("jvm")`: así Dependabot reconoce que es Kotlin y lo sube
+    // en el mismo PR que la app y el backend (31 · Calidad e integración continua)
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.20"
     `java-library`
 }
 

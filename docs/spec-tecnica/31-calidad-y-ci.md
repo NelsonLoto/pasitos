@@ -28,6 +28,7 @@ y los PRs encadenados) y en cada push a `develop`:
 | `shared` | `shared/**` | `./gradlew test` |
 | `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
 | `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
+| `docker` | `backend/**`, `shared/**`, `docker-compose.yml` o `.dockerignore` | `docker compose --profile full up` construye la imagen del backend y levanta base, Mailpit y backend; verifica que `/health` responda y que la imagen no tenga archivos `.env` (en ningún lugar) ni claves (`*.pem`, `*.jks`, `*.keystore`) en la aplicación ni dentro de los jars del backend y de `shared`, con un `backend/.env` de prueba en el contexto. Las claves no se buscan en el resto del sistema porque la imagen base trae certificados públicos `.pem` ([30](30-infraestructura.md#imagen-del-backend)) |
 | `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
 - Un cambio en `ci.yml` corre todos los jobs, para probar el cambio. Un PR que solo toca
@@ -39,7 +40,9 @@ y los PRs encadenados) y en cada push a `develop`:
   imágenes de Android que descarga Robolectric (`~/.m2/repository/org/robolectric`).
 - **Seguridad del workflow:** permisos de solo lectura y acciones fijadas por SHA del commit, con
   la versión en un comentario, para que una etiqueta movida no cambie el código que corre.
-  Dependabot las actualiza.
+  Dependabot las actualiza. La única excepción de permisos es `dependencias.yml`, un workflow
+  aparte que no corre en PRs ([Alertas y actualizaciones de
+  seguridad](#alertas-y-actualizaciones-de-seguridad)).
 - **Zona horaria del teléfono prohibida en la app (ADR-26):**
   `.github/scripts/check-local-date-now.sh` falla si en `app/app/src/main`, fuera de `core/time`,
   aparece `LocalDate.now()`, `LocalDateTime.now()`, `LocalTime.now()`, `ZonedDateTime.now()`,
@@ -64,18 +67,61 @@ equipo, igual que la regla de no pushear directo a `develop`.
 
 ### Dependabot
 
-`.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle y de
-las acciones de GitHub, con PRs agrupados por ecosistema y el prefijo `chore:`.
+`.github/dependabot.yml`: revisión semanal (lunes 6:00 de Argentina) de dependencias de Gradle, de
+las imágenes base del backend y de las acciones de GitHub, con PRs agrupados por ecosistema y el
+prefijo `chore:`.
 
 - Los tres builds de Gradle (app, backend y `shared`) se actualizan en los mismos PRs, porque
   Kotlin y kotlinx.serialization tienen que tener la misma versión en los tres
   ([01](01-stack.md)).
-- Kotlin y KSP van en un PR propio: antes de subirlos hay que verificar KSP, Hilt, Room y AGP, y
-  si se traban no frenan al resto.
+- Kotlin, KSP y Hilt van en un PR propio: cada versión de Kotlin necesita una de KSP y una de
+  Hilt que la soporten, así que suben juntas. Antes de mergearlo hay que verificar también Room y
+  AGP, y si se traba no frena al resto.
+- Para que Dependabot reconozca a Kotlin en el backend y en `shared`, el plugin se declara con su
+  id completo (`id("org.jetbrains.kotlin.jvm")`), no con `kotlin("jvm")`: con la forma corta
+  queda fuera del grupo y llega en otro PR, con una versión distinta de la de la app.
+- **El Kotlin del backend se sube a mano en el PR de Kotlin.** Dependabot actualiza cada
+  dependencia una sola vez por grupo. Al revisar `app/` también actualiza `shared/`, porque la app
+  lo incluye como build compuesto, y en `backend/` la saltea porque ya la dio por resuelta. Antes
+  de mergear ese PR se le suma un commit que lleva `backend/build.gradle.kts` a la misma versión.
+  Si se olvida, el job `backend` falla, porque no puede leer `shared` compilado con un Kotlin más
+  nuevo. Tener la versión en un solo archivo, para no depender de este paso, queda como
+  [P-16](92-pendientes.md).
 - Las demás versiones menores y parches van agrupados en otro PR. Cada versión mayor llega en su
-  propio PR, porque se evalúa aparte.
+  propio PR, porque se evalúa aparte. Las versiones mayores de Exposed se ignoran hasta evaluarlas
+  ([P-15](92-pendientes.md)).
+- Las imágenes base de `backend/Dockerfile` van fijadas por digest, así que dependen de Dependabot
+  para recibir los parches de seguridad del sistema y del JRE. Se ignora el cambio de versión
+  mayor de Java, que es la 21 en todo el proyecto ([01](01-stack.md)). Las imágenes de
+  `docker-compose.yml` (PostgreSQL y Mailpit) son solo para desarrollo local y se actualizan a
+  mano.
 - Una versión se propone recién 14 días después de publicada (`cooldown`), para dar tiempo a que
-  se detecte una versión maliciosa o rota. Las actualizaciones de seguridad no esperan.
+  se detecte una versión maliciosa o rota. La espera también vale para los digest de las imágenes
+  base. Las únicas que no esperan son las actualizaciones de seguridad (abajo).
+
+#### Alertas y actualizaciones de seguridad
+
+Desde el 18/10/2026, el repositorio tiene activadas en *Settings → Advanced Security* las alertas
+de Dependabot y sus actualizaciones de seguridad.
+
+- GitHub no lee los `build.gradle.kts`: hay que enviarle las dependencias de Gradle. Lo hace
+  `.github/workflows/dependencias.yml`, con un job por build (`app`, `backend` y `shared`) y
+  `gradle/actions/dependency-submission`. Las acciones de GitHub las lee solo de los workflows.
+- El workflow corre en cada push a `develop` que cambie dependencias (`*.gradle.kts`,
+  `libs.versions.toml` o el wrapper de Gradle), y también a mano. No hace falta más: GitHub
+  vuelve a evaluar el grafo ya enviado cada vez que se publica una vulnerabilidad.
+- Es el único workflow con permiso de escritura (`contents: write`), que pide la API de envío. No
+  corre en PRs, y valida que el `gradle-wrapper.jar` sea el oficial antes de ejecutarlo.
+- El envío automático de GitHub (*automatic dependency submission*) no sirve en este repositorio:
+  busca un build de Gradle en la raíz, y acá hay tres en subcarpetas.
+- Si una dependencia tiene una vulnerabilidad con aviso publicado en la base de GitHub (*GitHub
+  Advisory Database*), aparece una alerta y Dependabot abre un PR de seguridad sin esperar los 14
+  días.
+- Una corrección sin aviso en GitHub, por ejemplo una que solo figura en el registro de cambios de
+  la librería, no genera alerta: llega con la revisión semanal, después de la espera. Si es
+  urgente, se sube a mano en un PR propio.
+- Las imágenes de Docker no entran en el grafo de dependencias: sus parches llegan solo con la
+  revisión semanal.
 
 ## 3. Definición de terminado
 
