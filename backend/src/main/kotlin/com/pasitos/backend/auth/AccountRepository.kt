@@ -67,10 +67,25 @@ class AccountRepository {
         }
     }
 
-    /** RF-CTA-05, CA2: la recuperación de contraseña reemplaza el hash guardado. */
+    /** RF-CTA-05, CA2 y RF-CTA-11, CA2: reemplaza el hash guardado. */
     fun updatePassword(id: UUID, passwordHash: String) {
         Accounts.update({ Accounts.id eq id }) {
             it[Accounts.passwordHash] = passwordHash
+        }
+    }
+
+    /** RF-CTA-11, CA1. */
+    fun updateName(id: UUID, firstName: String, lastName: String) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[Accounts.firstName] = firstName
+            it[Accounts.lastName] = lastName
+        }
+    }
+
+    /** RF-CTA-11, CA1: al confirmar el cambio de email (`/web/confirm-email-change`). */
+    fun updateEmail(id: UUID, email: String) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[Accounts.email] = email
         }
     }
 
