@@ -16,7 +16,7 @@ repositories {
 // Misma versión que el cliente de la app (P-12).
 val ktorVersion = "3.6.0"
 val exposedVersion = "0.61.0"
-val flywayVersion = "11.8.2"
+val flywayVersion = "13.9.0"
 
 dependencies {
     // Motor de crecimiento, formato de edades y contratos de la API compartidos con la app
