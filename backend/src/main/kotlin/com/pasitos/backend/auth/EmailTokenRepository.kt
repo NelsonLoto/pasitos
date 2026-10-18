@@ -10,18 +10,19 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 
-data class EmailToken(val id: UUID, val accountId: UUID)
+data class EmailToken(val id: UUID, val accountId: UUID, val newEmail: String? = null)
 
 /** Todas las funciones asumen una transacción abierta. Los tokens llegan siempre como hash. */
 class EmailTokenRepository {
 
-    fun insert(accountId: UUID, purpose: EmailTokenPurpose, tokenHash: String, expiresAt: Instant): UUID {
+    fun insert(accountId: UUID, purpose: EmailTokenPurpose, tokenHash: String, expiresAt: Instant, newEmail: String? = null): UUID {
         val id = UUID.randomUUID()
         EmailTokens.insert {
             it[EmailTokens.id] = id
             it[EmailTokens.accountId] = accountId
             it[EmailTokens.purpose] = purpose
             it[EmailTokens.tokenHash] = tokenHash
+            it[EmailTokens.newEmail] = newEmail
             it[EmailTokens.expiresAt] = expiresAt.toUtc()
         }
         return id
@@ -37,7 +38,7 @@ class EmailTokenRepository {
                     (EmailTokens.expiresAt greater now.toUtc())
             }
             .firstOrNull()
-            ?.let { EmailToken(it[EmailTokens.id], it[EmailTokens.accountId]) }
+            ?.let { EmailToken(it[EmailTokens.id], it[EmailTokens.accountId], it[EmailTokens.newEmail]) }
 
     fun markUsed(id: UUID, at: Instant) {
         EmailTokens.update({ EmailTokens.id eq id }) {

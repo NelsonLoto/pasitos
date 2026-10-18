@@ -1,5 +1,6 @@
 package com.pasitos.backend
 
+import com.pasitos.backend.account.accountRoutes
 import com.pasitos.backend.auth.authRoutes
 import com.pasitos.backend.auth.configureAuthentication
 import com.pasitos.backend.child.childRoutes
@@ -59,11 +60,12 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         }
         childRoutes(dependencies.childService)
         measurementRoutes(dependencies.measurementService)
-        webRoutes(dependencies.authService)
+        webRoutes(dependencies.authService, dependencies.accountService)
 
         // API nueva (ADR-04). Los endpoints de arriba se mudan acá a medida que la app los adopta.
         route("/api/v1") {
             authRoutes(dependencies.authService)
+            accountRoutes(dependencies.accountService)
             syncRoutes(dependencies.syncService)
         }
     }

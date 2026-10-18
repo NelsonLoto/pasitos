@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Tu email de Pasitos cambió</title>
+</head>
+<body style="font-family: sans-serif; color: #222;">
+    <p>Hola <span th:text="${firstName}">Ana</span>,</p>
+    <p>El email de tu cuenta de Pasitos cambió a
+        <strong th:text="${newEmail}">nueva@example.com</strong>. A partir de ahora usá esa
+        dirección para iniciar sesión.</p>
+    <p>Si no fuiste vos, alguien más tiene acceso a tu cuenta: entrá con tu contraseña y el email
+        nuevo, y cambiala de inmediato desde la app.</p>
+</body>
+</html>

@@ -5,6 +5,7 @@ import java.time.Instant
 import java.util.UUID
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -61,6 +62,10 @@ class SessionRepository {
 
     /** RF-CTA-05, CA2: la recuperación de contraseña cierra todas las sesiones de la cuenta. */
     fun deleteAllForAccount(accountId: UUID): Int = Sessions.deleteWhere { Sessions.accountId eq accountId }
+
+    /** RF-CTA-11, CA2: cambiar la contraseña desde la cuenta cierra las demás sesiones, no la actual. */
+    fun deleteAllForAccountExcept(accountId: UUID, keepSessionId: UUID): Int =
+        Sessions.deleteWhere { (Sessions.accountId eq accountId) and (Sessions.id neq keepSessionId) }
 
     private fun ResultRow.toSession() = Session(
         id = this[Sessions.id],

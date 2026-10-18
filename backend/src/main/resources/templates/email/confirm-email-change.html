@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Confirmá tu nuevo email de Pasitos</title>
+</head>
+<body style="font-family: sans-serif; color: #222;">
+    <p>Hola <span th:text="${firstName}">Ana</span>,</p>
+    <p>Pediste cambiar el email de tu cuenta de Pasitos a esta dirección. Confirmalo tocando el
+        siguiente botón:</p>
+    <p>
+        <a th:href="${link}" style="background:#2e7d32; color:#fff; padding:12px 20px; text-decoration:none; border-radius:4px;">
+            Confirmar mi email nuevo
+        </a>
+    </p>
+    <p>O copiá y pegá este link en tu navegador:<br/>
+        <a th:href="${link}" th:text="${link}">https://pasitos.ar/web/confirm-email-change?token=...</a>
+    </p>
+    <p>Este link vence en 24 horas. Si no pediste este cambio, podés ignorar este email: tu email
+        actual sigue siendo el mismo.</p>
+</body>
+</html>
