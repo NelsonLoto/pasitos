@@ -59,6 +59,9 @@ class SessionRepository {
 
     fun delete(id: UUID): Int = Sessions.deleteWhere { Sessions.id eq id }
 
+    /** RF-CTA-05, CA2: la recuperación de contraseña cierra todas las sesiones de la cuenta. */
+    fun deleteAllForAccount(accountId: UUID): Int = Sessions.deleteWhere { Sessions.accountId eq accountId }
+
     private fun ResultRow.toSession() = Session(
         id = this[Sessions.id],
         accountId = this[Sessions.accountId],

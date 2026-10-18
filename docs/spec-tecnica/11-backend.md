@@ -55,6 +55,7 @@ pocos servicios, un archivo `Dependencies.kt` que los construye es suficiente y 
 | Google | La app obtiene un ID token con Credential Manager y lo envía a `POST /auth/google`. El backend verifica firma (claves públicas de Google), `aud` (client ID propio), `iss` y vencimiento, y usa `sub` y `email` verificado (RN-CTA-04) |
 | Bloqueo por intentos | `accounts.failed_login_count` y `locked_until` (RN-CTA-05) |
 | Verificación y recuperación | Tokens aleatorios de un solo uso, guardados como hash en `email_tokens` con su vencimiento (RN-CTA-06). Los links abren páginas del backend ([16](16-panel-admin.md#páginas-públicas)) |
+| Email sin verificar | `POST /auth/login` con credenciales correctas pero sin verificar responde 403 `email_not_verified`, sin abrir sesión ni contar como intento fallido (RF-CTA-02, CA1). El registro ya abre sesión igual (RF-CTA-01, CA1): la restricción es solo al iniciar sesión de nuevo |
 
 ### Administradores
 

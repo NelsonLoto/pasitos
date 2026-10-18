@@ -36,15 +36,15 @@ librerías que se incorporan; las nuevas se fijan en I0 con la última versión 
 | jwks-rsa (Auth0) | Nueva | Verificación de tokens de Google |
 | bcrypt (at.favre) | 0.10.2 | Contraseñas, costo 12 |
 | db-scheduler | Nueva | Tareas programadas persistidas en PostgreSQL (ADR-18) |
-| Thymeleaf | Nueva | Plantillas del panel, páginas públicas y PDFs (ADR-09, ADR-10) |
+| Thymeleaf (vía `ktor-server-thymeleaf`) | 3.6.0 | Plantillas del panel, páginas públicas y PDFs (ADR-09, ADR-10) |
 | HTMX | Nueva (archivo estático) | Interacción en el panel sin framework de frontend |
 | openhtmltopdf + soporte SVG | Nueva | HTML a PDF (ADR-10) |
 | Firebase Admin SDK | Nueva | Envío de avisos FCM |
-| Jakarta Mail (vía Simple Java Mail) | Nueva | Envío de emails por SMTP (ADR-07) |
+| Jakarta Mail (vía Simple Java Mail) | 8.12.6 | Envío de emails por SMTP (ADR-07) |
 | Sentry Java | Nueva | Errores (ADR-08) |
 | Logback | 1.5.18 | Logs |
 | dotenv-kotlin | 6.5.1 | Variables de entorno en desarrollo local |
-| Testcontainers (PostgreSQL) | 2.0.5 | Pruebas de integración contra PostgreSQL real; requiere Docker |
+| Testcontainers (PostgreSQL, genérico) | 2.0.5 | Pruebas de integración contra PostgreSQL y Mailpit reales; requiere Docker |
 
 ## App Android
 

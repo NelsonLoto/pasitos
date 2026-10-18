@@ -33,7 +33,12 @@ fun apiTest(
     block: suspend ApplicationTestBuilder.(client: HttpClient) -> Unit,
 ) = testApplication {
     TestDatabase.reset()
-    environment { config = TestDatabase.config() }
+    TestMailServer.reset()
+    environment {
+        config = TestDatabase.config().apply {
+            TestMailServer.config().forEach { (path, value) -> put(path, value) }
+        }
+    }
     application { module(clock) }
     val client = createClient {
         install(ContentNegotiation) { json() }

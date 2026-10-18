@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Pasitos</title>
+</head>
+<body style="font-family: sans-serif; color: #222; max-width: 480px; margin: 48px auto; text-align: center;">
+    <h1>Pasitos</h1>
+    <p th:if="${success}">Tu email quedó verificado. Volvé a la app para continuar.</p>
+    <p th:unless="${success}">
+        Ese link de verificación venció o ya se usó. Volvé a la app y pedí que te reenvíen el
+        email de verificación.
+    </p>
+</body>
+</html>
