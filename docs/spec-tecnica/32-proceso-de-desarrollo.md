@@ -154,3 +154,6 @@ Al cierre de cada incremento:
 2. Demo de los RF del incremento contra el backend local con datos ficticios.
 3. Registro de los cambios pedidos por el profesor: si afectan comportamiento, se cargan como
    cambio de SPEC antes de implementarlos.
+4. Actualización de las versiones de [01 · Stack](01-stack.md) contra los archivos de build, con la
+   fecha del cierre: Dependabot las cambia todas las semanas, y la tabla es la foto que queda para
+   la tesis.
