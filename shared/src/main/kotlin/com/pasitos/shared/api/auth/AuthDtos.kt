@@ -30,6 +30,18 @@ data class RefreshRequest(
     val refreshToken: String,
 )
 
+/** `POST /auth/email-verification` (RF-CTA-02). Responde 204 exista o no la cuenta. */
+@Serializable
+data class EmailVerificationRequest(
+    val email: String,
+)
+
+/** `POST /auth/password-reset` (RF-CTA-05, CA1). Responde 204 exista o no la cuenta. */
+@Serializable
+data class PasswordResetRequest(
+    val email: String,
+)
+
 /**
  * Tokens de una sesión (ADR-11). El de acceso dura 15 minutos y va en `Authorization: Bearer`. El
  * de renovación sirve una sola vez: cada `POST /auth/refresh` devuelve un par nuevo.

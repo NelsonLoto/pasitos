@@ -3,6 +3,7 @@ package com.pasitos.backend
 import com.pasitos.backend.auth.AccountRepository
 import com.pasitos.backend.auth.AuthService
 import com.pasitos.backend.auth.ConsentRepository
+import com.pasitos.backend.auth.EmailTokenRepository
 import com.pasitos.backend.auth.JwtConfig
 import com.pasitos.backend.auth.JwtService
 import com.pasitos.backend.auth.SessionRepository
@@ -10,6 +11,9 @@ import com.pasitos.backend.child.ChildRepository
 import com.pasitos.backend.child.ChildService
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.guardianship.GuardianshipRepository
+import com.pasitos.backend.mail.MailConfig
+import com.pasitos.backend.mail.MailService
+import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.MeasurementRepository
 import com.pasitos.backend.measurement.MeasurementService
 import com.pasitos.backend.sync.SyncRegistry
@@ -29,13 +33,19 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
 
     val jwtService = JwtService(JwtConfig.from(config), clock)
 
+    // Las páginas públicas (`/web/...`) usan su propio motor Thymeleaf, instalado como plugin en
+    // Application.kt con la misma configuración (ADR-09, ADR-27).
+    private val mailService = MailService(MailConfig.from(config), TemplateEngineFactory.create())
+
     private val childRepository = ChildRepository()
 
     val authService = AuthService(
         accounts = AccountRepository(),
         sessions = SessionRepository(),
         consents = ConsentRepository(),
+        emailTokens = EmailTokenRepository(),
         jwt = jwtService,
+        mail = mailService,
         clock = argentinaClock,
         termsVersion = config.property("terms.version").getString(),
     )
