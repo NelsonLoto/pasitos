@@ -46,5 +46,10 @@ jobs:
         with:
           build-root-directory: ${{ matrix.build }}
           dependency-graph: generate-and-submit
+          # Solo lo que se ejecuta en producción: el backend y shared (runtimeClasspath) y la app
+          # (debug y release). Las herramientas de compilación (plugins de Gradle, lint) y las
+          # pruebas quedan fuera, así una alerta siempre es algo que llega al teléfono o al servidor.
+          # Si AGP renombrara estas configuraciones, sus dependencias desaparecerían del grafo
+          dependency-graph-include-configurations: '^(runtimeClasspath|debugRuntimeClasspath|releaseRuntimeClasspath)$'
           # Este job corre con permiso de escritura: verifica que el gradle-wrapper.jar sea el oficial
           validate-wrappers: true

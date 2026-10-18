@@ -110,6 +110,14 @@ de Dependabot y sus actualizaciones de seguridad.
 - El workflow corre en cada push a `develop` que cambie dependencias (`*.gradle.kts`,
   `libs.versions.toml` o el wrapper de Gradle), y también a mano. No hace falta más: GitHub
   vuelve a evaluar el grafo ya enviado cada vez que se publica una vulnerabilidad.
+- **Solo se envía lo que se ejecuta en producción:** `runtimeClasspath` del backend y de `shared`,
+  y `debugRuntimeClasspath` y `releaseRuntimeClasspath` de la app. Quedan fuera las herramientas
+  de compilación (`classpath` con los plugins de Gradle como AGP, `androidLintTool`, KSP y el
+  compilador de Kotlin) y las pruebas. Así cada alerta es algo que llega al teléfono o al
+  servidor; las vulnerabilidades de esas herramientas se corrigen cuando Dependabot sube su
+  versión. Si AGP renombrara esas configuraciones, sus dependencias desaparecerían del grafo sin
+  aviso: después de cada cambio de AGP conviene revisar que el grafo siga teniendo, por ejemplo,
+  Room y Ktor.
 - Es el único workflow con permiso de escritura (`contents: write`), que pide la API de envío. No
   corre en PRs, y valida que el `gradle-wrapper.jar` sea el oficial antes de ejecutarlo.
 - El envío automático de GitHub (*automatic dependency submission*) no sirve en este repositorio:

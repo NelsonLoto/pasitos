@@ -7,6 +7,7 @@ import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.measurementRoutes
+import com.pasitos.backend.sync.syncRoutes
 import com.pasitos.backend.web.webRoutes
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.serialization.kotlinx.json.json
@@ -63,6 +64,7 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         // API nueva (ADR-04). Los endpoints de arriba se mudan acá a medida que la app los adopta.
         route("/api/v1") {
             authRoutes(dependencies.authService)
+            syncRoutes(dependencies.syncService)
         }
     }
 }

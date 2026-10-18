@@ -99,19 +99,49 @@ L, M y S). Las SAP, desde la transcripción del libro (doble transcripción, rie
 
 ## 3. Estados de vacunas
 
+`com.pasitos.shared.vaccination` (I1-S1):
+
 ```kotlin
+enum class DoseStatus { SCHEDULED, UPCOMING, DUE, OVERDUE, APPLIED }
+
 fun doseStatuses(
     birthDate: LocalDate,
-    calendar: List<CalendarDoseDto>,   // versión vigente
-    applied: List<AppliedDoseDto>,
+    calendar: List<CalendarDose>,   // versión vigente
+    applied: List<AppliedDose>,     // doseCode + appliedOn (nulo en la carga retroactiva)
     today: LocalDate,
-): List<DoseWithStatus>
+): VaccinationStatus                // doses: List<DoseWithStatus>, otherApplied: List<AppliedDose>
+
+fun calendarProblems(calendar: List<CalendarDose>): List<String>
 ```
 
-- La fecha indicada es `birthDate + ageDays` de la dosis, con **edad cronológica** (RN-VAC-08).
-- Los estados siguen RN-VAC-01 con la anticipación y la tolerancia de cada dosis.
+- Los tipos son **de dominio**, no DTOs: B7 define los de la API en `shared/api/vaccination` y los
+  convierte, y la app convierte desde Room (A7). Así la lógica no depende de la API ni de la base.
+- La fecha indicada es `birthDate.plusMonths(ageMonths)`, con **edad cronológica** (RN-VAC-08). La
+  edad va en meses, como en el calendario oficial: "2 meses" cae el mismo día del mes que el
+  nacimiento, y `plusMonths` resuelve los fines de mes (31/1 + 1 mes = 28 o 29/2).
+- Solo entran las dosis cuyo rango de nacimiento (`bornFrom`, `bornUntil`, ambos inclusive)
+  contiene `birthDate` (RN-VAC-10). Un mismo `doseCode` puede tener varias filas con rangos que no
+  se superpongan; `calendarProblems()` lo verifica, junto con valores negativos. La carga de datos
+  (B7) y el panel lo usan antes de publicar una versión.
+- Los estados siguen RN-VAC-01 con la anticipación y la tolerancia de cada dosis:
+
+  | Estado | Cuándo (sin registro de aplicación) |
+  |---|---|
+  | `SCHEDULED` | `today` < fecha indicada − `leadDays` |
+  | `UPCOMING` | fecha indicada − `leadDays` ≤ `today` < fecha indicada |
+  | `DUE` | fecha indicada ≤ `today` ≤ fecha indicada + `toleranceDays` |
+  | `OVERDUE` | `today` > fecha indicada + `toleranceDays` |
+
+  Con un registro de aplicación, con fecha o sin ella (RN-VAC-04), la dosis es `APPLIED`; si hay
+  más de un registro del mismo código, cuenta el primero (RN-VAC-09).
 - Una dosis aplicada se identifica por su `doseCode` estable (por ejemplo, `PENTA-1`), que no
-  cambia entre versiones del calendario (RN-VAC-03).
+  cambia entre versiones del calendario (RN-VAC-03). Las aplicadas que no corresponden a ninguna
+  dosis vigente para el niño van a `otherApplied`, para mostrarlas aparte. Como el registro solo
+  guarda el código, **B7 tiene que permitir obtener el nombre de las dosis de versiones
+  anteriores** para que la app pueda mostrarlas.
+- `shared` no conoce la zona horaria: la app y el backend pasan `ArgentinaClock.today()`.
+- Los datos iniciales están en `backend/seed/calendar/`, con sus fuentes oficiales en el README
+  de esa carpeta.
 - Campañas: vigente si `today` está entre sus fechas y la edad del niño en su rango (RF-VAC-06).
 
 ## 4. Tiempo

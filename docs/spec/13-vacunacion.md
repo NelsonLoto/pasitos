@@ -2,8 +2,15 @@
 
 El calendario de referencia es el **Calendario Nacional de Vacunación** vigente del Ministerio de
 Salud de la Nación. Su contenido (vacunas, dosis, edades) lo gestiona el administrador
-(RF-ADM-06) y puede actualizarse sin publicar una versión nueva de la app. Para I1 se carga
-inicialmente con los datos ya usados en la app.
+(RF-ADM-06) y puede actualizarse sin publicar una versión nueva de la app.
+
+Para I1 se carga el **Calendario Nacional de Vacunación 2026** para niños y adolescentes: las 27
+dosis con edad fija, transcriptas de los documentos oficiales del Ministerio de Salud
+([calendario](https://www.argentina.gob.ar/sites/default/files/2026-03-10_calendario_nacional_vacunacion_70x50_web.pdf)
+y [carnet](https://www.argentina.gob.ar/sites/default/files/2026-03-10_or_carnet_unificado_vacunacion_ninos-adolescentes.pdf),
+10/03/2026). La antigripal (anual), las vacunas regionales (fiebre amarilla y fiebre hemorrágica
+argentina) y los esquemas de "iniciar o completar" no forman parte del calendario: se registran
+como otras vacunas (RF-VAC-05). D-68. ⚕️ PVM-15
 
 ## Requerimientos funcionales
 
@@ -99,12 +106,13 @@ y fechas de inicio y fin (RF-ADM-07).
 
 | ID | Regla |
 |---|---|
-| RN-VAC-01 | **Estados de una dosis.** Cada dosis tiene una *fecha indicada* (fecha de nacimiento + edad indicada) y una *tolerancia* en días. **Aplicada**: tiene registro de aplicación. **Próxima**: no aplicada y faltan 7 días o menos para la fecha indicada. **Pendiente**: no aplicada, desde la fecha indicada hasta el fin de la tolerancia. **Atrasada**: no aplicada y pasó la tolerancia. Las dosis cuya fecha indicada está a más de 7 días se muestran como **Programada**, con su fecha, como dato informativo (SUP-19). La anticipación y la tolerancia por dosis las configura el administrador; tolerancia inicial propuesta: 30 días. ⚕️ PVM-12 |
+| RN-VAC-01 | **Estados de una dosis.** Cada dosis tiene una *fecha indicada* (fecha de nacimiento + edad indicada) y una *tolerancia* en días. **Aplicada**: tiene registro de aplicación. **Próxima**: no aplicada y faltan 7 días o menos para la fecha indicada. **Pendiente**: no aplicada, desde la fecha indicada hasta el fin de la tolerancia. **Atrasada**: no aplicada y pasó la tolerancia. Las dosis cuya fecha indicada está a más de 7 días se muestran como **Programada**, con su fecha, como dato informativo (SUP-19). La anticipación y la tolerancia por dosis las configura el administrador; tolerancia inicial propuesta: 30 días. En las dosis que el calendario oficial indica con una ventana, la tolerancia la cubre: 120 días en las de "15 a 18 meses" (hasta los 18 meses, más 30) y 365 en las de 5 y 11 años ("en el año en que cumplen"). La edad indicada se expresa en meses, como en el calendario oficial. ⚕️ PVM-12 |
 | RN-VAC-02 | La fecha de aplicación no puede ser anterior al nacimiento ni posterior a hoy. |
-| RN-VAC-03 | **Versiones del calendario.** Cada versión tiene fecha de vigencia. Las dosis aplicadas se conservan tal como se registraron. Las dosis no aplicadas se recalculan con la versión vigente (D-41). |
+| RN-VAC-03 | **Versiones del calendario.** Cada versión tiene fecha de vigencia. Las dosis aplicadas se conservan tal como se registraron y se siguen mostrando aunque la versión vigente ya no incluya esa dosis. Las dosis no aplicadas se recalculan con la versión vigente (D-41). |
 | RN-VAC-04 | Una dosis "aplicada con fecha no registrada" cuenta como aplicada para todos los cálculos y se muestra con esa leyenda. |
 | RN-VAC-05 | La app no calcula esquemas de recuperación. Ante una dosis atrasada muestra: "Esta dosis está atrasada. Consultá con tu pediatra o en el vacunatorio cómo completar el esquema." |
 | RN-VAC-06 | Las "otras vacunas" no tienen estado ni generan notificaciones. |
 | RN-VAC-07 | Los esquemas para grupos de riesgo están fuera de alcance. |
 | RN-VAC-08 | El calendario se calcula con la **edad cronológica**, también en prematuros. |
 | RN-VAC-09 | Cada dosis del calendario puede registrarse una sola vez por niño. |
+| RN-VAC-10 | **Dosis por cohorte.** Una dosis puede corresponder solo a los nacidos en un rango de fechas, con una edad indicada propia para ese rango. Por ejemplo, la 2ª dosis de triple viral: a los 15-18 meses para los nacidos desde el 01/07/2024, y a los 5 años para los nacidos antes. Los rangos de una misma dosis no se superponen. ⚕️ PVM-15 |
