@@ -1,5 +1,6 @@
 package com.pasitos.backend.web
 
+import com.pasitos.backend.account.AccountService
 import com.pasitos.backend.auth.AuthService
 import com.pasitos.backend.auth.ResetPasswordResult
 import io.ktor.http.HttpStatusCode
@@ -18,7 +19,7 @@ import io.ktor.server.thymeleaf.ThymeleafContent
  * Un link vencido, ya usado o inexistente responde 400: no hay nada que el visitante pueda
  * corregir en el pedido salvo pedir uno nuevo.
  */
-fun Route.webRoutes(authService: AuthService) {
+fun Route.webRoutes(authService: AuthService, accountService: AccountService) {
     get("/web/verify-email") {
         val token = call.request.queryParameters["token"]
         val success = token != null && authService.verifyEmail(token)
@@ -59,6 +60,12 @@ fun Route.webRoutes(authService: AuthService) {
             ResetPasswordResult.InvalidToken ->
                 call.respondTemplate("web/reset-password.html", mapOf("tokenValid" to false, "success" to false), ok = false)
         }
+    }
+
+    get("/web/confirm-email-change") {
+        val token = call.request.queryParameters["token"]
+        val success = token != null && accountService.confirmEmailChange(token)
+        call.respondTemplate("web/confirm-email-change.html", mapOf("success" to success), ok = success)
     }
 }
 

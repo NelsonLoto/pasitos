@@ -1,5 +1,6 @@
 package com.pasitos.backend
 
+import com.pasitos.backend.account.AccountService
 import com.pasitos.backend.auth.AccountRepository
 import com.pasitos.backend.auth.AuthService
 import com.pasitos.backend.auth.ConsentRepository
@@ -39,15 +40,31 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
 
     private val childRepository = ChildRepository()
 
+    // Compartidos entre AuthService (login y sesión) y AccountService (edición de la cuenta propia).
+    private val accountRepository = AccountRepository()
+    private val sessionRepository = SessionRepository()
+    private val consentRepository = ConsentRepository()
+    private val emailTokenRepository = EmailTokenRepository()
+    private val termsVersion = config.property("terms.version").getString()
+
     val authService = AuthService(
-        accounts = AccountRepository(),
-        sessions = SessionRepository(),
-        consents = ConsentRepository(),
-        emailTokens = EmailTokenRepository(),
+        accounts = accountRepository,
+        sessions = sessionRepository,
+        consents = consentRepository,
+        emailTokens = emailTokenRepository,
         jwt = jwtService,
         mail = mailService,
         clock = argentinaClock,
-        termsVersion = config.property("terms.version").getString(),
+        termsVersion = termsVersion,
+    )
+    val accountService = AccountService(
+        accounts = accountRepository,
+        sessions = sessionRepository,
+        consents = consentRepository,
+        emailTokens = emailTokenRepository,
+        mail = mailService,
+        clock = argentinaClock,
+        termsVersion = termsVersion,
     )
     val childService = ChildService(childRepository, GuardianshipRepository(), argentinaClock)
     val measurementService = MeasurementService(MeasurementRepository(), childRepository, argentinaClock)

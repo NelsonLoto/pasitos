@@ -52,6 +52,29 @@ class MailService(private val config: MailConfig, private val templateEngine: Te
         )
     }
 
+    /** RF-CTA-11, CA1: verificación del email nuevo, antes de reemplazar al anterior (vence a las 24 h). */
+    suspend fun sendEmailChangeVerification(to: String, firstName: String, token: String) {
+        send(
+            to = to,
+            subject = "Confirmá tu nuevo email de Pasitos",
+            template = "email/confirm-email-change",
+            context = linkContext(firstName, "/web/confirm-email-change?token=$token"),
+        )
+    }
+
+    /** RF-CTA-11, CA1: aviso al email anterior, una vez confirmado el cambio. */
+    suspend fun sendEmailChangeNotice(to: String, firstName: String, newEmail: String) {
+        send(
+            to = to,
+            subject = "Tu email de Pasitos cambió",
+            template = "email/email-changed-notice",
+            context = Context().apply {
+                setVariable("firstName", firstName)
+                setVariable("newEmail", newEmail)
+            },
+        )
+    }
+
     private fun linkContext(firstName: String, path: String) = Context().apply {
         setVariable("firstName", firstName)
         setVariable("link", "${config.publicBaseUrl}$path")
