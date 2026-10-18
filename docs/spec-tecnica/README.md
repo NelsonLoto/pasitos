@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.12 |
+| **Versión** | 1.2.13 |
 | **Fecha** | 18/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.4.0](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.13 | 18/10/2026 | El workflow `dependencias.yml` envía solo las dependencias que se ejecutan en producción (`runtimeClasspath` del backend y de `shared`, `debugRuntimeClasspath` y `releaseRuntimeClasspath` de la app); quedan fuera las herramientas de compilación y las pruebas ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | 8 alertas venían de AGP y de lint, no llegaban a la app ni al servidor, y Dependabot no las podía corregir (#103) |
 | 1.2.12 | 18/10/2026 | Versiones de [01](01-stack.md) al 18/10/2026 (Kotlin 2.4.20, Gradle 9.8.0, AGP 9.4.1, Compose BOM 2026.09.00, Navigation 2.10.2, Hilt 2.60.1, KSP 2.3.12, HikariCP 7.1.0, Flyway 13.9.0, java-jwt 4.6.2, logback 1.6.5); la tabla es una foto que se actualiza al cierre de cada incremento y, entre cierres, mandan los archivos de build ([01](01-stack.md), [32](32-proceso-de-desarrollo.md#6-demos-quincenales)) | Dependabot cambia las versiones todas las semanas y la tabla había quedado desactualizada en 11 filas (#101) |
 | 1.2.11 | 18/10/2026 | Alertas de Dependabot y actualizaciones de seguridad activadas; workflow `dependencias.yml` que envía a GitHub las dependencias de los tres builds de Gradle cuando cambian, el único con permiso de escritura y que no corre en PRs; qué vulnerabilidades generan un PR sin esperar los 14 días y qué queda fuera, como las correcciones sin aviso publicado y las imágenes de Docker ([31](31-calidad-y-ci.md#alertas-y-actualizaciones-de-seguridad)) | La SPEC decía que las actualizaciones de seguridad no esperaban, pero las alertas estaban desactivadas y GitHub no veía las dependencias de Gradle. Su envío automático no encuentra nuestros builds, porque no hay uno en la raíz (#96) |
 | 1.2.10 | 17/10/2026 | Dependabot actualiza cada dependencia una sola vez por grupo, así que el Kotlin del backend se sube a mano en el PR de Kotlin antes de mergearlo ([31](31-calidad-y-ci.md#dependabot)); P-16: tener la versión de Kotlin en un solo archivo ([92](92-pendientes.md)) | El PR de Kotlin que abrió Dependabot después de 1.2.8 no actualizó el backend (#90) |
