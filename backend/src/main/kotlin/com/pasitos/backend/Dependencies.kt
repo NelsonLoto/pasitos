@@ -13,6 +13,9 @@ import com.pasitos.backend.child.ChildService
 import com.pasitos.backend.common.AccessPolicy
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.guardianship.GuardianshipRepository
+import com.pasitos.backend.guardianship.GuardianshipService
+import com.pasitos.backend.invitation.InvitationRepository
+import com.pasitos.backend.invitation.InvitationService
 import com.pasitos.backend.mail.MailConfig
 import com.pasitos.backend.mail.MailService
 import com.pasitos.backend.mail.TemplateEngineFactory
@@ -50,6 +53,8 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
     private val consentRepository = ConsentRepository()
     private val emailTokenRepository = EmailTokenRepository()
     private val termsVersion = config.property("terms.version").getString()
+    private val declarationVersion = config.property("declaration.version").getString()
+    private val accessPolicy = AccessPolicy(guardianshipRepository)
 
     val authService = AuthService(
         accounts = accountRepository,
@@ -74,9 +79,30 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         children = childRepository,
         guardianships = guardianshipRepository,
         consents = consentRepository,
-        accessPolicy = AccessPolicy(guardianshipRepository),
+        accessPolicy = accessPolicy,
         clock = argentinaClock,
-        declarationVersion = config.property("declaration.version").getString(),
+        declarationVersion = declarationVersion,
+    )
+    private val invitationRepository = InvitationRepository()
+    val invitationService = InvitationService(
+        invitations = invitationRepository,
+        children = childRepository,
+        guardianships = guardianshipRepository,
+        accounts = accountRepository,
+        consents = consentRepository,
+        accessPolicy = accessPolicy,
+        mail = mailService,
+        clock = argentinaClock,
+        declarationVersion = declarationVersion,
+    )
+    val guardianshipService = GuardianshipService(
+        guardianships = guardianshipRepository,
+        children = childRepository,
+        accounts = accountRepository,
+        accessPolicy = accessPolicy,
+        childService = childService,
+        mail = mailService,
+        clock = argentinaClock,
     )
     val measurementService = MeasurementService(MeasurementRepository(), childRepository, argentinaClock)
 
