@@ -2,12 +2,9 @@ package com.pasitos.app.core.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +27,7 @@ import com.pasitos.app.ui.theme.PsType
 fun ChildSelectorChip(
     name: String,
     ageAndSex: String,
+    avatarKey: String?,
     avatarColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -42,7 +40,7 @@ fun ChildSelectorChip(
             .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(18.dp))
             .padding(start = 12.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
     ) {
-        ChildAvatar(initial = name.take(1).uppercase(), color = avatarColor, size = 44.dp)
+        ChildAvatar(avatarKey = avatarKey, initial = name.take(1).uppercase(), color = avatarColor, size = 44.dp)
         Column(modifier = Modifier.padding(start = 12.dp).weight(1f, fill = false)) {
             Text(text = name, style = PsType.H2)
             Text(text = ageAndSex, style = PsType.Caption, color = PsColor.TextSecondary)
@@ -56,22 +54,6 @@ fun ChildSelectorChip(
     }
 }
 
-/** Color determinístico por hijo (misma paleta que usa Figma: primary/accent alternados). */
-fun childAvatarColor(childId: String): Color =
-    if (Math.floorMod(childId.hashCode(), 2) == 0) PsColor.Primary else PsColor.Accent
-
-@Composable
-fun ChildAvatar(initial: String, color: Color, size: androidx.compose.ui.unit.Dp = 46.dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .background(color = color, shape = CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = initial, style = PsType.H3, color = PsColor.TextOnPrimary)
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun ChildSelectorChipPreview() {
@@ -79,6 +61,7 @@ private fun ChildSelectorChipPreview() {
         ChildSelectorChip(
             name = "Lucía",
             ageAndSex = "8 meses · Niña",
+            avatarKey = "rabbit",
             avatarColor = PsColor.Primary,
             onClick = {},
             modifier = Modifier.padding(16.dp),

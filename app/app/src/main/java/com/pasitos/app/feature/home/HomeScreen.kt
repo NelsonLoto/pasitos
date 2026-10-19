@@ -118,8 +118,9 @@ private fun HomeContent(
             val child = state.activeChild
             if (child != null) {
                 ChildSelectorChip(
-                    name = child.name,
+                    name = child.firstName,
                     ageAndSex = child.ageAndSexLabel(),
+                    avatarKey = child.avatarKey,
                     avatarColor = childAvatarColor(child.id),
                     onClick = onChildChipClick,
                     modifier = Modifier.fillMaxWidth(),
@@ -245,7 +246,7 @@ private fun HomeScreenPreview() {
         HomeContent(
             state = HomeUiState(
                 greetingName = "María",
-                activeChild = Child(id = "child-1", name = "Lucía", birthDate = LocalDate.now().minusMonths(8), sex = ChildSex.Female),
+                activeChild = Child(id = "child-1", firstName = "Lucía", lastName = "Gómez", birthDate = LocalDate.now().minusMonths(8), sex = ChildSex.Female),
             ),
             onChildChipClick = {},
             onNotificationsClick = {},
