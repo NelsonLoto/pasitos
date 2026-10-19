@@ -3,6 +3,9 @@ package com.pasitos.app.feature.childonboarding
 import com.pasitos.app.data.child.model.ChildSex
 import java.time.LocalDate
 
+/** El perfil se guardó. Después de un alta, [offerPreviousDoses] dice si ofrecer la carga retroactiva (RF-HIJ-01, CA2). */
+data class SavedChild(val childId: String, val offerPreviousDoses: Boolean)
+
 /** Formulario de alta y edición de un hijo (RF-HIJ-01 a 03). Los números se editan como texto. */
 data class ChildFormUiState(
     /** Nulo en el alta; en la edición, el niño que se edita. */

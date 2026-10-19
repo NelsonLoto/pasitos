@@ -6,11 +6,8 @@
 # Con lógica
 app/app/src/main/java/com/pasitos/app/core/designsystem/component/PsDatePickerField.kt
 app/app/src/main/java/com/pasitos/app/data/child/model/Child.kt
-app/app/src/main/java/com/pasitos/app/data/vaccination/DoseStatusResolver.kt
 app/app/src/main/java/com/pasitos/app/feature/measurement/MeasurementFormUiState.kt
-app/app/src/main/java/com/pasitos/app/feature/vaccinedetail/VaccineDetailViewModel.kt
 
 # Vistas previas de diseño, que conviene pasar a fechas fijas
 app/app/src/main/java/com/pasitos/app/feature/growthchart/GrowthChartScreen.kt
 app/app/src/main/java/com/pasitos/app/feature/home/HomeScreen.kt
-app/app/src/main/java/com/pasitos/app/feature/vaccinedetail/VaccineDetailScreen.kt

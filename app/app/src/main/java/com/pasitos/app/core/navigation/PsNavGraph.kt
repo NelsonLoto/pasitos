@@ -19,6 +19,8 @@ import com.pasitos.app.feature.login.LoginScreen
 import com.pasitos.app.feature.measurement.MeasurementFormScreen
 import com.pasitos.app.feature.measurementhistory.MeasurementHistoryScreen
 import com.pasitos.app.feature.notificationcenter.NotificationCenterScreen
+import com.pasitos.app.feature.othervaccine.OtherVaccineScreen
+import com.pasitos.app.feature.previousdoses.PreviousDosesScreen
 import com.pasitos.app.feature.profile.ProfileScreen
 import com.pasitos.app.feature.register.RegisterScreen
 import com.pasitos.app.feature.reportexport.ReportExportScreen
@@ -70,12 +72,15 @@ fun PsNavGraph(
             val isEdit = entry.toRoute<PsRoute.ChildForm>().childId != null
             ChildFormScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaved = {
-                    if (isEdit) {
-                        navController.popBackStack()
-                    } else {
+                onSaved = { saved ->
+                    when {
+                        isEdit -> navController.popBackStack()
+                        // Si por su edad ya debería tener dosis, se ofrece la carga retroactiva (RF-HIJ-01, CA2)
+                        saved.offerPreviousDoses -> navController.navigate(PsRoute.PreviousDoses(saved.childId, afterChildCreated = true)) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                         // El hijo nuevo queda activo (RF-HIJ-01, CA1): se vuelve a Inicio sin nada atrás
-                        navController.navigate(PsRoute.Home) {
+                        else -> navController.navigate(PsRoute.Home) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
                     }
@@ -125,13 +130,36 @@ fun PsNavGraph(
         composable<PsRoute.VaccinationCalendar> {
             VaccinationCalendarScreen(
                 onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
-                onDoseClick = { vaccineId -> navController.navigate(PsRoute.VaccineDetail(vaccineId)) },
+                onDoseClick = { childId, doseCode -> navController.navigate(PsRoute.VaccineDetail(childId, doseCode)) },
+                onMarkPreviousDosesClick = { childId -> navController.navigate(PsRoute.PreviousDoses(childId)) },
+                onAddOtherVaccineClick = { childId -> navController.navigate(PsRoute.OtherVaccine(childId)) },
+                onOtherVaccineClick = { childId, vaccineId -> navController.navigate(PsRoute.OtherVaccine(childId, vaccineId)) },
             )
         }
         composable<PsRoute.VaccineDetail> {
             VaccineDetailScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable<PsRoute.PreviousDoses> { entry ->
+            val afterChildCreated = entry.toRoute<PsRoute.PreviousDoses>().afterChildCreated
+            PreviousDosesScreen(
+                onFinished = {
+                    if (afterChildCreated) {
+                        navController.navigate(PsRoute.Home) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    } else {
+                        navController.popBackStack()
+                    }
+                },
+            )
+        }
+        composable<PsRoute.OtherVaccine> {
+            OtherVaccineScreen(
+                onBackClick = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
             )
         }
         composable<PsRoute.NotificationCenter> {
