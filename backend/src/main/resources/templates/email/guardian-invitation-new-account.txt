@@ -1,0 +1,6 @@
+Hola,
+
+[(${inviterFirstName})] te invitó a ser tutor/a de [(${childName})] en Pasitos.
+
+Todavía no tenés una cuenta: descargá la app Pasitos y registrate con este mismo email para ver la
+invitación.

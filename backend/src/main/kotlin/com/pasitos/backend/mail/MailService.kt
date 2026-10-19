@@ -75,6 +75,102 @@ class MailService(private val config: MailConfig, private val templateEngine: Te
         )
     }
 
+    /** RF-HIJ-05: invitación a ser tutor/a, a una cuenta que ya existe (se acepta/rechaza en la app). */
+    suspend fun sendGuardianInvitation(to: String, recipientFirstName: String, inviterFirstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "$inviterFirstName te invitó a Pasitos",
+            template = "email/guardian-invitation",
+            context = Context().apply {
+                setVariable("firstName", recipientFirstName)
+                setVariable("inviterFirstName", inviterFirstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-05: invitación a ser tutor/a, a un email sin cuenta todavía. */
+    suspend fun sendGuardianInvitationNewAccount(to: String, inviterFirstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "$inviterFirstName te invitó a Pasitos",
+            template = "email/guardian-invitation-new-account",
+            context = Context().apply {
+                setVariable("inviterFirstName", inviterFirstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-06, CA1: aviso al tutor principal de que aceptaron su invitación. */
+    suspend fun sendGuardianInvitationAccepted(to: String, principalFirstName: String, responderFirstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "$responderFirstName aceptó tu invitación",
+            template = "email/guardian-invitation-accepted",
+            context = Context().apply {
+                setVariable("firstName", principalFirstName)
+                setVariable("responderFirstName", responderFirstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-06, CA2: aviso al tutor principal de que rechazaron su invitación. */
+    suspend fun sendGuardianInvitationRejected(to: String, principalFirstName: String, responderFirstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "$responderFirstName rechazó tu invitación",
+            template = "email/guardian-invitation-rejected",
+            context = Context().apply {
+                setVariable("firstName", principalFirstName)
+                setVariable("responderFirstName", responderFirstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-09: aviso a un tutor de que el tutor principal lo sacó de un niño. */
+    suspend fun sendGuardianRemoved(to: String, firstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "Dejaste de ser tutor/a en Pasitos",
+            template = "email/guardian-removed",
+            context = Context().apply {
+                setVariable("firstName", firstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-09: aviso al tutor principal de que otro tutor se fue por su cuenta. */
+    suspend fun sendGuardianSelfAbandoned(to: String, principalFirstName: String, formerGuardianFirstName: String, childName: String) {
+        send(
+            to = to,
+            subject = "Un tutor dejó de ver a $childName",
+            template = "email/guardian-self-abandoned",
+            context = Context().apply {
+                setVariable("firstName", principalFirstName)
+                setVariable("formerGuardianFirstName", formerGuardianFirstName)
+                setVariable("childName", childName)
+            },
+        )
+    }
+
+    /** RF-HIJ-08: aviso del cambio de tutor principal, al que lo cede y al que lo recibe. */
+    suspend fun sendPrincipalTransferred(to: String, firstName: String, childName: String, becamePrincipal: Boolean) {
+        send(
+            to = to,
+            subject = "Cambió el tutor principal de $childName",
+            template = "email/principal-transferred",
+            context = Context().apply {
+                setVariable("firstName", firstName)
+                setVariable("childName", childName)
+                setVariable("becamePrincipal", becamePrincipal)
+            },
+        )
+    }
+
     private fun linkContext(firstName: String, path: String) = Context().apply {
         setVariable("firstName", firstName)
         setVariable("link", "${config.publicBaseUrl}$path")
