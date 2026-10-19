@@ -41,6 +41,8 @@ fun PsInputField(
     trailingIcon: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     onFieldClick: (() -> Unit)? = null,
+    /** `false` para textos de varias líneas, como alergias y antecedentes. */
+    singleLine: Boolean = true,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -52,7 +54,8 @@ fun PsInputField(
             // Un campo "solo click" se deshabilita para bloquear teclado/foco, pero conserva
             // los colores de habilitado para que no se vea grisado.
             enabled = if (onFieldClick != null) false else enabled,
-            singleLine = true,
+            singleLine = singleLine,
+            minLines = if (singleLine) 1 else 2,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = visualTransformation,

@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 sealed interface PsRoute {
     @Serializable data object Login : PsRoute // RF01
     @Serializable data object Register : PsRoute // RF01
-    @Serializable data object ChildOnboarding : PsRoute // RF02
+    @Serializable data class ChildForm(val childId: String? = null) : PsRoute // RF-HIJ-01 a 03: alta, o edición con childId
+    @Serializable data class ChildProfile(val childId: String) : PsRoute // RF-HIJ-02, 03, 09
     @Serializable data object ChildSelector : PsRoute // RF02, RF03
     @Serializable data object Home : PsRoute // RF03
     @Serializable data class MeasurementForm(val childId: String) : PsRoute // RF04

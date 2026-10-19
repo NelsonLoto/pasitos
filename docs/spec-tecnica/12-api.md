@@ -48,7 +48,7 @@ Así hay **un solo camino** para cada escritura sincronizable, sea con o sin con
 
 | Método y ruta | Descripción | RF |
 |---|---|---|
-| `POST /children` | Alta de hijo | RF-HIJ-01 |
+| `POST /children` | Alta de hijo. `avatarKey` es nulo o una de `AVATAR_KEYS` (`shared/api/child`); otra clave responde 400 (RN-HIJ-11) | RF-HIJ-01 |
 | `GET /children/{id}` · `PATCH /children/{id}` | Perfil, alergias y antecedentes | RF-HIJ-02, 03 |
 | `GET /children/{id}/deletion-preview` · `DELETE /children/{id}` | Eliminar o dejar de ser tutor | RF-HIJ-09 |
 | `GET /children/{id}/guardians` | Tutores del niño | RF-HIJ-05 a 08 |

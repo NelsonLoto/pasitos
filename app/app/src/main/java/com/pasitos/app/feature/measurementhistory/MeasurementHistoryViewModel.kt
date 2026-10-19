@@ -28,7 +28,7 @@ class MeasurementHistoryViewModel @Inject constructor(
         measurementRepository.measurements,
     ) { children, allMeasurements ->
         MeasurementHistoryUiState(
-            childName = children.firstOrNull { it.id == childId }?.name.orEmpty(),
+            childName = children.firstOrNull { it.id == childId }?.firstName.orEmpty(),
             measurements = allMeasurements
                 .filter { it.childId == childId }
                 .sortedByDescending { it.date },

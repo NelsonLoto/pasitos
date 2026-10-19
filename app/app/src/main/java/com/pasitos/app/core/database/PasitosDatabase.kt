@@ -7,6 +7,10 @@ import com.pasitos.app.core.sync.local.PendingMutationDao
 import com.pasitos.app.core.sync.local.PendingMutationEntity
 import com.pasitos.app.core.sync.local.SyncStateDao
 import com.pasitos.app.core.sync.local.SyncStateEntity
+import com.pasitos.app.data.child.local.ActiveChildEntity
+import com.pasitos.app.data.child.local.ChildDao
+import com.pasitos.app.data.child.local.ChildEntity
+import com.pasitos.app.data.child.local.GuardianshipEntity
 
 /**
  * Base local de la app (ADR-02). Cada dominio registra acá sus entidades y su DAO, y sube la
@@ -15,8 +19,14 @@ import com.pasitos.app.core.sync.local.SyncStateEntity
  * migraciones.
  */
 @Database(
-    entities = [PendingMutationEntity::class, SyncStateEntity::class],
-    version = 1,
+    entities = [
+        PendingMutationEntity::class,
+        SyncStateEntity::class,
+        ChildEntity::class,
+        GuardianshipEntity::class,
+        ActiveChildEntity::class,
+    ],
+    version = 2,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -25,6 +35,8 @@ abstract class PasitosDatabase : RoomDatabase() {
     abstract fun pendingMutationDao(): PendingMutationDao
 
     abstract fun syncStateDao(): SyncStateDao
+
+    abstract fun childDao(): ChildDao
 
     companion object {
         const val NAME = "pasitos.db"

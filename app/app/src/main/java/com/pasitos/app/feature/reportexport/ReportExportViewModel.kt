@@ -25,7 +25,7 @@ class ReportExportViewModel @Inject constructor(
     private fun buildInitialState(): ReportExportUiState {
         val activeChildId = childRepository.activeChildId.value
         val activeChild = childRepository.children.value.firstOrNull { it.id == activeChildId }
-        return ReportExportUiState(childName = activeChild?.name.orEmpty())
+        return ReportExportUiState(childName = activeChild?.firstName.orEmpty())
     }
 
     fun onToggleGrowthChart(checked: Boolean) {

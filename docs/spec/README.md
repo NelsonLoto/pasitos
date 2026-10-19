@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 1.5.0 |
-| **Fecha** | 18/10/2026 |
+| **Versión** | 1.5.1 |
+| **Fecha** | 19/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Reemplaza a** | `docs/Documento_Funcional_App_Nino_Sano.docx` (v1.0, 17/08/2026) como documento de referencia funcional |
 
@@ -91,6 +91,7 @@ en el registro de cambios.
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.5.1 | 19/10/2026 | Valores iniciales de los rangos absolutos de las medidas al nacer, fuera de los cuales se pide revisar el valor (RF-HIJ-01, CA4): en I1 son los únicos límites, porque el puntaje Z llega con el motor de crecimiento de I2 (PVM-06) | Al implementar el alta de hijos en la app (#50): RN-CRE-11 preveía rangos absolutos configurables sin valores |
 | 1.5.0 | 18/10/2026 | El calendario de I1 es el Calendario Nacional 2026 completo para niños y adolescentes, con sus fuentes oficiales (D-68); edad indicada en meses y ventanas oficiales en la tolerancia (RN-VAC-01); las dosis aplicadas se siguen mostrando aunque salgan del calendario (RN-VAC-03); dosis por cohorte (RN-VAC-10); PVM-15 a PVM-17 | Al implementar los estados de vacunas en `shared` (#45): las 7 dosis de la app eran un subconjunto con un error, y la 2ª de triple viral cambia de edad según la fecha de nacimiento |
 | 1.4.0 | 16/10/2026 | Cerrar sesión funciona sin conexión: borra los datos del dispositivo al instante y revoca la sesión al recuperar la conexión (RF-CTA-07, CA3; RNF-OFF-06) | Decisión del stakeholder (D-67) al revisar la sesión persistente de la app (#34) |
 | 1.3.0 | 16/10/2026 | Antes de su fecha de término, un prematuro muestra cuánto falta para esa fecha en lugar de la edad corregida (RN-HIJ-05); se agrega "Fecha de término" al glosario | Decisión del stakeholder (D-66) al implementar el formato de edades (#30) |

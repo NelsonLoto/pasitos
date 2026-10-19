@@ -57,7 +57,7 @@ END $$ LANGUAGE plpgsql;
 | `guardianships` ⟳ | `child_id`, `account_id`, `role` (`PRINCIPAL`, `SECONDARY`), `created_at` | PK (`child_id`, `account_id`); índice único parcial: un `PRINCIPAL` por niño |
 | `invitations` | `type` (`GUARDIAN`, `PEDIATRICIAN`, `CLAIM`), `child_id`, `inviter_account_id`, `email`, `first_name`, `last_name`, `status` (`PENDING`, `ACCEPTED`, `REJECTED`, `EXPIRED`, `CANCELLED`), `sent_at`, `expires_at`, `responded_at` | Índice por `email` y `status`; datos personales borrados al vencer (RN-PED-07) |
 | `care_links` ⟳ | `child_id`, `pediatrician_account_id` (nulo mientras espera registro), `invitation_id`, `status` (`REQUESTED`, `AWAITING_REGISTRATION`, `ACTIVE`, `REJECTED`, `CANCELLED`, `EXPIRED`, `ENDED`), `requested_by_account_id`, `requested_at`, `started_at`, `ended_at`, `end_reason`, `rejection_reason` | Únicos parciales: un `ACTIVE` por niño y uno en (`REQUESTED`, `AWAITING_REGISTRATION`) por niño (RN-PED-01) |
-| `access_revocations` | `account_id`, `child_id`, `sync_version` | Avisa a la app que debe borrar datos locales del niño (ADR-15) |
+| `access_revocations` | `account_id`, `child_id`, `sync_version` | Avisa a la app que debe borrar datos locales del niño (ADR-15). `GuardianshipRepository.softDelete` agrega una fila en cada baja de una tutoría: a los otros teléfonos de esa cuenta ya no les llega ninguna lápida del niño |
 
 ### Crecimiento
 
