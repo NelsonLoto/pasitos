@@ -4,109 +4,223 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.pasitos.app.core.designsystem.component.PsBadgeTone
 import com.pasitos.app.core.navigation.PsRoute
+import com.pasitos.app.core.network.NetworkMonitor
+import com.pasitos.app.core.time.ArgentinaClock
+import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.child.ChildRepository
+import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.vaccination.VaccinationRepository
-import com.pasitos.app.data.vaccination.model.DoseStatus
-import com.pasitos.app.data.vaccination.model.VaccineDoseSchedule
-import com.pasitos.app.data.vaccination.model.displayName
-import com.pasitos.app.data.vaccination.resolveDoseStatus
+import com.pasitos.app.data.vaccination.model.AppliedDoseRecord
+import com.pasitos.app.data.vaccination.model.DoseApplicationInput
+import com.pasitos.app.data.vaccination.model.VaccinationCalendar
+import com.pasitos.app.data.vaccination.model.ageMonthsLabel
+import com.pasitos.app.feature.vaccination.VaccinationDateFormatter
+import com.pasitos.shared.api.AuthorRole
+import com.pasitos.shared.api.vaccination.MAX_LOT_LENGTH
+import com.pasitos.shared.api.vaccination.MAX_PLACE_LENGTH
+import com.pasitos.shared.vaccination.DoseStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Lo que cambia en la pantalla sin venir de la base: el formulario, el guardado y la confirmación. */
+private data class LocalState(
+    val isEditing: Boolean = false,
+    val form: DoseFormUi = DoseFormUi(),
+    val isSaving: Boolean = false,
+    val confirmDelete: Boolean = false,
+    val error: String? = null,
+)
+
+/** Detalle de una dosis del hijo (RF-VAC-07) con su registro, edición y eliminación (RF-VAC-02 y 03). */
 @HiltViewModel
 class VaccineDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val childRepository: ChildRepository,
+    childRepository: ChildRepository,
     private val vaccinationRepository: VaccinationRepository,
+    private val authRepository: AuthRepository,
+    networkMonitor: NetworkMonitor,
+    private val clock: ArgentinaClock,
 ) : ViewModel() {
 
-    private val doseScheduleId: String = savedStateHandle.toRoute<PsRoute.VaccineDetail>().vaccineId
-    private val dose: VaccineDoseSchedule = vaccinationRepository.schedule.first { it.id == doseScheduleId }
+    private val route = savedStateHandle.toRoute<PsRoute.VaccineDetail>()
+    private val local = MutableStateFlow(LocalState())
 
-    private val _uiState = MutableStateFlow(buildInitialState())
-    val uiState: StateFlow<VaccineDetailUiState> = _uiState.asStateFlow()
+    /** El registro de esta dosis, si está aplicada. */
+    private var record: AppliedDoseRecord? = null
 
-    private val _navigateBack = Channel<Unit>(Channel.BUFFERED)
-    val navigateBack = _navigateBack.receiveAsFlow()
+    val uiState: StateFlow<VaccineDetailUiState> = combine(
+        childRepository.children.map { children -> children.firstOrNull { it.id == route.childId } },
+        vaccinationRepository.calendar,
+        vaccinationRepository.observeAppliedDoses(route.childId),
+        networkMonitor.isOnline,
+        local,
+    ) { child, calendar, applied, online, local ->
+        this.record = applied.firstOrNull { it.doseCode == route.doseCode }
+        buildState(child, calendar, applied, online, local)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VaccineDetailUiState())
 
-    private fun buildInitialState(): VaccineDetailUiState {
-        val activeChildId = childRepository.activeChildId.value
-        val activeChild = childRepository.children.value.firstOrNull { it.id == activeChildId }
-        val appliedDose = vaccinationRepository.appliedDoses.value
-            .firstOrNull { it.childId == activeChildId && it.doseScheduleId == doseScheduleId }
-        val status = resolveDoseStatus(dose, activeChild?.birthDate, isApplied = appliedDose != null)
+    private val _done = Channel<Unit>(Channel.BUFFERED)
+
+    /** Se registró o se eliminó la dosis: la pantalla vuelve al calendario. */
+    val done = _done.receiveAsFlow()
+
+    fun onDateSelected(date: LocalDate) = editForm { copy(date = date, dateError = null) }
+
+    fun onLotChange(value: String) = editForm { copy(lot = value, lotError = null) }
+
+    fun onPlaceChange(value: String) = editForm { copy(place = value, placeError = null) }
+
+    /** RF-VAC-03 y RF-VAC-04 CA3: el formulario con los datos actuales. */
+    fun onEditClick() {
+        val record = record ?: return
+        if (uiState.value.applied?.isOwn != true) return
+        local.update {
+            it.copy(
+                isEditing = true,
+                form = DoseFormUi(date = record.appliedOn, lot = record.lot.orEmpty(), place = record.place.orEmpty()),
+                error = null,
+            )
+        }
+    }
+
+    fun onCancelEdit() {
+        local.update { it.copy(isEditing = false, form = DoseFormUi(), error = null) }
+    }
+
+    fun onSave() {
+        val state = uiState.value
+        if (!state.showForm || state.isSaving || !state.isOnline) return
+        val form = validate(state) ?: return
+        val input = DoseApplicationInput(appliedOn = form.date, lot = form.lot, place = form.place)
+        val record = record
+
+        viewModelScope.launch {
+            local.update { it.copy(isSaving = true, error = null) }
+            if (record == null) {
+                vaccinationRepository.registerDose(route.childId, route.doseCode, input)
+                    .onSuccess {
+                        local.update { it.copy(isSaving = false) }
+                        _done.send(Unit)
+                    }
+                    .onFailure(::showError)
+            } else {
+                vaccinationRepository.updateDose(record.id, input)
+                    .onSuccess { local.update { it.copy(isSaving = false, isEditing = false, form = DoseFormUi()) } }
+                    .onFailure(::showError)
+            }
+        }
+    }
+
+    fun onDeleteClick() {
+        if (uiState.value.applied?.isOwn == true && uiState.value.isOnline) local.update { it.copy(confirmDelete = true, error = null) }
+    }
+
+    fun onDismissDelete() {
+        local.update { it.copy(confirmDelete = false) }
+    }
+
+    /** RF-VAC-03 CA1: con confirmación; el estado se recalcula en el calendario. */
+    fun onConfirmDelete() {
+        val record = record ?: return
+        viewModelScope.launch {
+            local.update { it.copy(isSaving = true, confirmDelete = false, error = null) }
+            vaccinationRepository.deleteDose(record.id)
+                .onSuccess {
+                    local.update { it.copy(isSaving = false) }
+                    _done.send(Unit)
+                }
+                .onFailure(::showError)
+        }
+    }
+
+    private fun showError(error: Throwable) {
+        local.update { it.copy(isSaving = false, error = error.message ?: "No pudimos guardar la dosis. Probá de nuevo.") }
+    }
+
+    /** RN-VAC-02 y los límites de SUP-24. Devuelve el formulario limpio, o nulo si hay errores. */
+    private fun validate(state: VaccineDetailUiState): DoseFormUi? {
+        val form = state.form.copy(lot = state.form.lot.trim(), place = state.form.place.trim())
+        val date = form.date
+        val dateError = when {
+            date == null -> if (state.dateRequired) "Elegí la fecha de aplicación" else null
+            state.minDate != null && date.isBefore(state.minDate) -> "La fecha no puede ser anterior al nacimiento"
+            date.isAfter(state.maxDate) -> "La fecha no puede ser posterior a hoy"
+            else -> null
+        }
+        val lotError = if (form.lot.length > MAX_LOT_LENGTH) "El lote tiene un máximo de $MAX_LOT_LENGTH caracteres" else null
+        val placeError = if (form.place.length > MAX_PLACE_LENGTH) "El lugar tiene un máximo de $MAX_PLACE_LENGTH caracteres" else null
+        if (dateError != null || lotError != null || placeError != null) {
+            local.update { it.copy(form = it.form.copy(dateError = dateError, lotError = lotError, placeError = placeError)) }
+            return null
+        }
+        return form
+    }
+
+    private fun editForm(change: DoseFormUi.() -> DoseFormUi) {
+        local.update { it.copy(form = it.form.change(), error = null) }
+    }
+
+    private fun buildState(
+        child: Child?,
+        calendar: VaccinationCalendar,
+        applied: List<AppliedDoseRecord>,
+        online: Boolean,
+        local: LocalState,
+    ): VaccineDetailUiState {
+        if (child == null) return VaccineDetailUiState(isLoaded = true, notFound = true)
+        val today = clock.today()
+        val record = applied.firstOrNull { it.doseCode == route.doseCode }
+        val info = calendar.info(route.doseCode, child.birthDate)
+        val withStatus = calendar.statusFor(child.birthDate, applied, today).doses.firstOrNull { it.dose.doseCode == route.doseCode }
+        val former = calendar.former(route.doseCode)
+        if (withStatus == null && record == null) return VaccineDetailUiState(isLoaded = true, notFound = true)
 
         return VaccineDetailUiState(
-            vaccineDisplayName = dose.displayName,
-            statusText = statusText(status, dose.recommendedAgeLabel, appliedDose?.appliedDate),
-            statusTone = statusTone(status),
-            recommendedAgeLabel = dose.recommendedAgeLabel,
-            description = dose.description,
-            date = appliedDose?.appliedDate ?: LocalDate.now(),
-            lot = appliedDose?.lot.orEmpty(),
+            isLoaded = true,
+            vaccineName = info?.dose?.vaccineName ?: former?.vaccineName ?: route.doseCode,
+            doseLabel = info?.dose?.doseLabel ?: former?.doseLabel.orEmpty(),
+            status = withStatus?.status ?: DoseStatus.APPLIED,
+            indicatedText = withStatus?.let { "${ageMonthsLabel(it.dose.ageMonths)} · ${it.indicatedDate.format(VaccinationDateFormatter)}" },
+            prevents = info?.prevents,
+            source = info?.source,
+            applied = record?.toUi(),
+            isEditing = local.isEditing && record != null,
+            form = local.form,
+            dateRequired = !(local.isEditing && record?.appliedOn == null),
+            minDate = child.birthDate,
+            maxDate = today,
+            isOnline = online,
+            isSaving = local.isSaving,
+            confirmDelete = local.confirmDelete,
+            error = local.error,
         )
     }
 
-    fun onDateSelected(date: LocalDate) {
-        _uiState.update { it.copy(date = date, dateError = null, generalError = null) }
-    }
-
-    fun onLotChange(value: String) {
-        _uiState.update { it.copy(lot = value, generalError = null) }
-    }
-
-    fun onSubmit() {
-        val state = _uiState.value
-        val date = state.date
-        if (date == null) {
-            _uiState.update { it.copy(dateError = "Seleccioná la fecha de aplicación") }
-            return
-        }
-        val activeChildId = childRepository.activeChildId.value
-        if (activeChildId == null) {
-            _uiState.update { it.copy(generalError = "No hay un hijo/a seleccionado/a") }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, generalError = null) }
-            vaccinationRepository.markApplied(activeChildId, doseScheduleId, date, state.lot.trim().ifBlank { null })
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
-                    _navigateBack.send(Unit)
-                }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(isLoading = false, generalError = error.message ?: "No pudimos registrar la aplicación. Probá de nuevo.")
-                    }
-                }
-        }
-    }
-
-    private fun statusText(status: DoseStatus, ageLabel: String, appliedDate: LocalDate?): String = when (status) {
-        DoseStatus.Overdue -> "Atrasada · Correspondía a los $ageLabel"
-        DoseStatus.Pending -> "Pendiente · Recomendada a los $ageLabel"
-        DoseStatus.Applied -> "Aplicada" + (appliedDate?.let { " · ${DateDisplayFormatter.format(it)}" } ?: "")
-    }
-
-    private fun statusTone(status: DoseStatus): PsBadgeTone = when (status) {
-        DoseStatus.Applied -> PsBadgeTone.Success
-        DoseStatus.Overdue -> PsBadgeTone.Error
-        DoseStatus.Pending -> PsBadgeTone.Warning
-    }
-
-    private companion object {
-        val DateDisplayFormatter: java.time.format.DateTimeFormatter =
-            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    private fun AppliedDoseRecord.toUi(): AppliedInfoUi {
+        val isOwn = authorAccountId == authRepository.currentSession.value?.userId
+        return AppliedInfoUi(
+            dateText = appliedOn?.format(VaccinationDateFormatter) ?: "Fecha no registrada",
+            lot = lot,
+            place = place,
+            authorText = when {
+                isOwn -> "La registraste vos"
+                authorRole == AuthorRole.PEDIATRICIAN -> "La registró el pediatra"
+                else -> "La registró la familia"
+            },
+            isOwn = isOwn,
+        )
     }
 }
+

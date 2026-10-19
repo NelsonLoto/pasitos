@@ -370,7 +370,7 @@ aceptar o perder acceso, la sincronización trae o borra el niño.
 
 | Componente | Tamaño | Depende de | Bloquea | Toca |
 |---|---|---|---|---|
-| app | L | I1-B7, I1-S1, I1-A4 | — | `app/.../data/vaccination/**`, `app/.../feature/vaccination/**`, `app/.../feature/vaccinedetail/**` |
+| app | L | I1-B7, I1-S1, I1-A4 | — | `app/.../data/vaccination/**`, `app/.../feature/vaccination/**`, `app/.../feature/vaccinedetail/**`, `feature/previousdoses` y `feature/othervaccine` (nuevas), `core/sync` (`ReferenceData`), `PsBadge`, el alta de hijo, Inicio y la navegación |
 
 **Requerimientos:** RF-VAC-01 a 05, RF-VAC-07, RF-HIJ-01 (CA2)
 

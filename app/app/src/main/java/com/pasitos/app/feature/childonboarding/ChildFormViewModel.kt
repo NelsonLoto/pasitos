@@ -10,6 +10,7 @@ import com.pasitos.app.core.time.ArgentinaClock
 import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ChildSex
+import com.pasitos.app.data.vaccination.VaccinationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -35,8 +36,9 @@ import kotlinx.coroutines.launch
 class ChildFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val childRepository: ChildRepository,
+    private val vaccinationRepository: VaccinationRepository,
     networkMonitor: NetworkMonitor,
-    clock: ArgentinaClock,
+    private val clock: ArgentinaClock,
 ) : ViewModel() {
 
     private val childId: String? = savedStateHandle.toRoute<PsRoute.ChildForm>().childId
@@ -48,7 +50,7 @@ class ChildFormViewModel @Inject constructor(
     )
     val uiState: StateFlow<ChildFormUiState> = _uiState.asStateFlow()
 
-    private val _saved = Channel<Unit>(Channel.BUFFERED)
+    private val _saved = Channel<SavedChild>(Channel.BUFFERED)
     val saved = _saved.receiveAsFlow()
 
     /** El perfil como estaba antes de editarlo. */
@@ -158,9 +160,10 @@ class ChildFormViewModel @Inject constructor(
                 childRepository.updateChild(childId, input)
             }
             result
-                .onSuccess {
+                .onSuccess { child ->
+                    val offerPreviousDoses = childId == null && hasPreviousDoses(child)
                     _uiState.update { it.copy(isSaving = false) }
-                    _saved.send(Unit)
+                    _saved.send(SavedChild(child.id, offerPreviousDoses))
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -168,6 +171,16 @@ class ChildFormViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    /**
+     * RF-HIJ-01 CA2: si por su edad ya debería tener dosis aplicadas, se ofrece la carga retroactiva.
+     * Justo después de registrarse el calendario puede no haberse bajado: se pide en el momento, y
+     * si no hay conexión ni calendario simplemente no se ofrece (queda "Marcar dosis anteriores").
+     */
+    private suspend fun hasPreviousDoses(child: Child): Boolean {
+        if (vaccinationRepository.calendar.value.isEmpty) vaccinationRepository.refreshCalendar()
+        return vaccinationRepository.calendar.value.previousDoses(child.birthDate, emptySet(), clock.today()).isNotEmpty()
     }
 
     /** Cualquier cambio vuelve a pedir las confirmaciones, que eran sobre los datos anteriores. */

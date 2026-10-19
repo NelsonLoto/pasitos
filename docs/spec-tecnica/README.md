@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.23 |
+| **Versión** | 1.2.24 |
 | **Fecha** | 19/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
-| **Implementa** | [SPEC funcional v1.5.2](../spec/README.md) |
+| **Implementa** | [SPEC funcional v1.5.3](../spec/README.md) |
 
 ## Propósito
 
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.24 | 19/10/2026 | Vacunas en la app: `ReferenceData`, registrado con `@IntoSet` y refrescado por `SyncWorker` después de cada sincronización con su `ETag`, sin hacerla fallar ([14](14-sincronizacion.md#61-implementación-en-la-app-i1-a4)); calendario en una fila JSON de Room (`vaccination_calendar`), dosis y otras vacunas por sincronización (`APPLIED_DOSE`, `OTHER_VACCINE`) y escrituras por REST con `withLock`; estados con `doseStatuses()` de `shared`; calendario agrupado por edad con resumen, filtro y secciones, detalle con registro y edición, carga retroactiva después del alta y desde Vacunas, y otras vacunas ([15](15-android.md#12-vacunas-i1-a7)); `PsBadge` suma el tono `Neutral` y un ícono; `DoseStatusResolver.kt`, `VaccineDetailViewModel.kt` y `VaccineDetailScreen.kt` salen de la lista de `LocalDate.now()` ([31](31-calidad-y-ci.md)); implementa la SPEC funcional 1.5.3 | Decisiones tomadas al implementar las vacunas en la app, revisadas una por una con el equipo (#53) |
 | 1.2.23 | 19/10/2026 | Vacunación en el backend: migración de `calendar_doses` a `age_months` con `born_from` y `born_until`, unicidad `NULLS NOT DISTINCT` y límites de texto ([13](13-base-de-datos.md#vacunación)); tarea `seedReferenceData` con un lector de CSV propio (comillas y CRLF), una versión por archivo y en una transacción, validada con `calendarProblems()`; columna `source` en el CSV para la fuente de RF-VAC-07; `GET /vaccination-calendar` con la versión vigente, `formerDoses` y `ETag` por hash; reglas de registro, carga retroactiva y edición ([12](12-api.md#vacunación)); `APPLIED_DOSE` y `OTHER_VACCINE` de solo lectura en la sincronización ([14](14-sincronizacion.md)); `ChildDataPurger` para borrar físicamente las vacunas al eliminar el perfil de un niño ([11](11-backend.md#4-autorización)); P-17 sobre la fila del niño eliminado; implementa la SPEC funcional 1.5.2 | Decisiones tomadas al implementar la vacunación en el backend, revisadas una por una con el equipo (#46). La 1.2.22 es de la postergación de Sentry (#112) |
 | 1.2.22 | 19/10/2026 | P-07 (organización de Sentry) pasa de I0 a antes de I6, junto con I0-10; ADR-08 no cambia ([92](92-pendientes.md)) | Hasta el piloto Sentry casi no aporta: en `local` y `ci` no envía eventos y en desarrollo los errores se ven en Logcat y en los logs del backend. Al retomarlo se decide si alcanza con Android vitals de Play Console y los logs del backend (#63) |
 | 1.2.21 | 19/10/2026 | Tutores e invitaciones: `GuardianshipService` (listar, sacar a otro tutor o abandonar reusando `ChildService.delete`, ceder el rol principal) e `InvitationService` (invitar, listar las propias, aceptar, rechazar, reenviar); el vencimiento a los 15 días (RN-HIJ-07) se calcula al leer, no con una tarea programada, que queda para I6; reenviar cancela la invitación anterior y crea una con un plazo nuevo en vez de actualizar la misma fila; ceder el rol principal degrada a quien lo tenía antes de ascender al nuevo, en ese orden, porque el índice único de un solo principal por niño no es diferible; siete plantillas de email nuevas para cada aviso (invitación con y sin cuenta, aceptada, rechazada, tutor sacado, tutor que se fue solo, cambio de principal) ([11](11-backend.md), [12](12-api.md)) | Decisiones tomadas al implementar tutores e invitaciones, revisadas una por una con el equipo (#43) |

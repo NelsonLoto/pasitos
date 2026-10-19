@@ -1,6 +1,7 @@
 package com.pasitos.app.core.sync.di
 
 import com.pasitos.app.core.database.PasitosDatabase
+import com.pasitos.app.core.sync.ReferenceData
 import com.pasitos.app.core.sync.SyncScheduler
 import com.pasitos.app.core.sync.SyncedEntity
 import com.pasitos.app.core.sync.WorkManagerSyncScheduler
@@ -23,6 +24,10 @@ abstract class SyncModule {
     /** Cada dominio agrega su [SyncedEntity] con `@IntoSet`; declararlo acá permite que el conjunto empiece vacío. */
     @Multibinds
     abstract fun syncedEntities(): Set<SyncedEntity>
+
+    /** Igual que [syncedEntities]: cada dominio agrega sus datos de referencia con `@IntoSet`. */
+    @Multibinds
+    abstract fun referenceData(): Set<ReferenceData>
 
     companion object {
 
