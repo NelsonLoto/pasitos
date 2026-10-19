@@ -235,7 +235,7 @@ medición), RN-CRE-12, ADR-28
 
 | Componente | Tamaño | Depende de | Bloquea | Toca |
 |---|---|---|---|---|
-| backend, shared | M | I1-B4, I1-S1 | I1-A7 | `backend/.../vaccination/**`, `shared/api/vaccination/**`, tarea `seedReferenceData` |
+| backend, shared | M | I1-B4, I1-S1 | I1-A7 | `backend/.../vaccination/**`, `shared/api/vaccination/**`, tarea `seedReferenceData`, una migración, `backend/seed/calendar/`, `sync/` (dos entidades) y `ChildService.delete` (limpieza al eliminar un niño) |
 
 **Requerimientos:** RF-VAC-01 a 05, RF-VAC-07, RN-VAC-02, RN-VAC-09
 

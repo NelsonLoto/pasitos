@@ -61,6 +61,17 @@ PostgreSQL y Flyway para versionar el schema.
 
 4. Verificar: `GET http://localhost:8080/health` debería responder `OK`.
 
+5. Cargar los datos de referencia (el Calendario Nacional de `seed/calendar/`):
+
+   ```
+   ./gradlew seedReferenceData
+   ```
+
+   Usa la misma configuración que el backend y aplica las migraciones antes, así
+   que funciona también con la base vacía y con el backend en Docker. Se puede
+   correr más de una vez: lo que ya está cargado se saltea. Sin calendario,
+   `GET /api/v1/vaccination-calendar` responde con las listas vacías.
+
 ## Todo con Docker, backend incluido
 
 Para correr el backend sin IntelliJ ni JDK (por ejemplo, si trabajás solo en la
