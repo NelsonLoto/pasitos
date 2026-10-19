@@ -89,6 +89,10 @@ Reglas transversales:
   serializan cuando quien pide es su autor. El DTO para tutores no tiene esos campos (RF-CON-08,
   RNF-SEG-05).
 - La edición o eliminación de un registro exige `author_account_id == caller` (RN de autoría).
+- **Eliminar el perfil de un niño** (RN-HIJ-08): `ChildService.delete` llama, dentro de su
+  transacción, al `ChildDataPurger` de cada dominio que guarda datos del niño. Así el dominio de
+  hijos no conoce a los demás. Cada dominio nuevo con datos del niño registra el suyo en
+  `Dependencies.kt`; vacunación lo hace desde I1-B7.
 - El pediatra anterior accede solo a `GET` de sus propias consultas (RN-PED-04).
 - Cada acceso de un pediatra a datos de un niño y cada modificación o exportación se registra en
   `audit_log` desde el servicio (RNF-SEG-06).

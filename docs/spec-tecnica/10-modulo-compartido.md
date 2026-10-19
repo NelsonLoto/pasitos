@@ -137,8 +137,8 @@ fun calendarProblems(calendar: List<CalendarDose>): List<String>
 - Una dosis aplicada se identifica por su `doseCode` estable (por ejemplo, `PENTA-1`), que no
   cambia entre versiones del calendario (RN-VAC-03). Las aplicadas que no corresponden a ninguna
   dosis vigente para el niño van a `otherApplied`, para mostrarlas aparte. Como el registro solo
-  guarda el código, **B7 tiene que permitir obtener el nombre de las dosis de versiones
-  anteriores** para que la app pueda mostrarlas.
+  guarda el código, `GET /vaccination-calendar` trae en `formerDoses` el nombre de las dosis de
+  versiones anteriores que la vigente ya no tiene (I1-B7, [12](12-api.md#vacunación)).
 - `shared` no conoce la zona horaria: la app y el backend pasan `ArgentinaClock.today()`.
 - Los datos iniciales están en `backend/seed/calendar/`, con sus fuentes oficiales en el README
   de esa carpeta.
