@@ -10,6 +10,7 @@ import com.pasitos.backend.auth.JwtService
 import com.pasitos.backend.auth.SessionRepository
 import com.pasitos.backend.child.ChildRepository
 import com.pasitos.backend.child.ChildService
+import com.pasitos.backend.common.AccessPolicy
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.guardianship.GuardianshipRepository
 import com.pasitos.backend.mail.MailConfig
@@ -17,6 +18,8 @@ import com.pasitos.backend.mail.MailService
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.MeasurementRepository
 import com.pasitos.backend.measurement.MeasurementService
+import com.pasitos.backend.sync.ChildSyncEntity
+import com.pasitos.backend.sync.GuardianshipSyncEntity
 import com.pasitos.backend.sync.SyncRegistry
 import com.pasitos.backend.sync.SyncRepository
 import com.pasitos.backend.sync.SyncService
@@ -39,6 +42,7 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
     private val mailService = MailService(MailConfig.from(config), TemplateEngineFactory.create())
 
     private val childRepository = ChildRepository()
+    private val guardianshipRepository = GuardianshipRepository()
 
     // Compartidos entre AuthService (login y sesión) y AccountService (edición de la cuenta propia).
     private val accountRepository = AccountRepository()
@@ -66,11 +70,22 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         clock = argentinaClock,
         termsVersion = termsVersion,
     )
-    val childService = ChildService(childRepository, GuardianshipRepository(), argentinaClock)
+    val childService = ChildService(
+        children = childRepository,
+        guardianships = guardianshipRepository,
+        consents = consentRepository,
+        accessPolicy = AccessPolicy(guardianshipRepository),
+        clock = argentinaClock,
+        declarationVersion = config.property("declaration.version").getString(),
+    )
     val measurementService = MeasurementService(MeasurementRepository(), childRepository, argentinaClock)
 
-    // I0 no registra ninguna entidad real todavía (ADR-03); I1 registra "children",
-    // "measurements", etc. a medida que cada dominio se adapta a sincronización (ADR-28).
-    val syncRegistry = SyncRegistry()
+    // I0 no registraba ninguna entidad real todavía (ADR-03); I1 va registrando cada dominio a
+    // medida que se adapta a sincronización (ADR-28). "children" y "guardianships" son de
+    // solo lectura acá: se escriben por REST, no por /sync/push (12 · API §Regla de escritura).
+    val syncRegistry = SyncRegistry().apply {
+        register(ChildSyncEntity(childRepository))
+        register(GuardianshipSyncEntity(guardianshipRepository))
+    }
     val syncService = SyncService(syncRegistry, SyncRepository())
 }

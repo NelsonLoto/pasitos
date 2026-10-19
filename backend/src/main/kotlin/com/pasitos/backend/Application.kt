@@ -58,7 +58,6 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         get("/health") {
             call.respondText("OK")
         }
-        childRoutes(dependencies.childService)
         measurementRoutes(dependencies.measurementService)
         webRoutes(dependencies.authService, dependencies.accountService)
 
@@ -66,6 +65,7 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         route("/api/v1") {
             authRoutes(dependencies.authService)
             accountRoutes(dependencies.accountService)
+            childRoutes(dependencies.childService)
             syncRoutes(dependencies.syncService)
         }
     }
