@@ -28,7 +28,7 @@ flowchart LR
     T07[I0-07 Room + sync app]
     T08[I0-08 Sync backend]
     T09[I0-09 Docker]
-    T10[I0-10 Sentry]
+    T10["I0-10 Sentry (pasó a I6)"]
 
     T01 --> T02
     T01 --> T07
@@ -46,7 +46,7 @@ flowchart LR
 | Ola | Tareas en paralelo | Comentario |
 |---|---|---|
 | 1 | I0-01, I0-04, I0-03, I0-09 | I0-01 toca solo `app/` y es corta: conviene mergearla el primer día. I0-04 toca solo `backend/` |
-| 2 | I0-02, I0-07, I0-10 | Arrancan cuando se mergea I0-01 |
+| 2 | I0-02, I0-07, I0-10 | Arrancan cuando se mergea I0-01. I0-10 se postergó a I6 |
 | 3 | I0-05, I0-08 | Arrancan cuando están I0-02 e I0-04 |
 | 4 | I0-06 | Cuando están I0-05 e I0-07 |
 
@@ -309,6 +309,12 @@ el `Dockerfile` cuando se mergea I0-02.
 ---
 
 ### I0-10 · Registro de errores con Sentry
+
+> **Postergada a I6 (19/10/2026).** Hasta el piloto, Sentry casi no aporta: en `local` y `ci` no
+> envía eventos, y en desarrollo los errores se ven en Logcat y en los logs del backend. Se hace
+> antes del piloto, junto con T-09. Al retomarla se decide primero si alcanza con Android vitals
+> de Play Console y los logs del backend. Lo averiguado y las decisiones pendientes están en el
+> issue de T-09 (#63).
 
 | Componente | Tamaño | Depende de | Bloquea | Toca |
 |---|---|---|---|---|
