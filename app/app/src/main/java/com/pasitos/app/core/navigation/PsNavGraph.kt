@@ -11,8 +11,10 @@ import com.pasitos.app.feature.advicelist.AdviceListScreen
 import com.pasitos.app.feature.childonboarding.ChildFormScreen
 import com.pasitos.app.feature.childprofile.ChildProfileScreen
 import com.pasitos.app.feature.childselector.ChildSelectorScreen
+import com.pasitos.app.feature.emailverification.EmailVerificationScreen
 import com.pasitos.app.feature.growthchart.GrowthChartScreen
 import com.pasitos.app.feature.home.HomeScreen
+import com.pasitos.app.feature.login.ForgotPasswordScreen
 import com.pasitos.app.feature.login.LoginScreen
 import com.pasitos.app.feature.measurement.MeasurementFormScreen
 import com.pasitos.app.feature.measurementhistory.MeasurementHistoryScreen
@@ -38,14 +40,31 @@ fun PsNavGraph(
                     }
                 },
                 onRegisterClick = { navController.navigate(PsRoute.Register) },
+                onForgotPasswordClick = { navController.navigate(PsRoute.ForgotPassword) },
             )
         }
         composable<PsRoute.Register> {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
-                onRegisterSuccess = { navController.navigate(PsRoute.ChildForm()) },
+                onRegisterSuccess = { email ->
+                    navController.navigate(PsRoute.EmailVerification(email, afterVerifiedGoHome = false))
+                },
                 onLoginClick = { navController.popBackStack() },
             )
+        }
+        composable<PsRoute.EmailVerification> { backStackEntry ->
+            val route = backStackEntry.toRoute<PsRoute.EmailVerification>()
+            EmailVerificationScreen(
+                onVerified = {
+                    val destination = if (route.afterVerifiedGoHome) PsRoute.Home else PsRoute.ChildForm()
+                    navController.navigate(destination) {
+                        popUpTo(PsRoute.Login) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable<PsRoute.ForgotPassword> {
+            ForgotPasswordScreen(onBackClick = { navController.popBackStack() })
         }
         composable<PsRoute.ChildForm> { entry ->
             val isEdit = entry.toRoute<PsRoute.ChildForm>().childId != null

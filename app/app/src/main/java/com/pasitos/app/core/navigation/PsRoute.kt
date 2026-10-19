@@ -6,6 +6,9 @@ import kotlinx.serialization.Serializable
 sealed interface PsRoute {
     @Serializable data object Login : PsRoute // RF01
     @Serializable data object Register : PsRoute // RF01
+    /** Después del alta (RF-CTA-01, RF-CTA-02): [afterVerifiedGoHome] decide a dónde seguir una vez verificado. */
+    @Serializable data class EmailVerification(val email: String, val afterVerifiedGoHome: Boolean) : PsRoute // RF01
+    @Serializable data object ForgotPassword : PsRoute // RF01, RF-CTA-05
     @Serializable data class ChildForm(val childId: String? = null) : PsRoute // RF-HIJ-01 a 03: alta, o edición con childId
     @Serializable data class ChildProfile(val childId: String) : PsRoute // RF-HIJ-02, 03, 09
     @Serializable data object ChildSelector : PsRoute // RF02, RF03

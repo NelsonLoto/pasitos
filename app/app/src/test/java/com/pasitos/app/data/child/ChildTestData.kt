@@ -88,6 +88,10 @@ class SignedInAuthRepository(session: AuthSession = ChildTestData.session) : Aut
     override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean) =
         Result.success(currentSession.value!!)
 
+    override suspend fun resendEmailVerification(email: String): Result<Unit> = Result.success(Unit)
+    override suspend fun requestPasswordReset(email: String): Result<Unit> = Result.success(Unit)
+    override suspend fun isEmailVerified(): Result<Boolean> = Result.success(true)
+
     override suspend fun pendingChanges(): Int = 0
     override suspend fun logout(): Result<Unit> = Result.success(Unit)
 }
