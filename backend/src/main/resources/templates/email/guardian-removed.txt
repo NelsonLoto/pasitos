@@ -1,0 +1,4 @@
+Hola [(${firstName})],
+
+El tutor/a principal te sacó como tutor/a de [(${childName})] en Pasitos. Ya no vas a ver sus
+datos, pero lo que registraste mientras fuiste su tutor/a queda igual.

@@ -69,6 +69,18 @@ class GuardianshipRepository {
         }
     }
 
+    /**
+     * RF-HIJ-08: para ceder el rol de principal a otro tutor, hay que llamar esto ANTES de
+     * [promoteToPrincipal] sobre el tutor nuevo, en la misma transacción. El índice único de
+     * "un solo principal por niño" no es diferible, así que invertir el orden deja un instante
+     * con dos principales y la transacción falla.
+     */
+    fun demoteToSecondary(childId: UUID, accountId: UUID) {
+        Guardianships.update({ (Guardianships.childId eq childId) and (Guardianships.accountId eq accountId) }) {
+            it[role] = GuardianshipRole.SECONDARY
+        }
+    }
+
     /** Filas (vigentes o borradas) de niños en [childIds] con `sync_version` mayor a [cursor]. */
     fun changesSince(childIds: Set<UUID>, cursor: Long, limit: Int): List<Guardianship> =
         Guardianships.selectAll()

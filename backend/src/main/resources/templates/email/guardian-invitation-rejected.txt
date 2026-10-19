@@ -1,0 +1,3 @@
+Hola [(${firstName})],
+
+[(${responderFirstName})] rechazó tu invitación para ser tutor/a de [(${childName})] en Pasitos.

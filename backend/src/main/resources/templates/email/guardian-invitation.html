@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Te invitaron a Pasitos</title>
+</head>
+<body style="font-family: sans-serif; color: #222;">
+    <p>Hola <span th:text="${firstName}">Ana</span>,</p>
+    <p><strong th:text="${inviterFirstName}">Juan</strong> te invitó a ser tutor/a de
+        <strong th:text="${childName}">Sofía</strong> en Pasitos.</p>
+    <p>Abrí la app para aceptar o rechazar la invitación.</p>
+</body>
+</html>

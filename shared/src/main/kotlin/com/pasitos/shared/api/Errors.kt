@@ -47,6 +47,15 @@ enum class ErrorCode(val value: String) {
     /** 409: ya existe una cuenta con ese email. */
     EMAIL_ALREADY_IN_USE("email_already_in_use"),
 
+    /** 409: ese email ya es tutor del niño (RF-HIJ-05, CA4). */
+    ALREADY_GUARDIAN("already_guardian"),
+
+    /** 409: ya hay una invitación vigente para ese email y ese niño. */
+    INVITATION_ALREADY_PENDING("invitation_already_pending"),
+
+    /** 404: la invitación no existe o no es de quien pide. */
+    INVITATION_NOT_FOUND("invitation_not_found"),
+
     /** 422: regla de negocio incumplida; el ID de la regla va en [ErrorResponse.rule]. */
     BUSINESS_RULE("business_rule"),
 
