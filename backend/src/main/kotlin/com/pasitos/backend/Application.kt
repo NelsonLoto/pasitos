@@ -9,7 +9,6 @@ import com.pasitos.backend.config.DatabaseFactory
 import com.pasitos.backend.guardianship.guardianshipRoutes
 import com.pasitos.backend.invitation.invitationRoutes
 import com.pasitos.backend.mail.TemplateEngineFactory
-import com.pasitos.backend.measurement.measurementRoutes
 import com.pasitos.backend.sync.syncRoutes
 import com.pasitos.backend.web.webRoutes
 import io.github.cdimascio.dotenv.dotenv
@@ -60,7 +59,6 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
         get("/health") {
             call.respondText("OK")
         }
-        measurementRoutes(dependencies.measurementService)
         webRoutes(dependencies.authService, dependencies.accountService)
 
         // API nueva (ADR-04). Los endpoints de arriba se mudan acá a medida que la app los adopta.
