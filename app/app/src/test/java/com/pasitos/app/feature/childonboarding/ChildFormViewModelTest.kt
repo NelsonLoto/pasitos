@@ -6,6 +6,8 @@ import com.pasitos.app.data.child.ChildTestData
 import com.pasitos.app.data.child.FakeChildRepository
 import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ChildSex
+import com.pasitos.app.data.vaccination.FakeVaccinationRepository
+import com.pasitos.app.data.vaccination.model.VaccinationCalendar
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +48,7 @@ class ChildFormViewModelTest {
         gestationalWeeks = 38,
     )
     private val repository = FakeChildRepository(listOf(sofia))
+    private val vaccinationRepository = FakeVaccinationRepository()
 
     @Before
     fun setUp() {
@@ -290,11 +293,42 @@ class ChildFormViewModelTest {
         assertTrue(repository.updated.isEmpty())
     }
 
+    @Test
+    fun `RF-HIJ-01 CA2 si por su edad ya le corresponden dosis, ofrece la carga retroactiva`() = runTest {
+        val viewModel = newChild()
+        val saved = lastSaved(viewModel)
+        // Nacida el 02/05/2026: ya le correspondían las dosis del nacimiento y de los 2 meses
+        viewModel.fillRequired()
+
+        viewModel.onSubmit()
+
+        assertEquals(SavedChild(childId = "new-child", offerPreviousDoses = true), saved())
+    }
+
+    @Test
+    fun `RF-HIJ-01 CA2 sin dosis anteriores o sin calendario, va directo a Inicio`() = runTest {
+        val newborn = newChild()
+        val savedNewborn = lastSaved(newborn)
+        newborn.fillRequired()
+        newborn.onBirthDateSelected(LocalDate.of(2026, 10, 19))
+        newborn.onSubmit()
+
+        vaccinationRepository.calendar.value = VaccinationCalendar.EMPTY
+        val withoutCalendar = newChild()
+        val savedWithoutCalendar = lastSaved(withoutCalendar)
+        withoutCalendar.fillRequired()
+        withoutCalendar.onSubmit()
+
+        assertEquals(false, savedNewborn()?.offerPreviousDoses)
+        assertEquals(false, savedWithoutCalendar()?.offerPreviousDoses)
+        assertEquals("Sin calendario, se pide en el momento", 1, vaccinationRepository.refreshCount)
+    }
+
     private fun newChild() =
-        ChildFormViewModel(SavedStateHandle(), repository, networkMonitor, ChildTestData.clock)
+        ChildFormViewModel(SavedStateHandle(), repository, vaccinationRepository, networkMonitor, ChildTestData.clock)
 
     private fun edit() =
-        ChildFormViewModel(SavedStateHandle(mapOf("childId" to ChildTestData.SOFIA)), repository, networkMonitor, ChildTestData.clock)
+        ChildFormViewModel(SavedStateHandle(mapOf("childId" to ChildTestData.SOFIA)), repository, vaccinationRepository, networkMonitor, ChildTestData.clock)
 
     private fun ChildFormViewModel.fillRequired() {
         onFirstNameChange("Lucía")
@@ -303,6 +337,13 @@ class ChildFormViewModelTest {
         onBirthDateSelected(LocalDate.of(2026, 5, 2))
         onGestationalWeeksChange("39")
         onRepresentationDeclaredChange(true)
+    }
+
+    /** El último aviso de que se guardó, con si ofrece la carga retroactiva. */
+    private fun TestScope.lastSaved(viewModel: ChildFormViewModel): () -> SavedChild? {
+        var last: SavedChild? = null
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.saved.collect { last = it } }
+        return { last }
     }
 
     /** Cuántas veces avisó que se guardó. */

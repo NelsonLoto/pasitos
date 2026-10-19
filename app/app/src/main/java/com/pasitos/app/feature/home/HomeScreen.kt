@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Scale
+import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -162,13 +163,27 @@ private fun HomeContent(
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }
-                StatCardEmpty(
-                    label = "VACUNAS",
-                    message = "Sin calendario cargado.",
-                    actionLabel = "Ver calendario →",
-                    onClick = onVaccinesClick,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
+                val vaccinationSummary = state.vaccinationSummary
+                if (vaccinationSummary != null) {
+                    // El mismo resumen que arriba del calendario (RF-VAC-01, CA2)
+                    StatCard(
+                        icon = Icons.Filled.Vaccines,
+                        label = "VACUNAS",
+                        value = vaccinationSummary.text,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(onClick = onVaccinesClick),
+                    )
+                } else {
+                    StatCardEmpty(
+                        label = "VACUNAS",
+                        message = "Sin calendario cargado.",
+                        actionLabel = "Ver calendario →",
+                        onClick = onVaccinesClick,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                }
             }
 
             Column(

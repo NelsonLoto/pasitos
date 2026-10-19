@@ -60,13 +60,13 @@ import java.time.LocalDate
 @Composable
 fun ChildFormScreen(
     onBackClick: () -> Unit,
-    onSaved: () -> Unit,
+    onSaved: (SavedChild) -> Unit,
     viewModel: ChildFormViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.saved.collect { onSaved() }
+        viewModel.saved.collect { onSaved(it) }
     }
 
     ChildFormContent(
