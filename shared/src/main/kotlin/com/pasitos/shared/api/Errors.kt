@@ -56,6 +56,9 @@ enum class ErrorCode(val value: String) {
     /** 404: la invitación no existe o no es de quien pide. */
     INVITATION_NOT_FOUND("invitation_not_found"),
 
+    /** 404: la medición no existe, está borrada o no es de quien pide (RF-CRE-02). */
+    MEASUREMENT_NOT_FOUND("measurement_not_found"),
+
     /** 422: regla de negocio incumplida; el ID de la regla va en [ErrorResponse.rule]. */
     BUSINESS_RULE("business_rule"),
 

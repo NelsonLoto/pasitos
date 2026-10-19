@@ -20,9 +20,9 @@ import com.pasitos.backend.mail.MailConfig
 import com.pasitos.backend.mail.MailService
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.MeasurementRepository
-import com.pasitos.backend.measurement.MeasurementService
 import com.pasitos.backend.sync.ChildSyncEntity
 import com.pasitos.backend.sync.GuardianshipSyncEntity
+import com.pasitos.backend.sync.MeasurementSyncEntity
 import com.pasitos.backend.sync.SyncRegistry
 import com.pasitos.backend.sync.SyncRepository
 import com.pasitos.backend.sync.SyncService
@@ -104,14 +104,16 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         mail = mailService,
         clock = argentinaClock,
     )
-    val measurementService = MeasurementService(MeasurementRepository(), childRepository, argentinaClock)
+    private val measurementRepository = MeasurementRepository()
 
     // I0 no registraba ninguna entidad real todavía (ADR-03); I1 va registrando cada dominio a
     // medida que se adapta a sincronización (ADR-28). "children" y "guardianships" son de
     // solo lectura acá: se escriben por REST, no por /sync/push (12 · API §Regla de escritura).
+    // "measurements" es la primera entidad que sí escribe por /sync/push (I1-B6).
     val syncRegistry = SyncRegistry().apply {
         register(ChildSyncEntity(childRepository))
         register(GuardianshipSyncEntity(guardianshipRepository))
+        register(MeasurementSyncEntity(measurementRepository, childRepository, argentinaClock))
     }
     val syncService = SyncService(syncRegistry, SyncRepository())
 }
