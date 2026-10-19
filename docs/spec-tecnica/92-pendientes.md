@@ -10,7 +10,7 @@
 | P-04 | Crear la cuenta del proveedor de email en región UE. En desarrollo alcanza con Mailpit | Equipo | Antes de I6 | ADR-07 |
 | P-05 | Crear el proyecto de Firebase con una cuenta de Google del equipo (no personal) y registrar `com.pasitos.app` | Equipo | I1 (Google Sign-In) | ADR-06, ADR-13 |
 | P-06 | Cuenta de desarrollador de Google Play | Nelson | Antes del piloto | ADR-13 |
-| P-07 | Crear la organización de Sentry en región UE | Equipo | I0 | ADR-08 |
+| P-07 | Crear la organización de Sentry en región UE. Se postergó de I0 a antes del piloto el 19/10/2026, junto con I0-10: hasta el piloto Sentry casi no aporta (T-09, #63) | Equipo | Antes de I6 | ADR-08 |
 | P-08 | Definir dónde se guarda la clave de subida de la app (gestor de contraseñas compartido) | Equipo | Antes de la primera subida a Play | [30](30-infraestructura.md#publicación-de-la-app) |
 | P-09 | Descargar las tablas expandidas de la OMS (L, M, S por día y por longitud o talla) y convertirlas al formato de importación | Equipo | I2 | [10](10-modulo-compartido.md#datos-de-referencia) |
 | P-10 | Confirmar si el libro de la SAP publica L, M y S o solo percentiles (define si el puntaje Z de 5 a 15 años es exacto o aproximado) | Equipo con pediatras | I2 | PVM-14 |
