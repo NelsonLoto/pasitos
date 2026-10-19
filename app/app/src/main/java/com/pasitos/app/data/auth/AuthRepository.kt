@@ -26,6 +26,15 @@ interface AuthRepository {
         acceptTerms: Boolean,
     ): Result<AuthSession>
 
+    /** RF-CTA-02: reenvía el email de verificación. Responde bien exista o no la cuenta. */
+    suspend fun resendEmailVerification(email: String): Result<Unit>
+
+    /** RF-CTA-05, CA1: responde lo mismo exista o no la cuenta, para no revelar qué emails están registrados. */
+    suspend fun requestPasswordReset(email: String): Result<Unit>
+
+    /** RF-CTA-02, CA2: si la cuenta con sesión iniciada ya verificó su email. */
+    suspend fun isEmailVerified(): Result<Boolean>
+
     /** Cambios guardados en el teléfono que el servidor todavía no recibió. Se pierden al cerrar sesión. */
     suspend fun pendingChanges(): Int
 
