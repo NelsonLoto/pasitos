@@ -40,14 +40,14 @@ import com.pasitos.app.ui.theme.PsType
 @Composable
 fun RegisterScreen(
     onBackClick: () -> Unit,
-    onRegisterSuccess: () -> Unit,
+    onRegisterSuccess: (email: String) -> Unit,
     onLoginClick: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.navigateToHome.collect { onRegisterSuccess() }
+        viewModel.navigateToEmailVerification.collect { email -> onRegisterSuccess(email) }
     }
 
     RegisterContent(

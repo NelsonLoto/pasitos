@@ -22,8 +22,9 @@ class RegisterViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    private val _navigateToHome = Channel<Unit>(Channel.BUFFERED)
-    val navigateToHome = _navigateToHome.receiveAsFlow()
+    /** RF-CTA-02: toda cuenta nueva tiene que verificar su email antes de seguir. */
+    private val _navigateToEmailVerification = Channel<String>(Channel.BUFFERED)
+    val navigateToEmailVerification = _navigateToEmailVerification.receiveAsFlow()
 
     fun onFirstNameChange(value: String) {
         _uiState.update { it.copy(firstName = value, firstNameError = null, generalError = null) }
@@ -37,8 +38,16 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { it.copy(email = value, emailError = null, generalError = null) }
     }
 
+    /** Validación en vivo (RN-CTA-01): el error aparece apenas la contraseña no cumple la regla, sin esperar al envío. */
     fun onPasswordChange(value: String) {
-        _uiState.update { it.copy(password = value, passwordError = null, confirmPasswordError = null, generalError = null) }
+        _uiState.update {
+            it.copy(
+                password = value,
+                passwordError = if (value.isBlank()) null else validatePassword(value),
+                confirmPasswordError = null,
+                generalError = null,
+            )
+        }
     }
 
     fun onConfirmPasswordChange(value: String) {
@@ -76,7 +85,7 @@ class RegisterViewModel @Inject constructor(
             authRepository.register(state.firstName, state.lastName, state.email, state.password, state.acceptTerms)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
-                    _navigateToHome.send(Unit)
+                    _navigateToEmailVerification.send(state.email)
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -92,7 +101,7 @@ class RegisterViewModel @Inject constructor(
         else -> null
     }
 
-    /** RN-CTA-01. La validación en vivo llega con I1-A1. */
+    /** RN-CTA-01. */
     private fun validatePassword(value: String): String? = when {
         value.isBlank() -> "Ingresá una contraseña"
         value.length < 8 || value.none { it.isLetter() } || value.none { it.isDigit() } ->
