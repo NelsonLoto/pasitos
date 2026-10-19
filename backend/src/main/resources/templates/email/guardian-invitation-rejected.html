@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Rechazaron tu invitación</title>
+</head>
+<body style="font-family: sans-serif; color: #222;">
+    <p>Hola <span th:text="${firstName}">Ana</span>,</p>
+    <p><strong th:text="${responderFirstName}">Juan</strong> rechazó tu invitación para ser tutor/a
+        de <strong th:text="${childName}">Sofía</strong> en Pasitos.</p>
+</body>
+</html>
