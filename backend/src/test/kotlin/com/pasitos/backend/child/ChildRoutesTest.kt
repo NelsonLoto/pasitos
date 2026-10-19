@@ -12,6 +12,7 @@ import com.pasitos.shared.api.child.CreateChildRequest
 import com.pasitos.shared.api.child.DeletionPreviewResponse
 import com.pasitos.shared.api.child.PatchChildRequest
 import com.pasitos.shared.api.child.Sex
+import com.pasitos.shared.api.sync.SyncChangesResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -134,6 +135,30 @@ class ChildRoutesTest {
     }
 
     @Test
+    fun `RN-HIJ-11 el avatar es uno de los predefinidos o ninguno`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+
+        val withAvatar = client.postChild(token, createRequest(avatarKey = "rabbit"))
+        val withoutAvatar = client.postChild(token, createRequest(avatarKey = null))
+        val unknown = client.postChild(token, createRequest(avatarKey = "https://example.com/foto.jpg"))
+        val patchUnknown = client.patch("/api/v1/children/${withAvatar.body<ChildResponse>().id}") {
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(patchRequest(avatarKey = "dragon"))
+        }
+
+        assertEquals("rabbit", withAvatar.body<ChildResponse>().avatarKey)
+        assertEquals(null, withoutAvatar.body<ChildResponse>().avatarKey)
+        assertEquals(HttpStatusCode.BadRequest, unknown.status)
+        assertEquals(ErrorCode.INVALID_INPUT, unknown.body<ErrorResponse>().code)
+        assertEquals(HttpStatusCode.BadRequest, patchUnknown.status)
+        assertEquals(
+            listOf("rabbit", "sin avatar"),
+            TestDatabase.column<String>("SELECT coalesce(avatar_key, 'sin avatar') FROM children ORDER BY created_at"),
+        )
+    }
+
+    @Test
     fun `matriz de permisos otro tutor recibe 404 en GET, PATCH y DELETE`() = apiTest { client ->
         val ana = client.register(email = "ana@example.com").tokens.accessToken
         val beto = client.register(email = "beto@example.com").tokens.accessToken
@@ -226,6 +251,36 @@ class ChildRoutesTest {
         assertTrue(body.contains(child.id))
     }
 
+    @Test
+    fun `RF-HIJ-09 los otros teléfonos del único tutor reciben el niño en revokedChildIds`() = apiTest { client ->
+        val token = client.register().tokens.accessToken
+        val child = client.createChild(token)
+        // Otro teléfono de la misma cuenta, que ya sincronizó al niño
+        val cursor = client.syncChanges(token, cursor = 0).cursor
+
+        client.delete("/api/v1/children/${child.id}") { bearerAuth(token) }
+
+        assertEquals(listOf(child.id), client.syncChanges(token, cursor).revokedChildIds)
+    }
+
+    @Test
+    fun `RF-HIJ-09 quien deja de ser tutor recibe el niño en revokedChildIds y los demás tutores no`() = apiTest { client ->
+        val principal = client.register(email = "ana@example.com").tokens.accessToken
+        val child = client.createChild(principal)
+        val secondary = client.register(email = "beto@example.com")
+        seedSecondaryGuardianship(child.id, secondary.account.id)
+        val secondaryCursor = client.syncChanges(secondary.tokens.accessToken, cursor = 0).cursor
+        val principalCursor = client.syncChanges(principal, cursor = 0).cursor
+
+        client.delete("/api/v1/children/${child.id}") { bearerAuth(secondary.tokens.accessToken) }
+
+        assertEquals(listOf(child.id), client.syncChanges(secondary.tokens.accessToken, secondaryCursor).revokedChildIds)
+        assertEquals(emptyList(), client.syncChanges(principal, principalCursor).revokedChildIds)
+    }
+
+    private suspend fun HttpClient.syncChanges(token: String, cursor: Long): SyncChangesResponse =
+        get("/api/v1/sync/changes?cursor=$cursor") { bearerAuth(token) }.body()
+
     private fun seedSecondaryGuardianship(childId: String, accountId: String) {
         TestDatabase.connect().use {
             it.createStatement().execute(
@@ -241,22 +296,25 @@ class ChildRoutesTest {
         birthDate: String = "2026-06-15",
         gestationalWeeks: Int? = 38,
         representationDeclared: Boolean = true,
+        avatarKey: String? = null,
     ) = CreateChildRequest(
         firstName = firstName,
         lastName = lastName,
         sex = sex,
         birthDate = birthDate,
         gestationalWeeks = gestationalWeeks,
+        avatarKey = avatarKey,
         representationDeclared = representationDeclared,
     )
 
-    private fun patchRequest(allergies: String? = null) = PatchChildRequest(
+    private fun patchRequest(allergies: String? = null, avatarKey: String? = null) = PatchChildRequest(
         firstName = "Sofi",
         lastName = "Pérez",
         sex = Sex.FEMALE,
         birthDate = "2026-06-15",
         gestationalWeeks = 38,
         allergies = allergies,
+        avatarKey = avatarKey,
     )
 
     private suspend fun HttpClient.postChild(token: String, request: CreateChildRequest): HttpResponse = post("/api/v1/children") {

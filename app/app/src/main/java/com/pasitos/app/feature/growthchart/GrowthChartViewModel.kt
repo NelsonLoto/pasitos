@@ -36,7 +36,7 @@ class GrowthChartViewModel @Inject constructor(
             .filter { it.childId == childId }
             .sortedBy { it.date }
         GrowthChartUiState(
-            childName = children.firstOrNull { it.id == childId }?.name.orEmpty(),
+            childName = children.firstOrNull { it.id == childId }?.firstName.orEmpty(),
             selectedMetric = metric,
             points = childMeasurements.mapNotNull { it.toChartPoint(metric) },
         )

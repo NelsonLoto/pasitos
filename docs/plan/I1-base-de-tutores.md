@@ -306,11 +306,14 @@ cerrar sesión con la advertencia de cambios pendientes, mostrar la última sinc
 
 | Componente | Tamaño | Depende de | Bloquea | Toca |
 |---|---|---|---|---|
-| app | L | I1-B4, I0-07 | I1-A5, I1-A6, I1-A7 | `app/.../data/child/**`, `app/.../feature/childonboarding/**`, `app/.../feature/childselector/**`, `app/.../feature/childprofile/**` |
+| app | L | I1-B4, I0-07 | I1-A5, I1-A6, I1-A7 | `app/.../data/child/**`, `app/.../feature/childonboarding/**`, `app/.../feature/childselector/**`, `app/.../feature/childprofile/**`, `app/.../core/sync/**` |
 
 **Requerimientos:** RF-HIJ-01 a 04, RF-HIJ-09, RN-HIJ-01 a 05, RN-HIJ-10, RN-HIJ-11
 
 **Qué hacer**
+- El motor que trae los cambios en la app (`core/sync`), con un manejador por entidad que I1-A6 e
+  I1-A7 reutilizan ([14 §6.1](../spec-tecnica/14-sincronizacion.md#61-implementación-en-la-app-i1-a4)).
+  Enviar la bandeja de salida queda para I1-A6.
 - `ChildRepository` lee de Room y se alimenta de la sincronización (`children`, `guardianships`).
 - Alta con los campos nuevos: semanas de gestación (con "No lo sé"), medidas al nacer, avatar
   predefinido, declaración de representación.

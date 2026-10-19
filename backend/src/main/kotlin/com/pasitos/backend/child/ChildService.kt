@@ -11,6 +11,7 @@ import com.pasitos.backend.common.toLocalDateOrNull
 import com.pasitos.backend.common.tx
 import com.pasitos.backend.guardianship.GuardianshipRepository
 import com.pasitos.backend.guardianship.GuardianshipRole
+import com.pasitos.shared.api.child.AVATAR_KEYS
 import com.pasitos.shared.api.child.ChildResponse
 import com.pasitos.shared.api.child.ChildStatus as ChildStatusDto
 import com.pasitos.shared.api.child.CreateChildRequest
@@ -44,6 +45,7 @@ class ChildService(
         val birthWeightKg = request.birthWeightKg?.toStoredValue(3)
         val birthLengthCm = request.birthLengthCm?.toStoredValue(1)
         val birthHeadCircumferenceCm = request.birthHeadCircumferenceCm?.toStoredValue(1)
+        val avatarKey = validateAvatarKey(request.avatarKey)
 
         return tx {
             val child = children.insert(
@@ -56,7 +58,7 @@ class ChildService(
                     birthWeightKg = birthWeightKg,
                     birthLengthCm = birthLengthCm,
                     birthHeadCircumferenceCm = birthHeadCircumferenceCm,
-                    avatarKey = request.avatarKey,
+                    avatarKey = avatarKey,
                 ),
                 createdBy = caller.accountId,
             )
@@ -86,6 +88,7 @@ class ChildService(
         val birthWeightKg = request.birthWeightKg?.toStoredValue(3)
         val birthLengthCm = request.birthLengthCm?.toStoredValue(1)
         val birthHeadCircumferenceCm = request.birthHeadCircumferenceCm?.toStoredValue(1)
+        val avatarKey = validateAvatarKey(request.avatarKey)
 
         return tx {
             accessPolicy.require(caller, childId)
@@ -102,7 +105,7 @@ class ChildService(
                     birthHeadCircumferenceCm = birthHeadCircumferenceCm,
                     allergies = allergies,
                     relevantHistory = relevantHistory,
-                    avatarKey = request.avatarKey,
+                    avatarKey = avatarKey,
                 ),
             )
             requireNotNull(children.findById(childId)).toDto()
@@ -153,6 +156,12 @@ class ChildService(
             throw InvalidInputException("Las semanas de gestación tienen que estar entre 22 y 42")
         }
         return weeks
+    }
+
+    /** RN-HIJ-11: sin avatar (null) o uno de los predefinidos. */
+    private fun validateAvatarKey(key: String?): String? {
+        if (key != null && key !in AVATAR_KEYS) throw InvalidInputException("Ese avatar no existe")
+        return key
     }
 
     private fun Double.toStoredValue(scale: Int): BigDecimal {

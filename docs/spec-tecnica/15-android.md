@@ -104,7 +104,8 @@ necesitar cambios grandes.
   traspaso a otro teléfono (`backup_rules.xml` y `data_extraction_rules.xml`). Sin la clave del
   Keystore de origen, no se podrían descifrar en otro teléfono.
 - Tablas de soporte: `pending_mutations`, `sync_state` (cursor, última sincronización),
-  `reference_data`, catálogos y caché de pacientes del pediatra. Las dos primeras existen desde I0.
+  `active_child` (sección 11), `reference_data`, catálogos y caché de pacientes del pediatra. Las
+  dos primeras existen desde I0.
 - Las fechas del calendario se guardan como texto ISO (`2026-10-14`) y los momentos como
   milisegundos en UTC (`Converters`, ADR-26). "Hoy" sale de `ArgentinaClock.today()` (`core/time`).
 
@@ -196,3 +197,15 @@ La URL se define con `buildConfigField` por variante.
 
 Sentry Android con `sendDefaultPii = false` y un `beforeSend` que elimina breadcrumbs de red con
 cuerpos y cualquier texto ingresado por el usuario (ADR-08).
+
+## 11. Hijos (I1-A4)
+
+| Tema | Implementación |
+|---|---|
+| Datos | `RoomChildRepository` lee `children` y `guardianships` de Room, que llegan por la sincronización (`CHILD` y `GUARDIANSHIP`, [14](14-sincronizacion.md#61-implementación-en-la-app-i1-a4)). El alta, la edición y la eliminación van por REST y guardan la respuesta con `SyncEngine.withLock` |
+| Solo en línea | `NetworkMonitor` (`core/network`) deshabilita el alta, la edición y la eliminación sin red, y la pantalla lo avisa. Consultar el perfil y elegir el hijo activo funcionan sin conexión |
+| Hijo activo | Tabla `active_child` de una sola fila (RF-HIJ-04, CA3): vive en la base local para borrarse con ella al cerrar sesión o al entrar otra cuenta. Si ese hijo ya no está, queda activo el primero de la lista, que va del mayor al menor. El alta deja activo al hijo nuevo (RF-HIJ-01, CA1) |
+| Avatares | Las claves están en `AVATAR_KEYS` (`shared/api/child`) y el backend rechaza otras (RN-HIJ-11). `ChildAvatar` (`core/designsystem`) dibuja cada clave con un ícono de Material sobre un fondo pastel de la paleta; sin avatar, o con una clave que esa versión de la app no conoce, muestra la inicial |
+| Medidas al nacer | Hasta I2 solo hay rangos absolutos fijos (`BirthMeasurementRanges`, PVM-06). Fuera de rango se pide revisar el valor y se guarda si el tutor confirma (RF-HIJ-01, CA4). El control por puntaje Z llega con I2-S2 y los rangos pasan a los datos de referencia con I2-B1 |
+| Formulario | Uno solo para el alta y la edición (`PsRoute.ChildForm`, con `childId` al editar). Al editar la fecha de nacimiento, el sexo o las semanas de gestación pide una segunda confirmación por el recálculo (RF-HIJ-02, CA1) |
+| Eliminación | La app pregunta al servidor si el usuario es el único tutor (`deletion-preview`), porque la lista local podría estar desactualizada. Si lo es, pide escribir el nombre de pila, sin distinguir mayúsculas, tildes ni espacios (RF-HIJ-09, CA1); si no, una confirmación simple (CA2) |

@@ -165,10 +165,50 @@ sequenceDiagram
   se pisan, un registro puede volver a una versión vieja. El motor de sincronización
   (I0-08 e I1) cumple dos reglas:
   - **Una sola a la vez:** usa un `Mutex`; la que llega segunda espera a que termine la primera.
-  - **Nunca pisar con algo más viejo:** al aplicar un cambio del servidor, se ignora si la fila
-    local ya tiene una `sync_version` mayor.
+  - **Nunca pisar con algo más viejo:** las filas del servidor no traen su `sync_version`, así
+    que la regla se cumple con el mismo `Mutex`, que también toman las escrituras por REST
+    (6.1). Cómo se protegen las filas locales con cambios sin enviar lo define la bandeja de
+    salida (I1-A6).
 
 - Cada fila local tiene `syncState`: `SYNCED`, `PENDING` o `ERROR` (RNF-OFF-04).
 - La app guarda la fecha de la última sincronización exitosa y la muestra en Perfil.
 - Al cerrar sesión se borran la base local y su clave (RF-CTA-07). Si hay mutaciones pendientes,
   primero se advierte (RF-CTA-07, CA2).
+
+### 6.1 Implementación en la app (I1-A4)
+
+`SyncEngine` (`core/sync`) trae los cambios; enviar la bandeja de salida llega con I1-A6. Igual
+que en el backend, el motor no conoce ninguna entidad: cada dominio implementa `SyncedEntity` y la
+registra con `@IntoSet` en su módulo de Hilt (`data/x/di/`).
+
+| Función | Qué hace |
+|---|---|
+| `apply(row)` | Guarda una fila del servidor, o borra la copia local si es una lápida. Si la fila no se puede leer, el motor la saltea sin frenar el resto y el log registra solo cuántas fueron |
+| `deleteChild(childId)` | Borra todas las filas locales de un niño |
+
+Cada página se procesa así:
+
+1. `GET /sync/changes` con el cursor guardado.
+2. Se piden las fotos de los `newChildIds` **antes** de guardar nada: si una falla, la página no
+   se guarda y la próxima sincronización vuelve a recibir esos niños. Si una foto responde 404, el
+   niño salió del alcance entre los dos pedidos y se sigue sin él.
+3. En una sola transacción: se borran los `revokedChildIds` en todas las entidades y en
+   `pending_mutations`, se aplican los cambios y las fotos, y se guarda el cursor. Las
+   revocaciones van primero para que un niño que se perdió y se recuperó vuelva con su foto.
+4. Si `hasMore`, se repite con el cursor nuevo. Al terminar se guarda la hora de la
+   sincronización en `sync_state`.
+
+- **Lápida de un niño** (`CHILD` con `deleted`): borra sus datos de todas las entidades
+  (RN-HIJ-08), porque el niño es la unidad del alcance.
+- **Entidades sin manejador:** sus filas se ignoran y el cursor avanza igual. La tarea que agrega
+  un manejador sube la versión de `PasitosDatabase`, y hasta el piloto la base se recrea y se
+  vuelve a bajar todo desde el cursor 0.
+- **Escrituras por REST** (hijos, tutores, vacunas): el repositorio hace el pedido y guarda la
+  respuesta en Room dentro de `SyncEngine.withLock`, el mismo `Mutex` de la sincronización. O la
+  sincronización en curso termina antes, o empieza después y ya baja la versión nueva: nunca pisa
+  la respuesta con una fila vieja.
+- **Eliminar un hijo** borra sus datos locales apenas responde el servidor, con el mismo camino que
+  una revocación (`SyncEngine.forgetChild`). Si la app se cierra antes, lo borra la próxima
+  sincronización por `revokedChildIds`.
+- `SyncWorker` reintenta si no hay red. Si el servidor rechaza el pedido, termina, y la próxima
+  sincronización periódica o el próximo disparador vuelven a probar.
