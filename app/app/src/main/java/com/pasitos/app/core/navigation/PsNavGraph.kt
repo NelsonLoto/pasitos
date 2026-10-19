@@ -5,12 +5,15 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.pasitos.app.feature.advicedetail.AdviceDetailScreen
 import com.pasitos.app.feature.advicelist.AdviceListScreen
 import com.pasitos.app.feature.childonboarding.ChildOnboardingScreen
 import com.pasitos.app.feature.childselector.ChildSelectorScreen
+import com.pasitos.app.feature.emailverification.EmailVerificationScreen
 import com.pasitos.app.feature.growthchart.GrowthChartScreen
 import com.pasitos.app.feature.home.HomeScreen
+import com.pasitos.app.feature.login.ForgotPasswordScreen
 import com.pasitos.app.feature.login.LoginScreen
 import com.pasitos.app.feature.measurement.MeasurementFormScreen
 import com.pasitos.app.feature.measurementhistory.MeasurementHistoryScreen
@@ -36,14 +39,31 @@ fun PsNavGraph(
                     }
                 },
                 onRegisterClick = { navController.navigate(PsRoute.Register) },
+                onForgotPasswordClick = { navController.navigate(PsRoute.ForgotPassword) },
             )
         }
         composable<PsRoute.Register> {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
-                onRegisterSuccess = { navController.navigate(PsRoute.ChildOnboarding) },
+                onRegisterSuccess = { email ->
+                    navController.navigate(PsRoute.EmailVerification(email, afterVerifiedGoHome = false))
+                },
                 onLoginClick = { navController.popBackStack() },
             )
+        }
+        composable<PsRoute.EmailVerification> { backStackEntry ->
+            val route = backStackEntry.toRoute<PsRoute.EmailVerification>()
+            EmailVerificationScreen(
+                onVerified = {
+                    val destination = if (route.afterVerifiedGoHome) PsRoute.Home else PsRoute.ChildOnboarding
+                    navController.navigate(destination) {
+                        popUpTo(PsRoute.Login) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable<PsRoute.ForgotPassword> {
+            ForgotPasswordScreen(onBackClick = { navController.popBackStack() })
         }
         composable<PsRoute.ChildOnboarding> {
             ChildOnboardingScreen(

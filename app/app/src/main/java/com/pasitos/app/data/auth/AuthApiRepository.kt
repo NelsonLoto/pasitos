@@ -11,10 +11,14 @@ import com.pasitos.app.core.sync.local.PendingMutationDao
 import com.pasitos.app.data.auth.model.AuthSession
 import com.pasitos.app.data.auth.model.SessionState
 import com.pasitos.shared.api.auth.AuthResponse
+import com.pasitos.shared.api.auth.EmailVerificationRequest
 import com.pasitos.shared.api.auth.LoginRequest
+import com.pasitos.shared.api.auth.MeResponse
+import com.pasitos.shared.api.auth.PasswordResetRequest
 import com.pasitos.shared.api.auth.RegisterRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -78,6 +82,34 @@ class AuthApiRepository @Inject constructor(
                 )
             }
         }
+
+    override suspend fun resendEmailVerification(email: String): Result<Unit> = runCatching {
+        val response = withConnection {
+            httpClient.post("/api/v1/auth/email-verification") {
+                withoutSession()
+                contentType(ContentType.Application.Json)
+                setBody(EmailVerificationRequest(email.trim()))
+            }
+        }
+        if (response.status != HttpStatusCode.NoContent) throw response.toApiException()
+    }
+
+    override suspend fun requestPasswordReset(email: String): Result<Unit> = runCatching {
+        val response = withConnection {
+            httpClient.post("/api/v1/auth/password-reset") {
+                withoutSession()
+                contentType(ContentType.Application.Json)
+                setBody(PasswordResetRequest(email.trim()))
+            }
+        }
+        if (response.status != HttpStatusCode.NoContent) throw response.toApiException()
+    }
+
+    override suspend fun isEmailVerified(): Result<Boolean> = runCatching {
+        val response = withConnection { httpClient.get("/api/v1/me") }
+        if (response.status != HttpStatusCode.OK) throw response.toApiException()
+        response.body<MeResponse>().account.emailVerified
+    }
 
     override suspend fun pendingChanges(): Int = pendingMutationDao.count()
 

@@ -153,6 +153,44 @@ class AuthApiRepositoryTest {
     }
 
     @Test
+    fun `RF-CTA-02 reenviar la verificación no manda el token de sesión`() = runTest {
+        server.routes["/api/v1/auth/email-verification"] = { respond("", HttpStatusCode.NoContent) }
+
+        val result = repository.resendEmailVerification(" ana@pasitos.test ")
+
+        assertTrue(result.isSuccess)
+        val request = server.requests.single()
+        assertNull(request.headers[HttpHeaders.Authorization])
+        assertTrue(request.bodyText().contains("\"email\":\"ana@pasitos.test\""))
+    }
+
+    @Test
+    fun `RF-CTA-05 CA1 pedir la recuperación no manda el token de sesión`() = runTest {
+        server.routes["/api/v1/auth/password-reset"] = { respond("", HttpStatusCode.NoContent) }
+
+        val result = repository.requestPasswordReset(" ana@pasitos.test ")
+
+        assertTrue(result.isSuccess)
+        val request = server.requests.single()
+        assertNull(request.headers[HttpHeaders.Authorization])
+        assertTrue(request.bodyText().contains("\"email\":\"ana@pasitos.test\""))
+    }
+
+    @Test
+    fun `RF-CTA-02 CA2 isEmailVerified consulta GET me con el token de la sesión`() = runTest {
+        session.start(account(), tokens(1))
+        server.validAccessToken = "access-1"
+        server.routes["/api/v1/me"] = { request ->
+            assertEquals("Bearer access-1", request.headers[HttpHeaders.Authorization])
+            json(Json.encodeToString(com.pasitos.shared.api.auth.MeResponse(account().copy(emailVerified = true), null)))
+        }
+
+        val result = repository.isEmailVerified()
+
+        assertEquals(true, result.getOrThrow())
+    }
+
+    @Test
     fun `RF-CTA-07 CA1 cerrar sesión la revoca, borra tokens y base local, y reinicia la app`() = runTest {
         session.start(account(), tokens(1))
         databaseKeyStore.create()

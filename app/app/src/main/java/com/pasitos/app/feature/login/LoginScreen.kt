@@ -45,12 +45,26 @@ import com.pasitos.app.ui.theme.PsType
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.navigateToHome.collect { onLoginSuccess() }
+    }
+
+    if (state.emailVerificationPending) {
+        EmailVerificationPendingContent(
+            email = state.email,
+            isResending = state.isResendingVerification,
+            isChecking = state.isLoading,
+            message = state.verificationMessage,
+            onResendClick = viewModel::onResendVerificationClick,
+            onAlreadyVerifiedClick = viewModel::onAlreadyVerifiedClick,
+            onBackClick = viewModel::onBackFromVerificationClick,
+        )
+        return
     }
 
     LoginContent(
@@ -61,10 +75,75 @@ fun LoginScreen(
         onSubmit = viewModel::onSubmit,
         onGoogleSignInClick = viewModel::onGoogleSignInClick,
         onRegisterClick = onRegisterClick,
-        // "¿Olvidaste tu contraseña?" no tiene pantalla propia entre las 15 del documento
-        // funcional todavía — el link está en el diseño pero sin destino definido.
-        onForgotPasswordClick = {},
+        onForgotPasswordClick = onForgotPasswordClick,
     )
+}
+
+/** RF-CTA-02, CA1: pantalla "Verificá tu email", con reenviar y "Ya verifiqué". */
+@Composable
+private fun EmailVerificationPendingContent(
+    email: String,
+    isResending: Boolean,
+    isChecking: Boolean,
+    message: String?,
+    onResendClick: () -> Unit,
+    onAlreadyVerifiedClick: () -> Unit,
+    onBackClick: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+            .padding(top = 100.dp, bottom = 24.dp),
+    ) {
+        Text(text = "📧", fontSize = 40.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Verificá tu email", style = PsType.H2, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Te mandamos un email a $email con un link para confirmar tu cuenta. Abrilo y después volvé acá.",
+            style = PsType.BodySmall,
+            color = PsColor.TextSecondary,
+            textAlign = TextAlign.Center,
+        )
+
+        message?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = it, style = PsType.BodySmall, color = PsColor.TextSecondary, textAlign = TextAlign.Center)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        PsButton(
+            text = "Ya verifiqué",
+            onClick = onAlreadyVerifiedClick,
+            variant = PsButtonVariant.Primary,
+            enabled = !isChecking && !isResending,
+            isLoading = isChecking,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        PsButton(
+            text = "Reenviar email",
+            onClick = onResendClick,
+            variant = PsButtonVariant.Secondary,
+            enabled = !isChecking && !isResending,
+            isLoading = isResending,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Volver",
+            style = PsType.BodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable(onClick = onBackClick),
+        )
+    }
 }
 
 @Composable
@@ -209,6 +288,22 @@ private fun LoginScreenPreview() {
             onGoogleSignInClick = {},
             onRegisterClick = {},
             onForgotPasswordClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Verificá tu email")
+@Composable
+private fun EmailVerificationPendingPreview() {
+    PsTheme {
+        EmailVerificationPendingContent(
+            email = "familia@ejemplo.com",
+            isResending = false,
+            isChecking = false,
+            message = null,
+            onResendClick = {},
+            onAlreadyVerifiedClick = {},
+            onBackClick = {},
         )
     }
 }
