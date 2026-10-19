@@ -25,7 +25,7 @@ class AdviceListViewModel @Inject constructor(
     ) { children, activeChildId, tips ->
         val activeChild = children.firstOrNull { it.id == activeChildId }
         AdviceListUiState(
-            childName = activeChild?.name.orEmpty(),
+            childName = activeChild?.firstName.orEmpty(),
             stageLabel = activeChild?.let { "¿Qué se viene? · ${it.ageLabel()}" } ?: "Consejos por edad",
             tips = tips.map { it.toUiModel() },
         )

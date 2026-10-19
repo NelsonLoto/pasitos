@@ -5,9 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.pasitos.app.feature.advicedetail.AdviceDetailScreen
 import com.pasitos.app.feature.advicelist.AdviceListScreen
-import com.pasitos.app.feature.childonboarding.ChildOnboardingScreen
+import com.pasitos.app.feature.childonboarding.ChildFormScreen
+import com.pasitos.app.feature.childprofile.ChildProfileScreen
 import com.pasitos.app.feature.childselector.ChildSelectorScreen
 import com.pasitos.app.feature.growthchart.GrowthChartScreen
 import com.pasitos.app.feature.home.HomeScreen
@@ -41,16 +43,22 @@ fun PsNavGraph(
         composable<PsRoute.Register> {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
-                onRegisterSuccess = { navController.navigate(PsRoute.ChildOnboarding) },
+                onRegisterSuccess = { navController.navigate(PsRoute.ChildForm()) },
                 onLoginClick = { navController.popBackStack() },
             )
         }
-        composable<PsRoute.ChildOnboarding> {
-            ChildOnboardingScreen(
+        composable<PsRoute.ChildForm> { entry ->
+            val isEdit = entry.toRoute<PsRoute.ChildForm>().childId != null
+            ChildFormScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = {
-                    navController.navigate(PsRoute.Home) {
-                        popUpTo(PsRoute.Login) { inclusive = true }
+                onSaved = {
+                    if (isEdit) {
+                        navController.popBackStack()
+                    } else {
+                        // El hijo nuevo queda activo (RF-HIJ-01, CA1): se vuelve a Inicio sin nada atrás
+                        navController.navigate(PsRoute.Home) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                     }
                 },
             )
@@ -58,7 +66,15 @@ fun PsNavGraph(
         composable<PsRoute.ChildSelector> {
             ChildSelectorScreen(
                 onBackClick = { navController.popBackStack() },
-                onAddChildClick = { navController.navigate(PsRoute.ChildOnboarding) },
+                onAddChildClick = { navController.navigate(PsRoute.ChildForm()) },
+                onChildProfileClick = { childId -> navController.navigate(PsRoute.ChildProfile(childId)) },
+            )
+        }
+        composable<PsRoute.ChildProfile> {
+            ChildProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { childId -> navController.navigate(PsRoute.ChildForm(childId)) },
+                onDeleted = { navController.popBackStack() },
             )
         }
         composable<PsRoute.Home> {
@@ -68,7 +84,7 @@ fun PsNavGraph(
                 onMeasurementClick = { childId -> navController.navigate(PsRoute.MeasurementForm(childId)) },
                 onVaccinesClick = { navController.navigate(PsRoute.VaccinationCalendar) },
                 onAdviceClick = { navController.navigate(PsRoute.AdviceList) },
-                onAddChildClick = { navController.navigate(PsRoute.ChildOnboarding) },
+                onAddChildClick = { navController.navigate(PsRoute.ChildForm()) },
             )
         }
         composable<PsRoute.MeasurementForm> {

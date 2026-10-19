@@ -29,7 +29,7 @@ class VaccinationCalendarViewModel @Inject constructor(
     ) { children, activeChildId, appliedDoses ->
         val activeChild = children.firstOrNull { it.id == activeChildId }
         VaccinationCalendarUiState(
-            childName = activeChild?.name.orEmpty(),
+            childName = activeChild?.firstName.orEmpty(),
             doses = vaccinationRepository.schedule.map { dose ->
                 toUiModel(dose, activeChild, activeChildId, appliedDoses)
             },

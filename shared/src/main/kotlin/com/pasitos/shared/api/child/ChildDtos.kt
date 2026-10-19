@@ -8,6 +8,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class Sex { FEMALE, MALE }
 
+/**
+ * Claves de los avatares predefinidos, en el orden en que la app los ofrece (RN-HIJ-11: no se suben
+ * fotos). La app dibuja cada clave y el backend rechaza cualquier otra. Una clave no cambia aunque
+ * cambie su dibujo.
+ */
+val AVATAR_KEYS: List<String> = listOf("rabbit", "bird", "bee", "paw", "flower", "tree", "sun", "star")
+
 /** RN-HIJ-09: un perfil finalizado no admite cargas ni modificaciones (desde I6). */
 @Serializable
 enum class ChildStatus { ACTIVE, FINALIZED }
@@ -24,6 +31,7 @@ data class CreateChildRequest(
     val birthWeightKg: Double? = null,
     val birthLengthCm: Double? = null,
     val birthHeadCircumferenceCm: Double? = null,
+    /** Una de [AVATAR_KEYS], o nulo sin avatar. */
     val avatarKey: String? = null,
     /** "Soy madre, padre o representante legal de este niño o niña" (RF-HIJ-01). */
     val representationDeclared: Boolean,
@@ -43,6 +51,7 @@ data class PatchChildRequest(
     /** Máximo 280 caracteres (RN-HIJ-10). */
     val allergies: String? = null,
     val relevantHistory: String? = null,
+    /** Una de [AVATAR_KEYS], o nulo sin avatar. */
     val avatarKey: String? = null,
 )
 
