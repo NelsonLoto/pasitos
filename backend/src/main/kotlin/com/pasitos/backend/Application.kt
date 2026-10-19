@@ -11,6 +11,7 @@ import com.pasitos.backend.invitation.invitationRoutes
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.measurementRoutes
 import com.pasitos.backend.sync.syncRoutes
+import com.pasitos.backend.vaccination.vaccinationRoutes
 import com.pasitos.backend.web.webRoutes
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.serialization.kotlinx.json.json
@@ -70,6 +71,7 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
             childRoutes(dependencies.childService)
             guardianshipRoutes(dependencies.guardianshipService, dependencies.invitationService)
             invitationRoutes(dependencies.invitationService)
+            vaccinationRoutes(dependencies.vaccinationService)
             syncRoutes(dependencies.syncService)
         }
     }
