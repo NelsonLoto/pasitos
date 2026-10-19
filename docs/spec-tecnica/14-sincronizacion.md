@@ -104,7 +104,12 @@ conocen ninguna entidad en particular. Cada dominio sincronizable se enchufa imp
 
 Un `SyncRegistry` (mapa nombre → `SyncEntity`) es la única pieza que sabe qué entidades existen.
 En I0 el registro de producción está vacío (`Dependencies.kt`); I1 registra `children`,
-`measurements`, etc. a medida que cada dominio se adapta (ADR-28).
+`measurements`, etc. a medida que cada dominio se adapta (ADR-28). Hasta ahora:
+- `CHILD` y `GUARDIANSHIP` (I1-B4);
+- `APPLIED_DOSE` y `OTHER_VACCINE` (I1-B7), con la cuenta y el perfil del autor
+  (`authorAccountId`, `authorRole`), porque la app muestra "Familia" o el nombre del profesional.
+
+Todas son de solo lectura: se escriben por REST y `apply` las rechaza.
 
 **Paginación de 500 filas entre varias entidades:** a cada entidad registrada se le pide
 `limit + 1` filas (para detectar si ella sola ya supera el límite), se fusiona todo por

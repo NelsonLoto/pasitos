@@ -58,7 +58,7 @@ relevamiento. Si no se objetan, quedan confirmadas al aprobarse el PR de esta ve
 | SUP-21 | Del examen físico y de las pesquisas, el tutor ve el resultado pero no la descripción ni las notas del pediatra. | RN-CON-02 |
 | SUP-22 | Al terminar el piloto se eliminan todas las cuentas y datos de ese entorno. | RNF-PRI-08 |
 | SUP-23 | El país donde se alojan los datos se decide en el diseño técnico, cumpliendo el art. 12 de la Ley 25.326. | RNF-PRI-09 |
-| SUP-24 | Valores propuestos menores: alergias y antecedentes hasta 280 caracteres; indicaciones y observaciones hasta 2.000; bloqueo de la app tras 5 minutos en segundo plano; sesión del panel de 30 minutos; registro de accesos conservado 2 años; 20 búsquedas por matrícula por hora. | RN-HIJ-10, RN-CON-06, RF-CTA-08, RF-ADM-01, RNF-SEG-06, RNF-SEG-07 |
+| SUP-24 | Valores propuestos menores: alergias y antecedentes hasta 280 caracteres; indicaciones y observaciones hasta 2.000; en vacunas, lote hasta 40 caracteres, vacunatorio o lugar hasta 120, nombre de otra vacuna hasta 120 y su nota hasta 280; bloqueo de la app tras 5 minutos en segundo plano; sesión del panel de 30 minutos; registro de accesos conservado 2 años; 20 búsquedas por matrícula por hora. | RN-HIJ-10, RN-CON-06, RF-VAC-02, RF-VAC-05, RF-CTA-08, RF-ADM-01, RNF-SEG-06, RNF-SEG-07 |
 
 ## Otros pendientes
 

@@ -20,12 +20,19 @@ import com.pasitos.backend.mail.MailConfig
 import com.pasitos.backend.mail.MailService
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.MeasurementRepository
+import com.pasitos.backend.sync.AppliedDoseSyncEntity
 import com.pasitos.backend.sync.ChildSyncEntity
 import com.pasitos.backend.sync.GuardianshipSyncEntity
 import com.pasitos.backend.sync.MeasurementSyncEntity
+import com.pasitos.backend.sync.OtherVaccineSyncEntity
 import com.pasitos.backend.sync.SyncRegistry
 import com.pasitos.backend.sync.SyncRepository
 import com.pasitos.backend.sync.SyncService
+import com.pasitos.backend.vaccination.AppliedDoseRepository
+import com.pasitos.backend.vaccination.CalendarRepository
+import com.pasitos.backend.vaccination.OtherVaccineRepository
+import com.pasitos.backend.vaccination.VaccinationDataPurger
+import com.pasitos.backend.vaccination.VaccinationService
 import io.ktor.server.config.ApplicationConfig
 import java.time.Clock
 
@@ -56,6 +63,10 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
     private val declarationVersion = config.property("declaration.version").getString()
     private val accessPolicy = AccessPolicy(guardianshipRepository)
 
+    private val calendarRepository = CalendarRepository()
+    private val appliedDoseRepository = AppliedDoseRepository()
+    private val otherVaccineRepository = OtherVaccineRepository()
+
     val authService = AuthService(
         accounts = accountRepository,
         sessions = sessionRepository,
@@ -82,6 +93,9 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         accessPolicy = accessPolicy,
         clock = argentinaClock,
         declarationVersion = declarationVersion,
+        // Lo que cada dominio borra al eliminarse el perfil de un niño (RN-HIJ-08). Cada dominio
+        // nuevo con datos del niño agrega aquí el suyo.
+        purgers = listOf(VaccinationDataPurger(appliedDoseRepository, otherVaccineRepository)),
     )
     private val invitationRepository = InvitationRepository()
     val invitationService = InvitationService(
@@ -105,15 +119,25 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         clock = argentinaClock,
     )
     private val measurementRepository = MeasurementRepository()
+    val vaccinationService = VaccinationService(
+        calendar = calendarRepository,
+        appliedDoses = appliedDoseRepository,
+        otherVaccines = otherVaccineRepository,
+        children = childRepository,
+        accessPolicy = accessPolicy,
+        clock = argentinaClock,
+    )
 
     // I0 no registraba ninguna entidad real todavía (ADR-03); I1 va registrando cada dominio a
-    // medida que se adapta a sincronización (ADR-28). "children" y "guardianships" son de
-    // solo lectura acá: se escriben por REST, no por /sync/push (12 · API §Regla de escritura).
+    // medida que se adapta a sincronización (ADR-28). "children", "guardianships" y las vacunas
+    // son de solo lectura acá: se escriben por REST, no por /sync/push (12 · API §Regla de escritura).
     // "measurements" es la primera entidad que sí escribe por /sync/push (I1-B6).
     val syncRegistry = SyncRegistry().apply {
         register(ChildSyncEntity(childRepository))
         register(GuardianshipSyncEntity(guardianshipRepository))
         register(MeasurementSyncEntity(measurementRepository, childRepository, argentinaClock))
+        register(AppliedDoseSyncEntity(appliedDoseRepository))
+        register(OtherVaccineSyncEntity(otherVaccineRepository))
     }
     val syncService = SyncService(syncRegistry, SyncRepository())
 }
