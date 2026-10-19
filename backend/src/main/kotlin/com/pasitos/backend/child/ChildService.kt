@@ -31,6 +31,8 @@ class ChildService(
     private val accessPolicy: AccessPolicy,
     private val clock: ArgentinaClock,
     private val declarationVersion: String,
+    /** Lo que cada dominio borra al eliminarse el perfil del niño (RN-HIJ-08). */
+    private val purgers: List<ChildDataPurger>,
 ) {
 
     suspend fun create(caller: Caller, request: CreateChildRequest): ChildResponse {
@@ -120,8 +122,8 @@ class ChildService(
     /**
      * RF-HIJ-09: si [caller] es el único tutor, se elimina el perfil entero (RN-HIJ-08); si hay
      * otros tutores, [caller] deja de serlo y, si era principal, el rol pasa al tutor secundario
-     * más antiguo (CA2). Las mediciones y demás datos sincronizables de cada dominio se limpian
-     * en su propia tarea (I1-B6 en adelante): esta tarea solo toca `children` y `guardianships`.
+     * más antiguo (CA2). Los datos de cada dominio (vacunas desde I1-B7) los borra su
+     * [ChildDataPurger], en la misma transacción.
      */
     suspend fun delete(caller: Caller, childId: UUID) = tx {
         val access = accessPolicy.require(caller, childId)
@@ -130,6 +132,7 @@ class ChildService(
         if (guardians.size == 1) {
             children.softDelete(childId, now)
             guardianships.softDelete(childId, caller.accountId, now)
+            purgers.forEach { it.purge(childId) }
         } else {
             guardianships.softDelete(childId, caller.accountId, now)
             if (access == ChildAccess.PRINCIPAL_GUARDIAN) {

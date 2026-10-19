@@ -77,19 +77,34 @@ END $$ LANGUAGE plpgsql;
 |---|---|---|
 | `vaccines` | `name`, `prevents`, `source` | |
 | `calendar_versions` | `effective_from`, `status` | |
-| `calendar_doses` | `version_id`, `vaccine_id`, `dose_code`, `dose_label`, `age_months`, `lead_days`, `tolerance_days`, `born_from`, `born_until`, `sort_order` | Único (`version_id`, `dose_code`, `born_from`); los rangos de nacimiento de un mismo `dose_code` no se superponen (RN-VAC-10, lo verifica `calendarProblems()` al cargar) |
+| `calendar_doses` | `version_id`, `vaccine_id`, `dose_code`, `dose_label`, `age_months`, `lead_days`, `tolerance_days`, `born_from`, `born_until`, `sort_order` | Único (`version_id`, `dose_code`, `born_from`) con `NULLS NOT DISTINCT`, así también chocan dos filas sin `born_from`; `born_from` ≤ `born_until`; los rangos de nacimiento de un mismo `dose_code` no se superponen (RN-VAC-10, lo verifica `calendarProblems()` al cargar) |
 | `campaigns` | `vaccine_id`, `name`, `age_from_days`, `age_to_days`, `starts_on`, `ends_on` | |
-| `applied_doses` ⟳ | `child_id`, `dose_code` o `campaign_id`, `applied_on` (nulo en carga retroactiva), `lot`, `place`, `consultation_id`, autoría | Único parcial (`child_id`, `dose_code`) sin borrar (RN-VAC-09) |
-| `other_vaccines` ⟳ | `child_id`, `name`, `applied_on`, `lot`, `note`, autoría | |
+| `applied_doses` ⟳ | `child_id`, `dose_code` o `campaign_id`, `applied_on` (nulo en carga retroactiva), `lot`, `place`, `consultation_id`, autoría | Único parcial (`child_id`, `dose_code`) sin borrar (RN-VAC-09); `lot` hasta 40 caracteres y `place` hasta 120 (SUP-24); índice por `child_id` |
+| `other_vaccines` ⟳ | `child_id`, `name`, `applied_on`, `lot`, `note`, autoría | `name` hasta 120 caracteres, `lot` hasta 40 y `note` hasta 280 (SUP-24) |
 
 `applied_doses` y `other_vaccines` son sincronizables para lectura, pero se escriben por REST
 porque requieren conexión (RNF-OFF-06).
 
 La línea base (I0-04) creó `calendar_doses` con `age_days` y la unicidad (`version_id`,
-`dose_code`). I1-B7 la lleva a lo de la tabla de arriba con una **migración nueva**: renombra
-`age_days` a `age_months` (la edad del calendario oficial está en meses), agrega `born_from` y
-`born_until` y cambia la unicidad. La tabla todavía está vacía, así que no hay datos que convertir
+`dose_code`). I1-B7 la llevó a lo de la tabla de arriba con
+`V2026_10_19_1800__vaccination_calendar_by_months.sql`:
+- renombra `age_days` a `age_months`, porque la edad del calendario oficial está en meses;
+- agrega `born_from` y `born_until`;
+- cambia la unicidad;
+- suma los límites de texto.
+
+La tabla estaba vacía, así que no hubo datos que convertir
 ([10](10-modulo-compartido.md#3-estados-de-vacunas)).
+
+`vaccines.source` es la fuente que la app muestra en el detalle de una vacuna (RF-VAC-07). Cada
+vacuna está una sola vez: una versión nueva del calendario actualiza su "qué previene" y su
+fuente.
+
+**Al eliminarse el perfil de un niño** (RN-HIJ-08), sus `applied_doses` y `other_vaccines` se
+borran físicamente en la misma transacción, por medio de un `ChildDataPurger`
+([11](11-backend.md#4-autorización)). Es una excepción al borrado lógico de las tablas
+sincronizables: el niño ya no está en el alcance de nadie, y los teléfonos de quien lo eliminó
+borran todo por `revokedChildIds`, así que nadie necesita las lápidas.
 
 ### Consultas
 

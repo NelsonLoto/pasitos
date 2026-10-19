@@ -79,6 +79,50 @@ Las mediciones se crean, editan y eliminan por `/sync/push` (RF-CRE-01, RF-CRE-0
 | `POST /children/{id}/applied-doses/retroactive` | Carga retroactiva (lista de `doseCode`) | RF-VAC-04 |
 | `POST /children/{id}/other-vaccines` · `PATCH`/`DELETE /other-vaccines/{id}` | Otras vacunas | RF-VAC-05 |
 
+Implementación de I1-B7 (#46), con los contratos en `shared/api/vaccination`:
+
+- **Calendario.**
+  - `GET /vaccination-calendar` devuelve la versión vigente con todas sus filas (`doses`, también
+    las de otras cohortes, RN-VAC-10), con qué previene y la fuente de cada vacuna (RF-VAC-07).
+    La versión vigente es la `PUBLISHED` más reciente con `effectiveFrom` igual o anterior a hoy,
+    en hora argentina.
+  - `formerDoses` trae código, vacuna y nombre de las dosis de versiones anteriores que la vigente
+    ya no tiene, para mostrar las aplicadas (RN-VAC-03).
+  - Sin calendario publicado, `effectiveFrom` es nulo y las listas vienen vacías.
+  - Las campañas se suman en I6 como un campo nuevo; la app ignora los campos que no conoce.
+  - `ETag` con el hash SHA-256 de la respuesta: con el mismo valor en `If-None-Match`, responde
+    `304` sin cuerpo.
+  - `Cache-Control: private, no-cache`: el teléfono lo guarda pero vuelve a preguntar, y ningún
+    intermediario lo guarda.
+- **Dosis aplicadas.**
+  - Solo se registran dosis del calendario vigente que corresponden al niño por su fecha de
+    nacimiento. Una dosis aplicada antes de su fecha indicada se acepta.
+  - La fecha no puede ser anterior al nacimiento ni posterior a hoy (RN-VAC-02, `400`).
+  - Una dosis ya registrada responde `422` con la regla `RN-VAC-09`. La app ya tiene el registro
+    existente por la sincronización y lo abre para verlo o editarlo (RF-VAC-02, CA4). Si dos
+    tutores la registran a la vez, el índice único rechaza la segunda con la misma respuesta.
+  - `PATCH` reemplaza fecha, lote y lugar. La dosis no cambia: para cambiarla se elimina y se
+    registra otra. La fecha solo puede quedar vacía en una dosis de carga retroactiva que todavía
+    no la tiene.
+  - Los identificadores los genera el servidor, como en `/children`: no son escrituras de
+    `/sync/push` (ADR-28).
+- **Carga retroactiva.**
+  - Recibe hasta 50 códigos. Todos tienen que ser del calendario vigente del niño, con fecha
+    indicada anterior a hoy. Si uno no corresponde, se rechaza todo el pedido (`400`), en una
+    transacción.
+  - Las dosis ya aplicadas se saltean, así reenviar el pedido da el mismo resultado.
+  - Responde `201` con las dosis creadas, sin fecha (RN-VAC-04).
+- **Autoría y permisos.**
+  - Registra cualquier tutor del niño.
+  - Edita o elimina solo el autor; si no lo es, `403`.
+  - Sin acceso al niño, `404`: `child_not_found` en las rutas del niño, `applied_dose_not_found`
+    y `other_vaccine_not_found` en las de cada registro.
+  - `authorRole` es `GUARDIAN` hasta que los pediatras tengan acceso (I3).
+- **Límites de texto (SUP-24).**
+  - Lote 40, lugar 120, nombre de otra vacuna 120 y nota 280.
+  - Se recortan los espacios de los extremos y un texto vacío se guarda como nulo.
+  - Las constantes están en `shared/api/vaccination`, para que la app use las mismas.
+
 ### Pediatras, vínculos y pacientes
 
 | Método y ruta | Descripción | RF |

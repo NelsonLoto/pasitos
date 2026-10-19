@@ -83,3 +83,13 @@ application {
 tasks.test {
     useJUnitPlatform()
 }
+
+// Carga los datos de referencia de backend/seed/ en la base local (13 · Base de datos, Datos
+// iniciales). Usa la misma configuración que el backend: backend/.env o las variables de entorno.
+tasks.register<JavaExec>("seedReferenceData") {
+    group = "application"
+    description = "Carga el Calendario Nacional de backend/seed/ en la base configurada"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.pasitos.backend.seed.SeedReferenceDataKt")
+    workingDir = projectDir
+}
