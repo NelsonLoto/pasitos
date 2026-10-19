@@ -95,9 +95,10 @@ private fun PreviousDosesContent(
 
 @Composable
 private fun QuestionStep(state: PreviousDosesUiState, onAnswer: (Boolean) -> Unit, onSkip: () -> Unit) {
+    // Cuenta solo las que faltan registrar: desde Vacunas puede haber otras ya cargadas
     Text(
-        text = "Según el Calendario Nacional, a su edad ${state.childName} ya debería tener ${state.total} " +
-            (if (state.total == 1) "dosis aplicada." else "dosis aplicadas."),
+        text = "Según el Calendario Nacional, a su edad ${state.childName} ya debería tener " +
+            (if (state.total == 1) "1 dosis que todavía no está registrada." else "${state.total} dosis que todavía no están registradas."),
         style = PsType.BodyRegular,
     )
     Spacer(modifier = Modifier.height(20.dp))
