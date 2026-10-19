@@ -51,11 +51,10 @@ y los PRs encadenados) y en cada push a `develop`:
   archivos anteriores a I0-07 que todavía usan `LocalDate.now()` están en
   `.github/scripts/local-date-now-allowlist.txt`, una lista que solo puede achicarse: el script
   también falla si un archivo de la lista ya no lo usa, así la tarea de I1 que lo reescribe tiene
-  que sacarlo. Quedan ocho:
-  - con lógica: `PsDatePickerField.kt`, `Child.kt`, `DoseStatusResolver.kt`,
-    `MeasurementFormUiState.kt` y `VaccineDetailViewModel.kt`;
-  - vistas previas de diseño, que conviene pasar a fechas fijas: `GrowthChartScreen.kt`,
-    `HomeScreen.kt` y `VaccineDetailScreen.kt`.
+  que sacarlo. Quedan cinco:
+  - con lógica: `PsDatePickerField.kt`, `Child.kt` y `MeasurementFormUiState.kt`;
+  - vistas previas de diseño, que conviene pasar a fechas fijas: `GrowthChartScreen.kt` y
+    `HomeScreen.kt`.
 - Los scripts de shell y los `gradlew` se guardan con fin de línea LF (`.gitattributes`), para
   que funcionen igual en Linux y en Git Bash de Windows.
 - Duración estimada: entre 8 y 12 minutos cuando corren todos los jobs. El plan gratuito incluye

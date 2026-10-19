@@ -62,8 +62,8 @@ como otras vacunas (RF-VAC-05). D-68. ⚕️ PVM-15
 **Criterios de aceptación**
 - **CA1.** Dado un niño recién dado de alta que por su edad ya debería tener dosis aplicadas,
   cuando el tutor ve la pregunta "¿Tiene las vacunas al día para su edad?" y responde que sí,
-  entonces todas las dosis con edad indicada anterior a hoy quedan como aplicadas con "fecha no
-  registrada" (RN-VAC-04).
+  entonces ve todas las dosis con edad indicada anterior a hoy marcadas y, al confirmar, quedan
+  como aplicadas con "fecha no registrada" (RN-VAC-04). Puede desmarcar alguna antes de confirmar.
 - **CA2.** Dada la misma pregunta, cuando el tutor responde "No" o "No sé", entonces ve la lista
   de esas dosis y puede marcar una por una las que se aplicaron.
 - **CA3.** Dada una dosis aplicada sin fecha, cuando el tutor la abre más tarde, entonces puede

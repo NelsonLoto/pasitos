@@ -217,3 +217,10 @@ Cada página se procesa así:
   sincronización por `revokedChildIds`.
 - `SyncWorker` reintenta si no hay red. Si el servidor rechaza el pedido, termina, y la próxima
   sincronización periódica o el próximo disparador vuelven a probar.
+- **Datos de referencia (I1-A7).** Lo que no es de ningún niño, como el Calendario Nacional (y
+  desde I2 las tablas de crecimiento), implementa `ReferenceData` y se registra con `@IntoSet`,
+  igual que un `SyncedEntity`. Después de cada sincronización, `SyncWorker` los refresca con
+  `ReferenceDataRefresher`, cada uno con su `ETag`. Uno que falla no hace fallar la
+  sincronización ni a los demás: se vuelve a pedir en el próximo disparador. Una pantalla que
+  necesita el calendario antes, por ejemplo la carga retroactiva justo después de registrarse,
+  lo pide en el momento.

@@ -104,7 +104,7 @@ necesitar cambios grandes.
   traspaso a otro teléfono (`backup_rules.xml` y `data_extraction_rules.xml`). Sin la clave del
   Keystore de origen, no se podrían descifrar en otro teléfono.
 - Tablas de soporte: `pending_mutations`, `sync_state` (cursor, última sincronización),
-  `active_child` (sección 11), `reference_data`, catálogos y caché de pacientes del pediatra. Las
+  `active_child` (sección 11), `vaccination_calendar` (sección 12), `reference_data`, catálogos y caché de pacientes del pediatra. Las
   dos primeras existen desde I0.
 - Las fechas del calendario se guardan como texto ISO (`2026-10-14`) y los momentos como
   milisegundos en UTC (`Converters`, ADR-26). "Hoy" sale de `ArgentinaClock.today()` (`core/time`).
@@ -209,3 +209,17 @@ cuerpos y cualquier texto ingresado por el usuario (ADR-08).
 | Medidas al nacer | Hasta I2 solo hay rangos absolutos fijos (`BirthMeasurementRanges`, PVM-06). Fuera de rango se pide revisar el valor y se guarda si el tutor confirma (RF-HIJ-01, CA4). El control por puntaje Z llega con I2-S2 y los rangos pasan a los datos de referencia con I2-B1 |
 | Formulario | Uno solo para el alta y la edición (`PsRoute.ChildForm`, con `childId` al editar). Al editar la fecha de nacimiento, el sexo o las semanas de gestación pide una segunda confirmación por el recálculo (RF-HIJ-02, CA1) |
 | Eliminación | La app pregunta al servidor si el usuario es el único tutor (`deletion-preview`), porque la lista local podría estar desactualizada. Si lo es, pide escribir el nombre de pila, sin distinguir mayúsculas, tildes ni espacios (RF-HIJ-09, CA1); si no, una confirmación simple (CA2) |
+
+## 12. Vacunas (I1-A7)
+
+| Tema | Implementación |
+|---|---|
+| Datos | `RoomVaccinationRepository` lee `applied_doses` y `other_vaccines` de Room, que llegan por la sincronización (`APPLIED_DOSE` y `OTHER_VACCINE`). Registrar, editar, eliminar y la carga retroactiva van por REST y guardan la respuesta con `SyncEngine.withLock`. Si al registrar una dosis el servidor responde `RN-VAC-09` (otro tutor la acaba de registrar), el repositorio pide sincronizar y la pantalla muestra el registro que llega |
+| Calendario | Tabla `vaccination_calendar` de una sola fila con la respuesta de `GET /vaccination-calendar` en JSON y su `ETag`. Se reemplaza entera: la app siempre usa el calendario completo. Lo refresca `VaccinationCalendarReferenceData` después de cada sincronización ([14](14-sincronizacion.md#61-implementación-en-la-app-i1-a4)); una respuesta que no se puede leer no reemplaza la copia guardada |
+| Estados | `doseStatuses()` de `shared/vaccination`, con `ArgentinaClock.today()`. Reemplaza al `DoseStatusResolver` anterior, que usaba la zona horaria del teléfono y solo tenía tres estados |
+| Calendario en pantalla | Las dosis agrupadas por edad indicada ("Al nacer", "2 meses"…, "5 años"), cada una con su estado con ícono y texto (`DoseStatusBadge`, sobre `PsBadge` con el tono `Neutral` para "Programada"). Arriba, el resumen ("2 atrasadas · 1 próxima"), que también se muestra en Inicio, y un filtro por estado. Al final, las dosis de calendarios anteriores (si hay) y las otras vacunas, que solo se ven sin filtro porque no tienen estado (RF-VAC-01) |
+| Detalle de una dosis | Una sola pantalla (`PsRoute.VaccineDetail(childId, doseCode)`): sin aplicar muestra el formulario; aplicada muestra sus datos y, si es propia, "Editar" y "Eliminar" con confirmación. La de otro tutor se ve en modo lectura con "La registró la familia" (40 · Modelo conceptual, Autoría). Una atrasada muestra el mensaje de RN-VAC-05. El selector de fecha va del nacimiento a hoy |
+| Carga retroactiva | `PsRoute.PreviousDoses`: la pregunta "¿Tiene las vacunas al día para su edad?" y después la lista de dosis con fecha indicada anterior a hoy sin registrar, toda marcada con "Sí" y sin marcar con "No" o "No sé"; se guarda con un solo pedido (RF-VAC-04). Después del alta de un hijo, si le corresponden dosis, la app va a esta pantalla en lugar de a Inicio, con "Ahora no" (RF-HIJ-01, CA2). Si el calendario todavía no se bajó, se pide en ese momento |
+| Otras vacunas | `PsRoute.OtherVaccine(childId, vaccineId?)`: una pantalla para crear, editar y eliminar, con sugerencias que completan el nombre ("Antigripal", "Fiebre amarilla", "Fiebre hemorrágica argentina") (RF-VAC-05) |
+| Solo en línea | `NetworkMonitor` deshabilita registrar, editar y eliminar sin red, y la pantalla lo avisa. El calendario y los detalles se ven sin conexión |
+| Límites de texto | Los de SUP-24, con las constantes de `shared/api/vaccination`: la app valida antes de enviar y muestra un contador |

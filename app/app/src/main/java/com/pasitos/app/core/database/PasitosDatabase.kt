@@ -11,6 +11,10 @@ import com.pasitos.app.data.child.local.ActiveChildEntity
 import com.pasitos.app.data.child.local.ChildDao
 import com.pasitos.app.data.child.local.ChildEntity
 import com.pasitos.app.data.child.local.GuardianshipEntity
+import com.pasitos.app.data.vaccination.local.AppliedDoseEntity
+import com.pasitos.app.data.vaccination.local.OtherVaccineEntity
+import com.pasitos.app.data.vaccination.local.VaccinationCalendarEntity
+import com.pasitos.app.data.vaccination.local.VaccinationDao
 
 /**
  * Base local de la app (ADR-02). Cada dominio registra acá sus entidades y su DAO, y sube la
@@ -25,8 +29,11 @@ import com.pasitos.app.data.child.local.GuardianshipEntity
         ChildEntity::class,
         GuardianshipEntity::class,
         ActiveChildEntity::class,
+        VaccinationCalendarEntity::class,
+        AppliedDoseEntity::class,
+        OtherVaccineEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -37,6 +44,8 @@ abstract class PasitosDatabase : RoomDatabase() {
     abstract fun syncStateDao(): SyncStateDao
 
     abstract fun childDao(): ChildDao
+
+    abstract fun vaccinationDao(): VaccinationDao
 
     companion object {
         const val NAME = "pasitos.db"
