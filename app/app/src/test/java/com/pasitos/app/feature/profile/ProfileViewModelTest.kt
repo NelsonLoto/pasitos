@@ -101,6 +101,9 @@ class ProfileViewModelTest {
         override suspend fun loginWithGoogle() = Result.success(session)
         override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean) =
             Result.success(session)
+        override suspend fun resendEmailVerification(email: String) = Result.success(Unit)
+        override suspend fun requestPasswordReset(email: String) = Result.success(Unit)
+        override suspend fun isEmailVerified() = Result.success(true)
 
         override suspend fun pendingChanges(): Int = pending
 
