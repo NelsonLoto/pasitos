@@ -6,6 +6,8 @@ import com.pasitos.backend.auth.configureAuthentication
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
+import com.pasitos.backend.guardianship.guardianshipRoutes
+import com.pasitos.backend.invitation.invitationRoutes
 import com.pasitos.backend.mail.TemplateEngineFactory
 import com.pasitos.backend.measurement.measurementRoutes
 import com.pasitos.backend.sync.syncRoutes
@@ -66,6 +68,8 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
             authRoutes(dependencies.authService)
             accountRoutes(dependencies.accountService)
             childRoutes(dependencies.childService)
+            guardianshipRoutes(dependencies.guardianshipService, dependencies.invitationService)
+            invitationRoutes(dependencies.invitationService)
             syncRoutes(dependencies.syncService)
         }
     }

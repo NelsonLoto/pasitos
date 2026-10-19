@@ -1,0 +1,5 @@
+Hola [(${firstName})],
+
+[# th:if="${becamePrincipal}"]Ahora sos el/la tutor/a principal de [(${childName})] en Pasitos.[/]
+[# th:unless="${becamePrincipal}"]Dejaste de ser el/la tutor/a principal de [(${childName})] en
+Pasitos. Seguís siendo su tutor/a.[/]
