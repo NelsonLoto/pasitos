@@ -56,6 +56,9 @@ enum class ErrorCode(val value: String) {
     /** 404: la invitación no existe o no es de quien pide. */
     INVITATION_NOT_FOUND("invitation_not_found"),
 
+    /** 404: la medición no existe, está borrada o no es de quien pide (RF-CRE-02). */
+    MEASUREMENT_NOT_FOUND("measurement_not_found"),
+
     /** 404: la dosis aplicada no existe o quien pide no tiene acceso a su niño. */
     APPLIED_DOSE_NOT_FOUND("applied_dose_not_found"),
 
