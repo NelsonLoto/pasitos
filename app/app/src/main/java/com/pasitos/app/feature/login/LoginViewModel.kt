@@ -3,8 +3,10 @@ package com.pasitos.app.feature.login
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pasitos.app.core.network.ApiException
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.auth.model.SessionState
+import com.pasitos.shared.api.ErrorCode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -61,11 +63,47 @@ class LoginViewModel @Inject constructor(
                     _navigateToHome.send(Unit)
                 }
                 .onFailure { error ->
-                    _uiState.update {
-                        it.copy(isLoading = false, generalError = error.message ?: "No pudimos iniciar sesión. Probá de nuevo.")
+                    if (error is ApiException && error.code == ErrorCode.EMAIL_NOT_VERIFIED) {
+                        // No es un error de credenciales: el usuario tiene que verificar su email
+                        // antes de poder entrar (RF-CTA-02, CA1). Si ya estaba en esta pantalla
+                        // (vino de "Ya verifiqué"), el aviso es que sigue sin estar verificado.
+                        val wasAlreadyPending = state.emailVerificationPending
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                emailVerificationPending = true,
+                                verificationMessage = if (wasAlreadyPending) "Todavía no verificaste tu email. Revisá tu bandeja de entrada." else null,
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(isLoading = false, generalError = error.message ?: "No pudimos iniciar sesión. Probá de nuevo.")
+                        }
                     }
                 }
         }
+    }
+
+    /** RF-CTA-02, CA1: reenvía el email de verificación a la cuenta que intentó iniciar sesión. */
+    fun onResendVerificationClick() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isResendingVerification = true, verificationMessage = null) }
+            val email = _uiState.value.email
+            authRepository.resendEmailVerification(email)
+            _uiState.update {
+                it.copy(isResendingVerification = false, verificationMessage = "Te volvimos a mandar el email de verificación.")
+            }
+        }
+    }
+
+    /** "Ya verifiqué": reintenta el login con las mismas credenciales, sin pedirlas de nuevo. */
+    fun onAlreadyVerifiedClick() {
+        _uiState.update { it.copy(verificationMessage = null) }
+        onSubmit()
+    }
+
+    fun onBackFromVerificationClick() {
+        _uiState.update { it.copy(emailVerificationPending = false, verificationMessage = null) }
     }
 
     fun onGoogleSignInClick() {
