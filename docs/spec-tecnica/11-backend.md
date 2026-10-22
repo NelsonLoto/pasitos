@@ -143,7 +143,7 @@ Todo por variables de entorno, con `.env` solo en desarrollo local (nunca versio
 |---|---|---|
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | — | Conexión a PostgreSQL |
 | `JWT_SECRET` | 64 caracteres aleatorios | Firma de tokens de acceso |
-| `GOOGLE_CLIENT_ID` | — | `aud` esperado en tokens de Google |
+| `GOOGLE_CLIENT_ID` | ID del cliente web ([30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)) | `aud` esperado en tokens de Google |
 | `FIREBASE_CREDENTIALS_FILE` | ruta a JSON | Envío FCM |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | — | Emails |
 | `PUBLIC_BASE_URL` | `https://api.pasitos.ar` | Links en emails |
