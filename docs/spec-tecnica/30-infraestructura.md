@@ -112,12 +112,46 @@ misma imagen y se reemplazan Caddy y la base por los servicios equivalentes del 
 | Piloto | Prueba cerrada de Google Play con los participantes del piloto (ADR-13) |
 | Identificador | `com.pasitos.app` desde I0, antes de la primera subida (ADR-12) |
 
+## Proyecto de Google Cloud y Firebase
+
+Creado el 22/10/2026 (T-08, #62). Lo usa el inicio de sesión con Google (I1-B2 e I1-A2), y desde
+I6 también FCM y App Distribution (I6-B2 e I6-A1).
+
+| Elemento | Definición |
+|---|---|
+| Cuenta dueña | `cervantes.app.pasitos@gmail.com`: una cuenta de Google del equipo, no personal, con verificación en dos pasos. Su contraseña y sus códigos de respaldo están en el gestor de contraseñas de Nelson. Los cuatro integrantes también son propietarios del proyecto con su propia cuenta: el trabajo diario no pasa por la cuenta del equipo, y el proyecto no queda sin dueño si se pierde su acceso |
+| Proyecto | **Pasitos**, ID `pasitos-751c4`. Plan Spark de Firebase, gratuito y sin cuenta de facturación. Google Analytics desactivado |
+| Pantalla de consentimiento | En Google Auth Platform, con público externo y en estado **"Prueba"**: solo pueden iniciar sesión con Google las cuentas cargadas como usuarios de prueba, hasta 100. No pide permisos adicionales: `openid`, `email` y `profile` vienen incluidos y no requieren que Google revise la app. Antes del piloto se le agregan los links a la política de privacidad y a la página principal (T-14) y se publica. No lleva logo, porque obligaría a esa revisión |
+| Cliente web | `627692337820-lao7eidv67os92k7mpqhrgoudh2belf9.apps.googleusercontent.com` (`Pasitos web (aud del backend)`). Es el `aud` que valida el backend (`GOOGLE_CLIENT_ID`, [11](11-backend.md#7-configuración)) y el `serverClientId` de `GetGoogleIdOption` en la app ([15](15-android.md#4-sesión)). No es secreto: queda dentro del APK. No tiene orígenes ni URIs de redireccionamiento. Su secreto de cliente no se usa, y no se guarda ni se versiona |
+| Clientes Android | Uno por cada certificado que firma la app, con el paquete `com.pasitos.app` y el SHA-1 del certificado. Sin ese registro, Credential Manager no ofrece cuentas de Google. Ver abajo |
+| App Android en Firebase | `com.pasitos.app` ("Pasitos Android"), registrada sin SHA-1: los certificados se registran en los clientes Android, y cargarlos también en Firebase crearía clientes duplicados. El `google-services.json` todavía no se descargó: se agrega en I6, con FCM, y ahí se decide si va al repositorio |
+
+### Certificados de debug
+
+Cada computadora tiene su propia clave de debug (`~/.android/debug.keystore`). Cada integrante la
+registra en un cliente Android propio, llamado `Pasitos Android (debug <usuario>)`. No se versiona
+una clave de debug compartida, porque ninguna clave va al repositorio.
+
+- La lista vigente de clientes está en la consola, en Google Auth Platform → Clientes. El SHA-1 de
+  cada integrante queda en el comentario de cierre de su issue.
+- Registrados: `Pasitos Android (debug Nelson)`. Pendientes: #116 (SELazo), #117
+  (juanpabloguingold) y #118 (caromanzuelli). Esos issues tienen el paso a paso completo.
+- El SHA-1 se obtiene de cualquiera de estas dos formas:
+  - Desde `app/`, con `./gradlew signingReport`, en el bloque `Variant: debug`. Necesita
+    `JAVA_HOME`, por ejemplo apuntando al JDK de Android Studio.
+  - Con `keytool -J-Duser.language=en -list -v -keystore ~/.android/debug.keystore -alias
+    androiddebugkey -storepass android`. `android` es la contraseña predeterminada de todas las
+    claves de debug. Con el sistema en español, sin `-J-Duser.language=en`, `keytool` falla con
+    `MissingFormatArgumentException` al mostrar el certificado.
+- El SHA-1 es una huella pública y se puede compartir. La clave `debug.keystore`, no.
+- En I6 se suma el cliente del certificado de firma de Google Play (P-06, P-08).
+
 ## Servicios externos y costos estimados
 
 | Servicio | Plan | Costo |
 |---|---|---|
 | GitHub (repositorio, Actions, Projects, Container Registry) | Gratuito | USD 0 |
-| Firebase (FCM, App Distribution) | Gratuito | USD 0 |
+| Google Cloud y Firebase (inicio con Google, FCM, App Distribution) | Gratuito (plan Spark de Firebase) | USD 0 |
 | Sentry (región UE) | Gratuito | USD 0 |
 | Email transaccional (región UE) | Gratuito, alrededor de 300 emails por día | USD 0 |
 | Google Play | Pago único | USD 25 |

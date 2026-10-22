@@ -8,7 +8,7 @@
 | P-02 | ✅ **Resuelto 14/10/2026.** Repositorio renombrado a `NelsonLoto/pasitos`. GitHub redirige las URLs viejas; igual, cada integrante actualiza su remoto: `git remote set-url origin https://github.com/NelsonLoto/pasitos.git` | — | — | ADR-12 |
 | P-03 | Registrar un dominio (por ejemplo, `.ar` en NIC Argentina o `.app`), necesario para HTTPS del piloto y para el email con SPF y DKIM | Equipo | Antes de I6 | ADR-07 |
 | P-04 | Crear la cuenta del proveedor de email en región UE. En desarrollo alcanza con Mailpit | Equipo | Antes de I6 | ADR-07 |
-| P-05 | Crear el proyecto de Firebase con una cuenta de Google del equipo (no personal) y registrar `com.pasitos.app` | Equipo | I1 (Google Sign-In) | ADR-06, ADR-13 |
+| P-05 | ✅ **Resuelto 22/10/2026.** Proyecto `pasitos-751c4`, creado con una cuenta de Google del equipo, con `com.pasitos.app` registrada ([30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)). Cada integrante registra el SHA-1 de su clave de debug (#116, #117 y #118) | — | — | ADR-06, ADR-13 |
 | P-06 | Cuenta de desarrollador de Google Play | Nelson | Antes del piloto | ADR-13 |
 | P-07 | Crear la organización de Sentry en región UE. Se postergó de I0 a antes del piloto el 19/10/2026, junto con I0-10: hasta el piloto Sentry casi no aporta (T-09, #63) | Equipo | Antes de I6 | ADR-08 |
 | P-08 | Definir dónde se guarda la clave de subida de la app (gestor de contraseñas compartido) | Equipo | Antes de la primera subida a Play | [30](30-infraestructura.md#publicación-de-la-app) |

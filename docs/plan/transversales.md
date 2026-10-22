@@ -16,7 +16,7 @@ tomarlas, y también se cargan como issues (etiqueta `datos`, `infra` o `docs`).
 | T-05 | Catálogo inicial de hitos del desarrollo con edad esperada, edad límite y fuente | 03/01/2027 | I4-A3, I5-B1 | RN-EVT-05, PVM-08 |
 | T-06 | Contenido inicial de consejos por tramo de edad y categoría, con fuentes | 17/01/2027 | I5-B3 | RN-CJO-01, PVM-11 |
 | T-07 | Textos del estado para tutores, en lenguaje no diagnóstico | 29/11/2026 (provisorios); validados antes del piloto | I2-A2 | RN-CRE-10, PVM-10 |
-| T-08 | Crear el proyecto de Google Cloud y Firebase con una cuenta del equipo (no personal) y registrar `com.pasitos.app` | 01/11/2026 | I1-B2, I1-A2, I6-B2 | P-05 |
+| T-08 | ✅ **Hecha (22/10/2026).** Crear el proyecto de Google Cloud y Firebase con una cuenta del equipo (no personal) y registrar `com.pasitos.app`: proyecto `pasitos-751c4` ([30](../spec-tecnica/30-infraestructura.md#proyecto-de-google-cloud-y-firebase)). Cada integrante registra el SHA-1 de su clave de debug (#116, #117 y #118) | 01/11/2026 | I1-B2, I1-A2, I6-B2 | P-05 |
 | T-09 | Crear la organización de Sentry en región UE. Se postergó el 19/10/2026 (antes vencía el 25/10/2026): hasta el piloto Sentry casi no aporta | 31/01/2027 | I0-10 (en I6) | P-07 |
 | T-10 | Crear la cuenta del proveedor de email en región UE. En desarrollo alcanza con Mailpit | 31/01/2027 | I6-I1 | P-04 |
 | T-11 | Registrar el dominio y configurar SPF, DKIM y DMARC | 31/01/2027 | I6-I1 | P-03 |
