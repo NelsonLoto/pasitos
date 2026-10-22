@@ -117,7 +117,7 @@ necesitar cambios grandes.
 | Renovación automática | El plugin `Auth` de Ktor Client agrega el token de acceso a cada pedido. Si el servidor responde 401, renueva los tokens y repite el pedido sin que el usuario lo note. Detalles abajo |
 | Estado de sesión | `SessionRepository` expone `StateFlow<SessionState>`: restaurando, iniciada (con la cuenta) o cerrada (vencida o no). Al abrir la app se restaura desde DataStore, también sin conexión (RF-CTA-06, CA1 y CA3). Mientras se restaura no se muestra ni el login ni el inicio |
 | Sincronización | Solo con sesión iniciada: al iniciarla o restaurarla se programa la periódica y se pide una inmediata; al vencer o cerrarla se cancelan |
-| Google | Credential Manager con `GetGoogleIdOption` (client ID web del proyecto). El ID token se envía a `POST /auth/google`. Hasta I1-A2 el botón avisa que todavía no está disponible |
+| Google | Credential Manager con `GetGoogleIdOption` (ID del cliente web del proyecto, [30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)). El ID token se envía a `POST /auth/google`. Hasta I1-A2 el botón avisa que todavía no está disponible |
 | Bloqueo con huella o PIN | `BiometricPrompt` con `BIOMETRIC_STRONG` o credencial del dispositivo. Se pide al abrir la app y al volver después de 5 minutos en segundo plano. Con el bloqueo activo se marca la ventana con `FLAG_SECURE` (RNF-SEG-08) |
 
 **Renovación de tokens.** El backend revoca la sesión completa si recibe dos veces el mismo token
