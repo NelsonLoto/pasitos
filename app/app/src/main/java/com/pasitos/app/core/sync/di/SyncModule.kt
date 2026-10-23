@@ -2,7 +2,9 @@ package com.pasitos.app.core.sync.di
 
 import com.pasitos.app.core.database.PasitosDatabase
 import com.pasitos.app.core.sync.ReferenceData
+import com.pasitos.app.core.sync.RoomSyncStatus
 import com.pasitos.app.core.sync.SyncScheduler
+import com.pasitos.app.core.sync.SyncStatus
 import com.pasitos.app.core.sync.SyncedEntity
 import com.pasitos.app.core.sync.WorkManagerSyncScheduler
 import com.pasitos.app.core.sync.local.PendingMutationDao
@@ -20,6 +22,9 @@ abstract class SyncModule {
 
     @Binds
     abstract fun bindSyncScheduler(impl: WorkManagerSyncScheduler): SyncScheduler
+
+    @Binds
+    abstract fun bindSyncStatus(impl: RoomSyncStatus): SyncStatus
 
     /** Cada dominio agrega su [SyncedEntity] con `@IntoSet`; declararlo acá permite que el conjunto empiece vacío. */
     @Multibinds

@@ -11,7 +11,6 @@ import com.pasitos.backend.common.UnauthorizedException
 import com.pasitos.backend.common.tx
 import com.pasitos.backend.mail.MailService
 import com.pasitos.shared.api.ErrorCode
-import com.pasitos.shared.api.auth.AccountDto
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.EmailVerificationRequest
 import com.pasitos.shared.api.auth.GoogleAuthRequest
@@ -311,16 +310,6 @@ class AuthService(
             throw InvalidInputException("La contraseña tiene que tener al menos 8 caracteres, con letras y números")
         }
     }
-
-    private fun Account.toDto() = AccountDto(
-        id = id.toString(),
-        email = email,
-        firstName = firstName,
-        lastName = lastName,
-        emailVerified = emailVerifiedAt != null,
-        isGuardian = isGuardian,
-        lastMode = lastMode,
-    )
 
     private fun Duration.toMinutesRoundedUp(): Long = (toSeconds() + 59) / 60
 

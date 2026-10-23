@@ -92,6 +92,12 @@ data class AccountDto(
     val isGuardian: Boolean,
     /** Último modo usado, para abrir la app en él (RF-CTA-04, CA1). Nulo si nunca eligió. */
     val lastMode: AccountMode?,
+    /**
+     * Falso en las cuentas creadas con Google y en las que perdieron la contraseña por RN-CTA-04:
+     * ven "Crear una contraseña" en lugar de "Cambiar contraseña" (RF-CTA-11, CA4). Verdadero por
+     * defecto, para leer las sesiones guardadas antes de que existiera.
+     */
+    val hasPassword: Boolean = true,
 )
 
 /** `GET /me` (RF-CTA-09). */
