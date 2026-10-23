@@ -254,3 +254,14 @@ cuerpos y cualquier texto ingresado por el usuario (ADR-08).
 | Otras vacunas | `PsRoute.OtherVaccine(childId, vaccineId?)`: una pantalla para crear, editar y eliminar, con sugerencias que completan el nombre ("Antigripal", "Fiebre amarilla", "Fiebre hemorrágica argentina") (RF-VAC-05) |
 | Solo en línea | `NetworkMonitor` deshabilita registrar, editar y eliminar sin red, y la pantalla lo avisa. El calendario y los detalles se ven sin conexión |
 | Límites de texto | Los de SUP-24, con las constantes de `shared/api/vaccination`: la app valida antes de enviar y muestra un contador |
+
+## 13. Perfil y cuenta (I1-A3)
+
+| Tema | Implementación |
+|---|---|
+| Datos | `AccountRepository` (`AccountApiRepository`) contra `/api/v1/me`. `GET /me` y `PATCH /me` guardan la cuenta que devuelve el servidor con `SessionRepository.updateAccount`, sin tocar los tokens. Todo necesita conexión (RF-CTA-11) |
+| Datos actualizados y términos nuevos | `PasitosApplication` llama a `GET /me` al iniciar o restaurar la sesión, y cada vez que la app pasa a primer plano con sesión. Así se actualizan nombre, email (por ejemplo, después de confirmar un cambio desde la web) y `hasPassword`. Sin conexión falla y se ignora |
+| Términos nuevos (RN-CTA-02) | Si `GET /me` informa `pendingTermsVersion`, `PsApp` muestra `TermsUpdateScreen` en lugar de toda la app, sin "atrás": la casilla sin marcar (`PsTermsCheckbox`), "Aceptar y continuar" (`POST /me/consents`) y "Cerrar sesión", con el aviso de cambios sin sincronizar. Su ViewModel vive mientras viva la Activity, así que vuelve a su estado inicial al aceptar y al dejar de mostrarse: si los términos cambian otra vez con la app abierta, la casilla no aparece marcada |
+| Pantallas | En el perfil, la sección "Datos de la cuenta" abre una pantalla por dato (`PsRoute.EditName`, `ChangeEmail` y `ChangePassword`), porque cada cambio funciona distinto. Comparten `AccountFormScaffold`, que avisa si no hay conexión. Nombre y apellido se guardan al instante. El email pide la contraseña actual y muestra "Revisá tu email": no cambia hasta que se confirma (RF-CTA-11, CA1). La contraseña pide la actual y la nueva dos veces, con las reglas de RN-CTA-01, y cierra las demás sesiones (CA2) |
+| Cuentas sin contraseña (RF-CTA-11, CA4) | `AccountDto.hasPassword` es falso en las cuentas creadas con Google y en las que perdieron la contraseña por RN-CTA-04. La fila dice "Crear una contraseña": la pantalla manda el email de recuperación a la cuenta propia (`POST /auth/password-reset`, sin token) y avisa que, al crearla, se cierran todas las sesiones, también esta. "Email" pide crear la contraseña primero |
+| Última sincronización (RNF-OFF-04) | `SyncStatus` (`RoomSyncStatus`) expone `lastSyncedAt` de `sync_state` y la cantidad de cambios pendientes. El perfil muestra "Última sincronización: hoy a las 14:32 · 2 cambios sin sincronizar", en hora argentina ("hoy", "ayer" o la fecha) |

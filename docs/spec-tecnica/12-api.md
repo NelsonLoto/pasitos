@@ -34,7 +34,7 @@ Así hay **un solo camino** para cada escritura sincronizable, sea con o sin con
 | `POST /auth/logout` | Revoca la sesión actual | RF-CTA-07 |
 | `POST /auth/email-verification` | Reenvía el email de verificación | RF-CTA-02 |
 | `POST /auth/password-reset` | Pide el email de recuperación (respuesta idéntica exista o no la cuenta) | RF-CTA-05 |
-| `GET /me` | Cuenta, perfiles, estado del perfil de pediatra y términos pendientes | RF-CTA-09 |
+| `GET /me` | Cuenta (con `hasPassword`), perfiles, estado del perfil de pediatra y términos pendientes. La app lo consulta cada vez que pasa a primer plano | RF-CTA-09, RN-CTA-02 |
 | `PATCH /me` | Nombre y apellido | RF-CTA-11 |
 | `POST /me/email-change` | Pide cambio de email (requiere verificación del nuevo) | RF-CTA-11 |
 | `POST /me/password` | Cambia la contraseña (pide la actual) | RF-CTA-11 |

@@ -46,6 +46,21 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun `RF-CTA-11 los datos nuevos de la cuenta reemplazan a los guardados sin tocar los tokens`() = runTest {
+        val repository = openApp()
+        repository.start(account(), tokens(1))
+
+        repository.updateAccount(account(firstName = "Anita").copy(hasPassword = false))
+        repository.updateAccount(account(id = "otra-cuenta", firstName = "Otra"))
+
+        val reopened = openApp()
+        val session = (reopened.state.value as SessionState.SignedIn).session
+        assertEquals("Anita", session.firstName)
+        assertEquals(false, session.hasPassword)
+        assertEquals(tokens(1), reopened.current())
+    }
+
+    @Test
     fun `RF-CTA-06 CA1 al volver a abrir la app la sesión sigue iniciada`() = runTest {
         openApp().start(account(), tokens(1))
 

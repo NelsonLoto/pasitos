@@ -157,13 +157,17 @@ El usuario puede modificar su nombre, apellido, email y contraseña.
   contraseña actual y la nueva debe cumplir RN-CTA-01.
 - **CA3.** Dado un pediatra validado que cambia su nombre o apellido, cuando lo confirma,
   entonces su perfil profesional pasa a *pendiente de revalidación* según RN-PED-02.
+- **CA4.** Dada una cuenta sin contraseña (creada con Google, o que la perdió por RN-CTA-04),
+  cuando el usuario quiere tener una, entonces recibe el email de recuperación de contraseña
+  (RF-CTA-05) para crearla, y al crearla se cierran todas sus sesiones. Hasta tenerla no puede
+  cambiar su email, porque el cambio se confirma con la contraseña actual.
 
 ## Reglas de negocio
 
 | ID | Regla |
 |---|---|
 | RN-CTA-01 | La contraseña tiene al menos 8 caracteres y contiene al menos una letra y un número. |
-| RN-CTA-02 | La aceptación de términos y política de privacidad es expresa (casilla no premarcada). Se registran la versión de los términos aceptados y la fecha y hora de aceptación. Si los términos cambian, el usuario debe aceptar la nueva versión al ingresar. |
+| RN-CTA-02 | La aceptación de términos y política de privacidad es expresa (casilla no premarcada). Se registran la versión de los términos aceptados y la fecha y hora de aceptación. Si los términos cambian, el usuario debe aceptar la nueva versión al ingresar: la app lo consulta cada vez que se abre con conexión, aunque la sesión siga iniciada, y hasta aceptarla solo puede cerrar sesión. |
 | RN-CTA-03 | El email es único en el sistema y se usa como identificador de la cuenta. |
 | RN-CTA-04 | Si un inicio con Google trae un email que coincide con una cuenta existente con email verificado, se ingresa a esa cuenta y queda asociado el inicio con Google. Si la cuenta existente no verificó su email, el inicio con Google lo verifica: se ingresa a esa cuenta, se borra su contraseña y se cierran sus sesiones abiertas, porque pudo crearla otra persona antes que el dueño del email (D-69). Si el email ya está asociado a otra cuenta de Google, no se ingresa. |
 | RN-CTA-05 | Tras 5 intentos fallidos consecutivos de inicio con contraseña, la cuenta se bloquea 15 minutos para ese método. El inicio con Google y la recuperación de contraseña siguen disponibles. Valores propuestos (SUP-05). |
