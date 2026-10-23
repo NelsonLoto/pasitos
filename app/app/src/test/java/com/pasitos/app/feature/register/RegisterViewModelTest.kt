@@ -87,6 +87,7 @@ class RegisterViewModelTest {
     private fun fillValidForm() {
         viewModel.onFirstNameChange("Ana")
         viewModel.onLastNameChange("Pérez")
+        viewModel.onDniChange("12345678")
         viewModel.onEmailChange("ana@pasitos.test")
         viewModel.onPasswordChange("secreta123")
         viewModel.onConfirmPasswordChange("secreta123")
@@ -113,7 +114,7 @@ class RegisterViewModelTest {
 
         override suspend fun loginWithGoogle(idToken: String, acceptTerms: Boolean, firstName: String?, lastName: String?) = Result.failure<AuthSession>(Exception("No disponible"))
 
-        override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean): Result<AuthSession> {
+        override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean, accountType: String, dni: String?, licenseNumber: String?, specialty: String?): Result<AuthSession> {
             registerCalls++
             return Result.success(AuthSession("1", email, firstName, lastName))
         }

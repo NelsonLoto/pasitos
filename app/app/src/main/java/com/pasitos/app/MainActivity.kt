@@ -27,6 +27,7 @@ import com.pasitos.app.core.navigation.currentTabItemOrNull
 import com.pasitos.app.core.navigation.toRoute
 import com.pasitos.app.data.auth.model.SessionState
 import com.pasitos.app.feature.profile.terms.TermsUpdateScreen
+import com.pasitos.shared.api.auth.AccountMode
 import com.pasitos.app.ui.theme.PsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -62,8 +63,13 @@ private fun PsApp(appViewModel: AppViewModel = hiltViewModel()) {
     }
 
     val navController = rememberNavController()
+    val isProfessional = (sessionState as? SessionState.SignedIn)?.session?.let {
+        it.lastMode == AccountMode.PEDIATRICIAN || !it.isGuardian
+    } == true
     val startDestination: PsRoute = remember {
-        if (sessionState is SessionState.SignedIn) PsRoute.Home else PsRoute.Login
+        if (sessionState is SessionState.SignedIn) {
+            if (isProfessional) PsRoute.ProfessionalHome else PsRoute.Home
+        } else PsRoute.Login
     }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val currentTab = currentTabItemOrNull(currentDestination)
@@ -88,8 +94,9 @@ private fun PsApp(appViewModel: AppViewModel = hiltViewModel()) {
                 PsTabBar(
                     selected = currentTab,
                     onSelect = { tab ->
-                        navController.navigate(tab.toRoute(activeChildId)) { launchSingleTop = true }
+                        navController.navigate(tab.toRoute(activeChildId, isProfessional)) { launchSingleTop = true }
                     },
+                    isProfessional = isProfessional,
                 )
             }
         },
@@ -97,6 +104,8 @@ private fun PsApp(appViewModel: AppViewModel = hiltViewModel()) {
         PsNavGraph(
             navController = navController,
             startDestination = startDestination,
+            isProfessional = isProfessional,
+            firstName = (sessionState as? SessionState.SignedIn)?.session?.firstName.orEmpty(),
             modifier = Modifier.padding(innerPadding),
         )
     }
