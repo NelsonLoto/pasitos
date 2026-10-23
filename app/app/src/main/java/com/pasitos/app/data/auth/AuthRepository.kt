@@ -24,6 +24,10 @@ interface AuthRepository {
         email: String,
         password: String,
         acceptTerms: Boolean,
+        accountType: String = "FAMILY",
+        dni: String? = null,
+        licenseNumber: String? = null,
+        specialty: String? = null,
     ): Result<AuthSession>
 
     /** RF-CTA-02: reenvía el email de verificación. Responde bien exista o no la cuenta. */

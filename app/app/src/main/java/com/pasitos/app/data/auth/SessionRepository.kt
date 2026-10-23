@@ -135,6 +135,8 @@ class SessionRepository @Inject constructor(
         email = email,
         firstName = firstName,
         lastName = lastName,
+        isGuardian = isGuardian,
+        lastMode = lastMode,
     )
 
     private companion object {

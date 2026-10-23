@@ -16,6 +16,7 @@ import com.pasitos.shared.api.auth.LoginRequest
 import com.pasitos.shared.api.auth.MeResponse
 import com.pasitos.shared.api.auth.PasswordResetRequest
 import com.pasitos.shared.api.auth.RegisterRequest
+import com.pasitos.shared.api.auth.RegistrationAccountType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -66,6 +67,10 @@ class AuthApiRepository @Inject constructor(
         email: String,
         password: String,
         acceptTerms: Boolean,
+        accountType: String,
+        dni: String?,
+        licenseNumber: String?,
+        specialty: String?,
     ): Result<AuthSession> =
         signIn(HttpStatusCode.Created) {
             httpClient.post("/api/v1/auth/register") {
@@ -78,6 +83,10 @@ class AuthApiRepository @Inject constructor(
                         email = email.trim(),
                         password = password,
                         acceptTerms = acceptTerms,
+                        accountType = RegistrationAccountType.valueOf(accountType),
+                        dni = dni?.trim()?.takeIf(String::isNotEmpty),
+                        licenseNumber = licenseNumber?.trim()?.takeIf(String::isNotEmpty),
+                        specialty = specialty?.trim()?.takeIf(String::isNotEmpty),
                     )
                 )
             }

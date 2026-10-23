@@ -21,6 +21,9 @@ data class Account(
     val lastMode: AccountMode? = null,
     val failedLoginCount: Int = 0,
     val lockedUntil: Instant? = null,
+    val dni: String? = null,
+    val licenseNumber: String? = null,
+    val specialty: String? = null,
 )
 
 /** Todas las funciones asumen una transacción abierta. */
@@ -39,17 +42,31 @@ class AccountRepository {
     fun findById(id: UUID): Account? =
         Accounts.selectAll().where { Accounts.id eq id }.firstOrNull()?.toAccount()
 
-    fun insertGuardian(email: String, firstName: String, lastName: String, passwordHash: String): Account {
+    fun insertGuardian(
+        email: String,
+        firstName: String,
+        lastName: String,
+        passwordHash: String,
+        dni: String? = null,
+        licenseNumber: String? = null,
+        specialty: String? = null,
+        isGuardian: Boolean = true,
+        lastMode: AccountMode? = null,
+    ): Account {
         val id = UUID.randomUUID()
         Accounts.insert {
             it[Accounts.id] = id
             it[Accounts.email] = email
             it[Accounts.firstName] = firstName
             it[Accounts.lastName] = lastName
+            it[Accounts.dni] = dni
+            it[Accounts.licenseNumber] = licenseNumber
+            it[Accounts.specialty] = specialty
             it[Accounts.passwordHash] = passwordHash
-            it[isGuardian] = true
+            it[Accounts.isGuardian] = isGuardian
+            it[Accounts.lastMode] = lastMode?.name
         }
-        return Account(id, email, firstName, lastName, passwordHash)
+        return Account(id, email, firstName, lastName, passwordHash, isGuardian = isGuardian, lastMode = lastMode, dni = dni, licenseNumber = licenseNumber, specialty = specialty)
     }
 
     /** Guarda los intentos fallidos consecutivos y, si corresponde, hasta cuándo queda bloqueada. */
@@ -94,6 +111,9 @@ class AccountRepository {
         email = this[Accounts.email],
         firstName = this[Accounts.firstName],
         lastName = this[Accounts.lastName],
+        dni = this[Accounts.dni],
+        licenseNumber = this[Accounts.licenseNumber],
+        specialty = this[Accounts.specialty],
         passwordHash = this[Accounts.passwordHash],
         emailVerifiedAt = this[Accounts.emailVerifiedAt]?.toInstant(),
         isGuardian = this[Accounts.isGuardian],

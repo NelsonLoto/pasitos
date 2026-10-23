@@ -47,4 +47,11 @@ abstract class ChildDao {
         upsertGuardianship(principal)
         saveActiveChild(ActiveChildEntity(childId = child.id))
     }
+
+    /** Alta profesional: guarda al paciente local y lo selecciona, sin crear tutoría. */
+    @Transaction
+    open suspend fun insertPatient(child: ChildEntity) {
+        upsert(child)
+        saveActiveChild(ActiveChildEntity(childId = child.id))
+    }
 }
