@@ -45,8 +45,9 @@ considera verificado.
 
 **Criterios de aceptación**
 - **CA1.** Dado que es la primera vez que esa cuenta de Google ingresa, cuando el visitante
-  completa el inicio con Google, entonces debe aceptar los términos (RN-CTA-02) e indicar si es
-  tutor, pediatra o ambos antes de usar la app.
+  completa el inicio con Google, entonces debe aceptar los términos (RN-CTA-02), confirmar su
+  nombre y apellido (precargados con los de Google) e indicar si es tutor, pediatra o ambos antes
+  de usar la app. Hasta que acepta los términos no se guarda ningún dato.
 - **CA2.** Dado que el email de Google coincide con una cuenta existente con email verificado,
   cuando el visitante inicia sesión con Google, entonces ingresa a esa misma cuenta (RN-CTA-04).
 - **CA3.** Dado que el visitante cancela el flujo de Google, cuando vuelve a la app, entonces
@@ -164,7 +165,7 @@ El usuario puede modificar su nombre, apellido, email y contraseña.
 | RN-CTA-01 | La contraseña tiene al menos 8 caracteres y contiene al menos una letra y un número. |
 | RN-CTA-02 | La aceptación de términos y política de privacidad es expresa (casilla no premarcada). Se registran la versión de los términos aceptados y la fecha y hora de aceptación. Si los términos cambian, el usuario debe aceptar la nueva versión al ingresar. |
 | RN-CTA-03 | El email es único en el sistema y se usa como identificador de la cuenta. |
-| RN-CTA-04 | Si un inicio con Google trae un email que coincide con una cuenta existente con email verificado, se ingresa a esa cuenta y queda asociado el inicio con Google. Si la cuenta existente no verificó su email, se pide verificarlo primero. |
+| RN-CTA-04 | Si un inicio con Google trae un email que coincide con una cuenta existente con email verificado, se ingresa a esa cuenta y queda asociado el inicio con Google. Si la cuenta existente no verificó su email, el inicio con Google lo verifica: se ingresa a esa cuenta, se borra su contraseña y se cierran sus sesiones abiertas, porque pudo crearla otra persona antes que el dueño del email (D-69). Si el email ya está asociado a otra cuenta de Google, no se ingresa. |
 | RN-CTA-05 | Tras 5 intentos fallidos consecutivos de inicio con contraseña, la cuenta se bloquea 15 minutos para ese método. El inicio con Google y la recuperación de contraseña siguen disponibles. Valores propuestos (SUP-05). |
 | RN-CTA-06 | Los enlaces de verificación de email vencen a las 24 horas y los de recuperación de contraseña a los 60 minutos. Valores propuestos (SUP-04). |
 | RN-CTA-07 | La sesión vence tras 30 días sin uso de la app. Cualquier uso renueva el plazo. |

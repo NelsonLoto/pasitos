@@ -52,10 +52,44 @@ pocos servicios, un archivo `Dependencies.kt` que los construye es suficiente y 
 | Rotación | `POST /auth/refresh` entrega un par nuevo e invalida el token de renovación anterior. Si llega un token ya rotado, se revoca la sesión completa (posible robo) y se registra en el log con el ID de la sesión, sin datos personales. La sesión guarda solo el token anterior (`previous_refresh_token_hash`): uno más viejo se rechaza con 401 sin revocar. La app debe renovar de a un pedido por vez (el plugin `Auth` de Ktor Client ya lo hace), o dos renovaciones simultáneas parecerían una reutilización |
 | Revocación | Cerrar sesión borra la fila de `sessions`. Cada request valida que `sid` siga vigente (RNF-SEG-04) |
 | Cambio o recuperación de contraseña | Revoca todas las sesiones de la cuenta (RF-CTA-05, CA2) |
-| Google | La app obtiene un ID token con Credential Manager y lo envía a `POST /auth/google`. El backend verifica firma (claves públicas de Google), `aud` (client ID propio), `iss` y vencimiento, y usa `sub` y `email` verificado (RN-CTA-04) |
+| Google | La app obtiene un ID token con Credential Manager y lo envía a `POST /auth/google` (I1-B2). Detalles abajo |
 | Bloqueo por intentos | `accounts.failed_login_count` y `locked_until` (RN-CTA-05) |
 | Verificación y recuperación | Tokens aleatorios de un solo uso, guardados como hash en `email_tokens` con su vencimiento (RN-CTA-06). Los links abren páginas del backend ([16](16-panel-admin.md#páginas-públicas)) |
 | Email sin verificar | `POST /auth/login` con credenciales correctas pero sin verificar responde 403 `email_not_verified`, sin abrir sesión ni contar como intento fallido (RF-CTA-02, CA1). El registro ya abre sesión igual (RF-CTA-01, CA1): la restricción es solo al iniciar sesión de nuevo |
+
+### Inicio con Google (I1-B2)
+
+`auth/google/`: `GoogleTokenVerifier` verifica el ID token y `GooglePublicKeys` le da las claves
+de Google.
+
+- **Verificación,** con `java-jwt` y `jwks-rsa`:
+  - firma RS256 con una clave publicada por Google en `https://www.googleapis.com/oauth2/v3/certs`.
+    El algoritmo es fijo: un token que declare otro se rechaza;
+  - `iss` igual a `https://accounts.google.com` o `accounts.google.com`;
+  - `aud` igual exactamente al ID del cliente web (`GOOGLE_CLIENT_ID`), y a ningún otro;
+  - vencimiento, con 60 segundos de tolerancia por diferencia de reloj, y `email_verified` en
+    `true`.
+- **Claves:** se bajan la primera vez que aparece cada ID de clave y se guardan un día. Cuando
+  Google las rota, un ID nuevo provoca otra descarga. Como mucho se piden 10 veces por minuto, así
+  que tokens con IDs inventados no hacen que el backend consulte a Google sin parar.
+- **Pruebas:** usan una clave RSA propia publicada en el mismo formato (`TestGoogle`), sin red.
+- **Búsqueda de la cuenta:** primero por `google_subject`, que no cambia aunque cambie el email, y
+  después por email:
+
+| Caso | Resultado |
+|---|---|
+| Ya ingresó con esa cuenta de Google | Ingresa |
+| El email es de una cuenta verificada | Asocia `google_subject` e ingresa. La contraseña sigue funcionando (RN-CTA-04) |
+| El email es de una cuenta sin verificar | La marca verificada, asocia `google_subject`, borra la contraseña y cierra todas sus sesiones, y después ingresa (RN-CTA-04, D-69): la contraseña y las sesiones pudo crearlas otra persona que registró ese email antes que su dueño |
+| El email ya tiene otra cuenta de Google | 409 `email_already_in_use`, por ejemplo con una dirección de una organización que se reasignó |
+| Primer ingreso sin `acceptTerms` | 409 `terms_required`, sin guardar nada (RF-CTA-03, CA1). La app muestra los términos con nombre y apellido precargados y reenvía el mismo token |
+| Primer ingreso con `acceptTerms` | Crea la cuenta de tutor, verificada y sin contraseña, con el nombre y el apellido confirmados (400 si faltan), y guarda el consentimiento |
+
+- **Errores:** si el token no es válido, 401 `invalid_google_token`. Si Google no responde al pedir
+  las claves, 503 `google_unavailable`, sin abrir sesión.
+- **Bloqueo por intentos:** no aplica, porque no interviene la contraseña (RN-CTA-05).
+- **Dos primeros ingresos simultáneos:** el segundo choca con el índice único de `accounts`.
+  Exposed reintenta la transacción, y en el reintento encuentra la cuenta que creó el primero.
 
 ### Administradores
 
@@ -108,14 +142,15 @@ Formato único (`ErrorResponse` en `shared`):
 | HTTP | Uso |
 |---|---|
 | 400 | Formato inválido (`invalid_input`), con `fields` opcional por campo |
-| 401 | Sin token, token vencido o sesión revocada (`unauthorized`) |
+| 401 | Sin token, token vencido o sesión revocada (`unauthorized`); email o contraseña incorrectos (`invalid_credentials`); ID token de Google inválido (`invalid_google_token`) |
 | 403 | Autenticado con acceso al recurso pero sin permiso para esa acción (`forbidden`) |
 | 404 | Recurso inexistente o sin acceso (`*_not_found`) |
-| 409 | Conflicto de estado: email en uso, matrícula registrada, solicitud pendiente existente |
+| 409 | Conflicto de estado: email en uso, matrícula registrada, solicitud pendiente existente, primer ingreso con Google sin aceptar los términos (`terms_required`) |
 | 422 | Regla de negocio incumplida (`business_rule`), con el ID de la regla, por ejemplo `RN-HIJ-01` |
 | 423 | Cuenta bloqueada por intentos (`account_locked`) |
 | 429 | Límite de requests (`rate_limited`) |
 | 500 | Error inesperado (`internal_error`). Se registra en Sentry sin datos personales |
+| 503 | Un servicio externo no respondió: Google, al verificar un ID token (`google_unavailable`) |
 
 Los mensajes `message` están en español y listos para mostrar.
 
@@ -143,7 +178,7 @@ Todo por variables de entorno, con `.env` solo en desarrollo local (nunca versio
 |---|---|---|
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | — | Conexión a PostgreSQL |
 | `JWT_SECRET` | 64 caracteres aleatorios | Firma de tokens de acceso |
-| `GOOGLE_CLIENT_ID` | ID del cliente web ([30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)) | `aud` esperado en tokens de Google |
+| `GOOGLE_CLIENT_ID` | ID del cliente web ([30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)) | `aud` esperado en tokens de Google. Opcional: por defecto, el del proyecto `pasitos-751c4` |
 | `FIREBASE_CREDENTIALS_FILE` | ruta a JSON | Envío FCM |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | — | Emails |
 | `PUBLIC_BASE_URL` | `https://api.pasitos.ar` | Links en emails |

@@ -28,6 +28,7 @@ const val AUTH_JWT = "auth-jwt"
 private val LOGIN_LIMIT = RateLimitName("auth-login")
 private val REGISTER_LIMIT = RateLimitName("auth-register")
 private val EMAIL_LIMIT = RateLimitName("auth-email")
+private val GOOGLE_LIMIT = RateLimitName("auth-google")
 
 fun Application.configureAuthentication(jwt: JwtService, authService: AuthService) {
     install(Authentication) {
@@ -66,6 +67,10 @@ fun Application.configureAuthentication(jwt: JwtService, authService: AuthServic
             rateLimiter(limit = 10, refillPeriod = 1.minutes)
             requestKey { call -> call.request.origin.remoteAddress }
         }
+        register(GOOGLE_LIMIT) {
+            rateLimiter(limit = 10, refillPeriod = 1.minutes)
+            requestKey { call -> call.request.origin.remoteAddress }
+        }
     }
 }
 
@@ -80,6 +85,12 @@ fun Route.authRoutes(authService: AuthService) {
     rateLimit(LOGIN_LIMIT) {
         post("/auth/login") {
             call.respond(HttpStatusCode.OK, authService.login(call.receive()))
+        }
+    }
+
+    rateLimit(GOOGLE_LIMIT) {
+        post("/auth/google") {
+            call.respond(HttpStatusCode.OK, authService.loginWithGoogle(call.receive()))
         }
     }
 
