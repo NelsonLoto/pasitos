@@ -41,11 +41,12 @@ class ChildFormViewModel @Inject constructor(
     private val clock: ArgentinaClock,
 ) : ViewModel() {
 
-    private val childId: String? = savedStateHandle.toRoute<PsRoute.ChildForm>().childId
+    private val formRoute = savedStateHandle.toRoute<PsRoute.ChildForm>()
+    private val childId: String? = formRoute.childId
 
     private val _uiState = MutableStateFlow(
         clock.today().let { today ->
-            ChildFormUiState(childId = childId, today = today, minBirthDate = minBirthDate(today), isLoading = childId != null)
+            ChildFormUiState(childId = childId, professionalPatient = formRoute.professionalPatient, today = today, minBirthDate = minBirthDate(today), isLoading = childId != null)
         },
     )
     val uiState: StateFlow<ChildFormUiState> = _uiState.asStateFlow()
@@ -154,14 +155,16 @@ class ChildFormViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, generalError = null) }
             val input = state.toInput()
-            val result = if (childId == null) {
+            val result = if (childId == null && state.professionalPatient) {
+                childRepository.addPatient(input)
+            } else if (childId == null) {
                 childRepository.addChild(input, state.representationDeclared)
             } else {
                 childRepository.updateChild(childId, input)
             }
             result
                 .onSuccess { child ->
-                    val offerPreviousDoses = childId == null && hasPreviousDoses(child)
+                    val offerPreviousDoses = childId == null && !state.professionalPatient && hasPreviousDoses(child)
                     _uiState.update { it.copy(isSaving = false) }
                     _saved.send(SavedChild(child.id, offerPreviousDoses))
                 }

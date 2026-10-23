@@ -37,6 +37,20 @@ data class CreateChildRequest(
     val representationDeclared: Boolean,
 )
 
+/** Alta de un paciente propio por un profesional, sin declarar representación legal. */
+@Serializable
+data class CreatePatientRequest(
+    val firstName: String,
+    val lastName: String,
+    val sex: Sex,
+    val birthDate: String,
+    val gestationalWeeks: Int?,
+    val birthWeightKg: Double? = null,
+    val birthLengthCm: Double? = null,
+    val birthHeadCircumferenceCm: Double? = null,
+    val avatarKey: String? = null,
+)
+
 /** `PATCH /children/{id}` (RF-HIJ-02, RF-HIJ-03). Reemplaza todos los campos editables. */
 @Serializable
 data class PatchChildRequest(

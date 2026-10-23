@@ -125,7 +125,7 @@ private fun ChildFormContent(state: ChildFormUiState, onBackClick: () -> Unit, a
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        PsTopAppBar(title = if (state.isEdit) "Editar perfil" else "Agregar hijo/a", showBack = true, onBackClick = onBackClick)
+        PsTopAppBar(title = if (state.isEdit) "Editar perfil" else if (state.professionalPatient) "Agregar paciente" else "Agregar hijo/a", showBack = true, onBackClick = onBackClick)
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -137,7 +137,7 @@ private fun ChildFormContent(state: ChildFormUiState, onBackClick: () -> Unit, a
         ) {
             if (!state.isEdit) {
                 Text(
-                    text = "Contanos un poco sobre tu hijo/a para empezar su seguimiento.",
+                    text = if (state.professionalPatient) "Completá los datos para empezar el seguimiento de tu paciente." else "Contanos un poco sobre tu hijo/a para empezar su seguimiento.",
                     style = PsType.BodySmall,
                     color = PsColor.TextSecondary,
                     textAlign = TextAlign.Center,
@@ -255,7 +255,7 @@ private fun ChildFormContent(state: ChildFormUiState, onBackClick: () -> Unit, a
                     enabled,
                     actions.onRelevantHistoryChange,
                 )
-            } else {
+            } else if (!state.professionalPatient) {
                 Spacer(modifier = Modifier.height(18.dp))
                 CheckboxRow(
                     label = "Soy madre, padre o representante legal de este niño o niña",

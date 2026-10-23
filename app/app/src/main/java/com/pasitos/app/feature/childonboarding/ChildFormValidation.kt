@@ -28,7 +28,7 @@ internal fun validate(state: ChildFormUiState): ChildFormErrors = ChildFormError
     allergies = textError(state.allergies),
     relevantHistory = textError(state.relevantHistory),
     representation = "Confirmá que sos madre, padre o representante legal"
-        .takeIf { !state.isEdit && !state.representationDeclared },
+        .takeIf { !state.professionalPatient && !state.isEdit && !state.representationDeclared },
 )
 
 /** RN-HIJ-01, con un mensaje que explica el motivo (RF-HIJ-01, CA3). */

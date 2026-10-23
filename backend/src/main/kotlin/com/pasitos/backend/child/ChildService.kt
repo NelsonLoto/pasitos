@@ -1,6 +1,7 @@
 package com.pasitos.backend.child
 
 import com.pasitos.backend.auth.ConsentRepository
+import com.pasitos.backend.auth.AccountRepository
 import com.pasitos.backend.common.AccessPolicy
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.Caller
@@ -15,6 +16,7 @@ import com.pasitos.shared.api.child.AVATAR_KEYS
 import com.pasitos.shared.api.child.ChildResponse
 import com.pasitos.shared.api.child.ChildStatus as ChildStatusDto
 import com.pasitos.shared.api.child.CreateChildRequest
+import com.pasitos.shared.api.child.CreatePatientRequest
 import com.pasitos.shared.api.child.DeletionPreviewResponse
 import com.pasitos.shared.api.child.PatchChildRequest
 import com.pasitos.shared.api.child.Sex as SexDto
@@ -33,7 +35,34 @@ class ChildService(
     private val declarationVersion: String,
     /** Lo que cada dominio borra al eliminarse el perfil del niño (RN-HIJ-08). */
     private val purgers: List<ChildDataPurger>,
+    private val accounts: AccountRepository? = null,
+    private val patientOwnership: PatientOwnershipRepository? = null,
 ) {
+
+    suspend fun createPatient(caller: Caller, request: CreatePatientRequest): ChildResponse {
+        val account = tx { accounts?.findById(caller.accountId) }
+        if (account == null || account.isGuardian || account.licenseNumber.isNullOrBlank()) {
+            throw InvalidInputException("Solo una cuenta profesional puede agregar pacientes")
+        }
+        val firstName = request.firstName.trim()
+        val lastName = request.lastName.trim()
+        if (firstName.isBlank() || lastName.isBlank()) throw InvalidInputException("Completá nombre y apellido")
+        val birthDate = parseBirthDate(request.birthDate)
+        val gestationalWeeks = validateGestationalWeeks(request.gestationalWeeks)
+        val birthWeightKg = request.birthWeightKg?.toStoredValue(3)
+        val birthLengthCm = request.birthLengthCm?.toStoredValue(1)
+        val birthHeadCircumferenceCm = request.birthHeadCircumferenceCm?.toStoredValue(1)
+        val avatarKey = validateAvatarKey(request.avatarKey)
+        return tx {
+            val child = children.insert(
+                NewChild(firstName, lastName, request.sex.toDomain(), birthDate, gestationalWeeks, birthWeightKg,
+                    birthLengthCm, birthHeadCircumferenceCm, avatarKey),
+                createdBy = caller.accountId,
+            )
+            requireNotNull(patientOwnership) { "Patient ownership is not configured" }.insert(child.id, caller.accountId)
+            child.toDto()
+        }
+    }
 
     suspend fun create(caller: Caller, request: CreateChildRequest): ChildResponse {
         val firstName = request.firstName.trim()

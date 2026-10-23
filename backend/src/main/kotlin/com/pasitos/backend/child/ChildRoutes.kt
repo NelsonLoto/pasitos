@@ -4,6 +4,7 @@ import com.pasitos.backend.auth.AUTH_JWT
 import com.pasitos.backend.common.ChildNotFoundException
 import com.pasitos.backend.common.caller
 import com.pasitos.backend.common.toUuidOrNull
+import com.pasitos.shared.api.child.CreatePatientRequest
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -19,6 +20,9 @@ import io.ktor.server.routing.post
 /** `/children` (RF-HIJ-01 a 03, 09; 12 · API). */
 fun Route.childRoutes(childService: ChildService) {
     authenticate(AUTH_JWT) {
+        post("/patients") {
+            call.respond(HttpStatusCode.Created, childService.createPatient(call.caller(), call.receive<CreatePatientRequest>()))
+        }
         post("/children") {
             call.respond(HttpStatusCode.Created, childService.create(call.caller(), call.receive()))
         }

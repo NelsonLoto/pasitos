@@ -18,7 +18,6 @@ import com.pasitos.app.feature.login.ForgotPasswordScreen
 import com.pasitos.app.feature.login.LoginScreen
 import com.pasitos.app.feature.measurement.MeasurementFormScreen
 import com.pasitos.app.feature.measurementhistory.MeasurementHistoryScreen
-import com.pasitos.app.feature.notificationcenter.NotificationCenterScreen
 import com.pasitos.app.feature.othervaccine.OtherVaccineScreen
 import com.pasitos.app.feature.previousdoses.PreviousDosesScreen
 import com.pasitos.app.feature.profile.ProfileScreen
@@ -29,18 +28,25 @@ import com.pasitos.app.feature.register.RegisterScreen
 import com.pasitos.app.feature.reportexport.ReportExportScreen
 import com.pasitos.app.feature.vaccination.VaccinationCalendarScreen
 import com.pasitos.app.feature.vaccinedetail.VaccineDetailScreen
+import com.pasitos.app.feature.professional.ProfessionalHomeScreen
+import com.pasitos.app.feature.professional.ProfessionalPatientsScreen
+import com.pasitos.app.feature.professional.ProfessionalGrowthScreen
+import com.pasitos.app.feature.professional.ProfessionalVaccinesScreen
+import com.pasitos.app.feature.notificationcenter.NotificationCenterScreen
 
 @Composable
 fun PsNavGraph(
     navController: NavHostController,
     startDestination: PsRoute,
+    isProfessional: Boolean,
+    firstName: String,
     modifier: Modifier = Modifier,
 ) {
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         composable<PsRoute.Login> {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(PsRoute.Home) {
+                    navController.navigate(if (isProfessional) PsRoute.ProfessionalHome else PsRoute.Home) {
                         popUpTo(PsRoute.Login) { inclusive = true }
                     }
                 },
@@ -61,7 +67,11 @@ fun PsNavGraph(
             val route = backStackEntry.toRoute<PsRoute.EmailVerification>()
             EmailVerificationScreen(
                 onVerified = {
-                    val destination = if (route.afterVerifiedGoHome) PsRoute.Home else PsRoute.ChildForm()
+                    val destination = when {
+                        isProfessional -> PsRoute.ProfessionalHome
+                        route.afterVerifiedGoHome -> PsRoute.Home
+                        else -> PsRoute.ChildForm()
+                    }
                     navController.navigate(destination) {
                         popUpTo(PsRoute.Login) { inclusive = true }
                     }
@@ -72,7 +82,8 @@ fun PsNavGraph(
             ForgotPasswordScreen(onBackClick = { navController.popBackStack() })
         }
         composable<PsRoute.ChildForm> { entry ->
-            val isEdit = entry.toRoute<PsRoute.ChildForm>().childId != null
+            val formRoute = entry.toRoute<PsRoute.ChildForm>()
+            val isEdit = formRoute.childId != null
             ChildFormScreen(
                 onBackClick = { navController.popBackStack() },
                 onSaved = { saved ->
@@ -80,6 +91,9 @@ fun PsNavGraph(
                         isEdit -> navController.popBackStack()
                         // Si por su edad ya debería tener dosis, se ofrece la carga retroactiva (RF-HIJ-01, CA2)
                         saved.offerPreviousDoses -> navController.navigate(PsRoute.PreviousDoses(saved.childId, afterChildCreated = true)) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                        formRoute.professionalPatient -> navController.navigate(PsRoute.ProfessionalHome) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
                         // El hijo nuevo queda activo (RF-HIJ-01, CA1): se vuelve a Inicio sin nada atrás
@@ -132,7 +146,7 @@ fun PsNavGraph(
         }
         composable<PsRoute.VaccinationCalendar> {
             VaccinationCalendarScreen(
-                onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
+                onChildChipClick = { navController.navigate(if (isProfessional) PsRoute.ProfessionalPatients else PsRoute.ChildSelector) },
                 onDoseClick = { childId, doseCode -> navController.navigate(PsRoute.VaccineDetail(childId, doseCode)) },
                 onMarkPreviousDosesClick = { childId -> navController.navigate(PsRoute.PreviousDoses(childId)) },
                 onAddOtherVaccineClick = { childId -> navController.navigate(PsRoute.OtherVaccine(childId)) },
@@ -172,6 +186,7 @@ fun PsNavGraph(
             AdviceListScreen(
                 onChildChipClick = { navController.navigate(PsRoute.ChildSelector) },
                 onAdviceClick = { adviceId -> navController.navigate(PsRoute.AdviceDetail(adviceId)) },
+                isProfessional = isProfessional,
             )
         }
         composable<PsRoute.AdviceDetail> {
@@ -182,13 +197,39 @@ fun PsNavGraph(
         }
         composable<PsRoute.Profile> {
             ProfileScreen(
-                onMyChildrenClick = { navController.navigate(PsRoute.ChildSelector) },
+                onMyChildrenClick = {
+                    navController.navigate(if (isProfessional) PsRoute.ProfessionalPatients else PsRoute.ChildSelector)
+                },
                 onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
                 onExportReportsClick = { navController.navigate(PsRoute.ReportExport) },
+                isProfessional = isProfessional,
                 onEditNameClick = { navController.navigate(PsRoute.EditName) },
                 onChangeEmailClick = { navController.navigate(PsRoute.ChangeEmail) },
                 onChangePasswordClick = { navController.navigate(PsRoute.ChangePassword) },
             )
+        }
+        composable<PsRoute.ProfessionalHome> {
+            ProfessionalHomeScreen(
+                firstName = firstName,
+                onPatientsClick = { navController.navigate(PsRoute.ProfessionalPatients) },
+                onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
+                onAddPatientClick = { navController.navigate(PsRoute.ChildForm(professionalPatient = true)) },
+            )
+        }
+        composable<PsRoute.ProfessionalPatients> {
+            ProfessionalPatientsScreen(
+                onBackClick = { navController.popBackStack() },
+                onAddPatientClick = { navController.navigate(PsRoute.ChildForm(professionalPatient = true)) },
+                onPatientClick = { patientId ->
+                    navController.navigate(PsRoute.GrowthChart(patientId))
+                },
+            )
+        }
+        composable<PsRoute.ProfessionalGrowth> {
+            ProfessionalGrowthScreen(onPatientsClick = { navController.navigate(PsRoute.ProfessionalPatients) })
+        }
+        composable<PsRoute.ProfessionalVaccines> {
+            ProfessionalVaccinesScreen(onPatientsClick = { navController.navigate(PsRoute.ProfessionalPatients) })
         }
         composable<PsRoute.EditName> {
             EditNameScreen(onBackClick = { navController.popBackStack() })

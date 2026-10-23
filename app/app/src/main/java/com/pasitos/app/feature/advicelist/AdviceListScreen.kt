@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,11 +39,13 @@ import com.pasitos.app.ui.theme.PsType
 fun AdviceListScreen(
     onChildChipClick: () -> Unit,
     onAdviceClick: (adviceId: String) -> Unit,
+    isProfessional: Boolean = false,
+    onShareAdvice: (adviceId: String) -> Unit = {},
     viewModel: AdviceListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    AdviceListContent(state = state, onChildChipClick = onChildChipClick, onAdviceClick = onAdviceClick)
+    AdviceListContent(state = state, onChildChipClick = onChildChipClick, onAdviceClick = onAdviceClick, isProfessional = isProfessional, onShareAdvice = onShareAdvice)
 }
 
 @Composable
@@ -50,6 +53,8 @@ private fun AdviceListContent(
     state: AdviceListUiState,
     onChildChipClick: () -> Unit,
     onAdviceClick: (adviceId: String) -> Unit,
+    isProfessional: Boolean = false,
+    onShareAdvice: (adviceId: String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -94,14 +99,14 @@ private fun AdviceListContent(
             Text(text = state.stageLabel, style = PsType.H3.copy(fontSize = 15.sp))
 
             state.tips.forEachIndexed { index, tip ->
-                AdviceTipRow(tip = tip, useAccentTone = index % 2 == 1, onClick = { onAdviceClick(tip.id) })
+                AdviceTipRow(tip = tip, useAccentTone = index % 2 == 1, onClick = { onAdviceClick(tip.id) }, isProfessional = isProfessional, onShare = { onShareAdvice(tip.id) })
             }
         }
     }
 }
 
 @Composable
-private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick: () -> Unit) {
+private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick: () -> Unit, isProfessional: Boolean, onShare: () -> Unit) {
     val squareColor = if (useAccentTone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     PsCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -120,12 +125,12 @@ private fun AdviceTipRow(tip: AdviceTipUiModel, useAccentTone: Boolean, onClick:
                     color = PsColor.TextSecondary,
                 )
                 Text(text = tip.title, style = PsType.BodySmall, modifier = Modifier.padding(top = 1.dp))
-                Text(
-                    text = tip.summary,
-                    style = PsType.Caption,
-                    color = PsColor.TextSecondary,
-                    modifier = Modifier.padding(top = 2.dp),
-                )
+                Text(text = tip.summary, style = PsType.Caption, color = PsColor.TextSecondary, modifier = Modifier.padding(top = 2.dp))
+                if (isProfessional) {
+                    TextButton(onClick = onShare) {
+                        Text("Compartir al tutor", style = PsType.Caption)
+                    }
+                }
             }
             Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = PsColor.TextSecondary)
         }
