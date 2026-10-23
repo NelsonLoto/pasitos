@@ -93,6 +93,16 @@ class SessionRepository @Inject constructor(
     }
 
     /** Cierre de sesión: borra la cuenta y los tokens guardados. */
+    /**
+     * Reemplaza los datos guardados de la cuenta con los que devolvió el servidor (`GET /me`,
+     * `PATCH /me`), sin tocar los tokens. Si la sesión ya no es de esa cuenta, no hace nada.
+     */
+    suspend fun updateAccount(account: AccountDto) = locked {
+        val current = stored ?: return@locked
+        if (current.tokens == null || current.account.id != account.id) return@locked
+        save(current.copy(account = account))
+    }
+
     suspend fun clear() = locked {
         stored = null
         publish()
@@ -135,6 +145,7 @@ class SessionRepository @Inject constructor(
         email = email,
         firstName = firstName,
         lastName = lastName,
+        hasPassword = hasPassword,
     )
 
     private companion object {

@@ -26,4 +26,7 @@ sealed interface PsRoute {
     @Serializable data class AdviceDetail(val adviceId: String) : PsRoute // RF14
     @Serializable data object ReportExport : PsRoute // RF15
     @Serializable data object Profile : PsRoute // 5to tab
+    @Serializable data object EditName : PsRoute // RF-CTA-11
+    @Serializable data object ChangeEmail : PsRoute // RF-CTA-11, CA1
+    @Serializable data object ChangePassword : PsRoute // RF-CTA-11, CA2 y CA4
 }
