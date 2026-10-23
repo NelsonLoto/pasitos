@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.core.app.ApplicationProvider
 import com.pasitos.app.core.database.LocalDatabase
+import com.pasitos.app.core.network.ApiException
 import com.pasitos.app.core.network.FakeServer
 import com.pasitos.app.core.network.FakeServer.Companion.bodyText
 import com.pasitos.app.core.network.FakeServer.Companion.error
@@ -22,10 +23,13 @@ import com.pasitos.app.core.sync.local.PendingMutationDao
 import com.pasitos.app.core.sync.local.PendingMutationEntity
 import com.pasitos.app.data.auth.AuthTestData.account
 import com.pasitos.app.data.auth.AuthTestData.tokens
+import com.pasitos.app.data.auth.google.GoogleCredentialResult
+import com.pasitos.app.data.auth.google.GoogleCredentials
 import com.pasitos.app.data.auth.local.SessionStore
 import com.pasitos.app.data.auth.model.SessionState
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.auth.AuthResponse
+import com.pasitos.shared.api.auth.GoogleAuthRequest
 import com.pasitos.shared.api.auth.RegisterRequest
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
@@ -65,6 +69,7 @@ class AuthApiRepositoryTest {
     /** Lo que hizo la app, en orden: programar la revocación, cancelar la sincronización y reiniciar. */
     private val events = mutableListOf<String>()
     private val pendingMutations = FakePendingMutationDao()
+    private var googleCleared = 0
 
     private val session by lazy { SessionRepository(store) }
     private val repository by lazy {
@@ -88,6 +93,12 @@ class AuthApiRepositoryTest {
             processRestarter = object : ProcessRestarter {
                 override fun restart() {
                     events += "reiniciar"
+                }
+            },
+            googleCredentials = object : GoogleCredentials {
+                override suspend fun request(activityContext: Context) = GoogleCredentialResult.Cancelled
+                override suspend fun clear() {
+                    googleCleared++
                 }
             },
         )
@@ -127,6 +138,8 @@ class AuthApiRepositoryTest {
 
         assertEquals("Email o contraseña incorrectos", result.exceptionOrNull()?.message)
         assertEquals(1, server.requests.size)
+        // Espera a que termine de restaurarse la sesión guardada (no había ninguna)
+        assertNull(session.current())
         assertEquals(SessionState.SignedOut(), session.state.value)
     }
 
@@ -137,6 +150,36 @@ class AuthApiRepositoryTest {
         val result = repository.login("ana@pasitos.test", "secreta123")
 
         assertTrue(result.exceptionOrNull() is NoConnectionException)
+    }
+
+    @Test
+    fun `RF-CTA-03 el inicio con Google manda el token sin sesión y guarda la sesión`() = runTest {
+        serverSignsIn(path = "/api/v1/auth/google")
+
+        val result = repository.loginWithGoogle("id-token-de-google", acceptTerms = true, firstName = " Ana ", lastName = "Pérez")
+
+        assertTrue(result.isSuccess)
+        assertTrue(session.state.value is SessionState.SignedIn)
+        val request = server.requests.single()
+        assertNull(request.headers[HttpHeaders.Authorization])
+        assertEquals(
+            GoogleAuthRequest("id-token-de-google", acceptTerms = true, firstName = "Ana", lastName = "Pérez"),
+            Json.decodeFromString<GoogleAuthRequest>(request.bodyText()),
+        )
+    }
+
+    @Test
+    fun `RF-CTA-03 CA1 el primer ingreso devuelve terms_required sin abrir sesión`() = runTest {
+        server.routes["/api/v1/auth/google"] = {
+            error(HttpStatusCode.Conflict, ErrorCode.TERMS_REQUIRED, "Para crear la cuenta tenés que aceptar los términos y la política de privacidad")
+        }
+
+        val result = repository.loginWithGoogle("id-token-de-google")
+
+        assertEquals(ErrorCode.TERMS_REQUIRED, (result.exceptionOrNull() as ApiException).code)
+        // Espera a que termine de restaurarse la sesión guardada (no había ninguna)
+        assertNull(session.current())
+        assertEquals(SessionState.SignedOut(), session.state.value)
     }
 
     @Test
@@ -206,6 +249,8 @@ class AuthApiRepositoryTest {
         assertEquals(1, server.requestsTo("/api/v1/auth/logout").size)
         // Ya quedó revocada: no hay nada pendiente para después
         assertEquals(listOf("cancelar sincronización", "reiniciar"), events)
+        // El próximo inicio con Google vuelve a preguntar qué cuenta usar
+        assertEquals(1, googleCleared)
         assertNull(store.read())
         assertNull(databaseKeyStore.read())
         assertEquals(SessionState.SignedOut(), session.state.value)

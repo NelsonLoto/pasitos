@@ -84,7 +84,7 @@ class SignedInAuthRepository(session: AuthSession = ChildTestData.session) : Aut
     override val currentSession: StateFlow<AuthSession?> = MutableStateFlow(session)
 
     override suspend fun login(email: String, password: String) = Result.success(currentSession.value!!)
-    override suspend fun loginWithGoogle() = Result.success(currentSession.value!!)
+    override suspend fun loginWithGoogle(idToken: String, acceptTerms: Boolean, firstName: String?, lastName: String?) = Result.success(currentSession.value!!)
     override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean, accountType: String, dni: String?, licenseNumber: String?, specialty: String?) =
         Result.success(currentSession.value!!)
 

@@ -36,7 +36,7 @@ incorporan en el incremento que las necesita, con la última versión estable co
 | HikariCP | 7.1.0 | Pool de conexiones |
 | Flyway | 13.9.0 | Migraciones |
 | java-jwt (Auth0) | 4.6.2 | Tokens de acceso |
-| jwks-rsa (Auth0) | Nueva | Verificación de tokens de Google |
+| jwks-rsa (Auth0) | 0.24.1 | Claves públicas de Google para verificar sus ID tokens (I1-B2) |
 | bcrypt (at.favre) | 0.10.2 | Contraseñas, costo 12 |
 | db-scheduler | Nueva | Tareas programadas persistidas en PostgreSQL (ADR-18) |
 | Thymeleaf (vía `ktor-server-thymeleaf`) | 3.6.0 | Plantillas del panel, páginas públicas y PDFs (ADR-09, ADR-10) |
@@ -65,7 +65,7 @@ incorporan en el incremento que las necesita, con la última versión estable co
 | WorkManager (con Hilt Work 1.4.0) | 2.12.0 | Sincronización en segundo plano |
 | DataStore | 1.2.1 | Preferencias y sesión |
 | Tink | 1.23.0 | Cifrado de tokens y clave de la base con el Android Keystore |
-| Credential Manager + Google ID | Nueva | Inicio con Google (ADR-11) |
+| Credential Manager (`androidx.credentials`, con `credentials-play-services-auth`) y Google ID (`googleid`) | 1.6.0 y 1.2.1 | Inicio con Google (ADR-11, I1-A2) |
 | Firebase Cloud Messaging | Nueva | Recepción de avisos |
 | Biometric | Nueva | Bloqueo con huella o PIN (RF-CTA-08) |
 | Sentry Android | Nueva | Errores |

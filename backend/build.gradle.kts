@@ -32,6 +32,8 @@ dependencies {
 
     // Auth: JWT (emisión + validación) + hashing de contraseñas
     implementation("com.auth0:java-jwt:4.6.2")
+    // Claves públicas de Google para verificar sus ID tokens (I1-B2). También la trae ktor-server-auth-jwt.
+    implementation("com.auth0:jwks-rsa:0.24.1")
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")

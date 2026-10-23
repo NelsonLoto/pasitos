@@ -18,15 +18,12 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pasitos.app.core.designsystem.component.PsButton
 import com.pasitos.app.core.designsystem.component.PsButtonVariant
 import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTermsCheckbox
 import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.ui.theme.PsColor
 import com.pasitos.app.ui.theme.PsTheme
@@ -203,28 +201,12 @@ private fun RegisterContent(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .toggleable(
-                        value = state.acceptTerms,
-                        enabled = !state.isLoading,
-                        role = Role.Checkbox,
-                        onValueChange = onAcceptTermsChange,
-                    ),
-            ) {
-                Checkbox(checked = state.acceptTerms, onCheckedChange = null, enabled = !state.isLoading)
-                Text(
-                    text = "Acepto los Términos y Condiciones y la Política de Privacidad",
-                    style = PsType.BodySmall,
-                    color = PsColor.TextSecondary,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-            state.termsError?.let { error ->
-                Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
-            }
+            PsTermsCheckbox(
+                checked = state.acceptTerms,
+                onCheckedChange = onAcceptTermsChange,
+                enabled = !state.isLoading,
+                errorText = state.termsError,
+            )
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))

@@ -35,6 +35,9 @@ enum class ErrorCode(val value: String) {
     /** 401: email o contraseña incorrectos. */
     INVALID_CREDENTIALS("invalid_credentials"),
 
+    /** 401: el ID token de Google no es válido: firma, emisor, destinatario, vencimiento o email sin verificar. */
+    INVALID_GOOGLE_TOKEN("invalid_google_token"),
+
     /** 403: con acceso al recurso pero sin permiso para esa acción. */
     FORBIDDEN("forbidden"),
 
@@ -46,6 +49,12 @@ enum class ErrorCode(val value: String) {
 
     /** 409: ya existe una cuenta con ese email. */
     EMAIL_ALREADY_IN_USE("email_already_in_use"),
+
+    /**
+     * 409: primer ingreso con Google sin aceptar los términos (RF-CTA-03, CA1). No se creó nada: la
+     * app muestra los términos y reenvía el mismo token con `acceptTerms`.
+     */
+    TERMS_REQUIRED("terms_required"),
 
     /** 409: ese email ya es tutor del niño (RF-HIJ-05, CA4). */
     ALREADY_GUARDIAN("already_guardian"),
@@ -76,6 +85,9 @@ enum class ErrorCode(val value: String) {
 
     /** 500: error inesperado. */
     INTERNAL_ERROR("internal_error"),
+
+    /** 503: no se pudieron obtener las claves públicas de Google para verificar el token. */
+    GOOGLE_UNAVAILABLE("google_unavailable"),
 
     /** Código que esta versión no conoce. El backend nunca lo envía. */
     UNKNOWN("unknown"),

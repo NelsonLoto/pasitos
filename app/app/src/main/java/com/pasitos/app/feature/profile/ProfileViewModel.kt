@@ -2,6 +2,8 @@ package com.pasitos.app.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pasitos.app.core.sync.SyncStatus
+import com.pasitos.app.core.time.ArgentinaClock
 import com.pasitos.app.data.auth.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,15 +18,24 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    syncStatus: SyncStatus,
+    private val clock: ArgentinaClock,
 ) : ViewModel() {
 
     private val logout = MutableStateFlow(LogoutState())
 
-    val uiState: StateFlow<ProfileUiState> = combine(authRepository.currentSession, logout) { session, logout ->
+    val uiState: StateFlow<ProfileUiState> = combine(
+        authRepository.currentSession,
+        logout,
+        syncStatus.lastSyncedAt,
+        syncStatus.pendingChanges,
+    ) { session, logout, lastSyncedAt, pendingChanges ->
         ProfileUiState(
             displayName = session?.displayName.orEmpty(),
             email = session?.email.orEmpty(),
             avatarInitial = session?.displayName?.trim()?.firstOrNull()?.uppercase().orEmpty(),
+            hasPassword = session?.hasPassword ?: true,
+            lastSyncText = lastSyncText(lastSyncedAt, pendingChanges, clock.now()),
             pendingChangesToConfirm = logout.pendingChangesToConfirm,
             isLoggingOut = logout.inProgress,
             logoutError = logout.error,

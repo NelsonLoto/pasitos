@@ -26,6 +26,7 @@ import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.core.navigation.currentTabItemOrNull
 import com.pasitos.app.core.navigation.toRoute
 import com.pasitos.app.data.auth.model.SessionState
+import com.pasitos.app.feature.profile.terms.TermsUpdateScreen
 import com.pasitos.shared.api.auth.AccountMode
 import com.pasitos.app.ui.theme.PsTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,6 +51,14 @@ private fun PsApp(appViewModel: AppViewModel = hiltViewModel()) {
     // Mientras se lee la sesión guardada no se sabe si mostrar el inicio o el login
     if (sessionState == SessionState.Restoring) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
+
+    // RN-CTA-02: con términos nuevos sin aceptar no se muestra nada más. Al aceptarlos la app
+    // vuelve a armarse desde el inicio
+    val pendingTermsVersion by appViewModel.pendingTermsVersion.collectAsStateWithLifecycle()
+    if (sessionState is SessionState.SignedIn && pendingTermsVersion != null) {
+        TermsUpdateScreen()
         return
     }
 

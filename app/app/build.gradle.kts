@@ -78,6 +78,10 @@ dependencies {
     implementation(libs.sqlcipher.android)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.tink.android)
+    // Inicio con Google (I1-A2): Credential Manager y el ID token de Google
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)

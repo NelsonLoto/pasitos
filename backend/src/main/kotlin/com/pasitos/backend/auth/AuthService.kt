@@ -1,5 +1,6 @@
 package com.pasitos.backend.auth
 
+import com.pasitos.backend.auth.google.GoogleTokenVerifier
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.Caller
 import com.pasitos.backend.common.ConflictException
@@ -14,6 +15,7 @@ import com.pasitos.shared.api.auth.AccountDto
 import com.pasitos.shared.api.auth.AccountMode
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.EmailVerificationRequest
+import com.pasitos.shared.api.auth.GoogleAuthRequest
 import com.pasitos.shared.api.auth.LoginRequest
 import com.pasitos.shared.api.auth.MeResponse
 import com.pasitos.shared.api.auth.PasswordResetRequest
@@ -40,6 +42,12 @@ class AccountLockedException(minutes: Long) : LockedException(
 /** RF-CTA-02, CA1: credenciales correctas, pero hay que verificar el email antes de entrar. */
 class EmailNotVerifiedException : ForbiddenException(ErrorCode.EMAIL_NOT_VERIFIED, "Tenés que verificar tu email antes de continuar")
 
+/** RF-CTA-03, CA1: primer ingreso con Google. No se guardó nada hasta que acepte los términos. */
+class TermsRequiredException : ConflictException(
+    ErrorCode.TERMS_REQUIRED,
+    "Para crear la cuenta tenés que aceptar los términos y la política de privacidad",
+)
+
 /** `POST /web/reset-password` (RF-CTA-05). */
 sealed interface ResetPasswordResult {
     data object Success : ResetPasswordResult
@@ -54,6 +62,7 @@ class AuthService(
     private val consents: ConsentRepository,
     private val emailTokens: EmailTokenRepository,
     private val jwt: JwtService,
+    private val google: GoogleTokenVerifier,
     private val mail: MailService,
     private val clock: ArgentinaClock,
     private val termsVersion: String,
@@ -101,6 +110,52 @@ class AuthService(
             is LoginResult.Locked -> throw AccountLockedException(result.minutesLeft)
             LoginResult.EmailNotVerified -> throw EmailNotVerifiedException()
         }
+
+    /**
+     * RF-CTA-03 y RN-CTA-04. El token se verifica antes de abrir la transacción, porque puede hacer
+     * falta bajar las claves de Google. La cuenta se busca primero por la cuenta de Google, que no
+     * cambia aunque cambie el email, y después por el email. Como el inicio con contraseña no
+     * interviene, el bloqueo por intentos fallidos no aplica (RN-CTA-05).
+     *
+     * Si dos primeros ingresos con la misma cuenta de Google llegan juntos, el segundo choca con el
+     * índice único de `accounts`. Exposed reintenta la transacción, y en el reintento encuentra la
+     * cuenta que creó el primero.
+     */
+    suspend fun loginWithGoogle(request: GoogleAuthRequest): AuthResponse {
+        val identity = google.verify(request.idToken)
+        return tx {
+            val now = clock.now()
+            accounts.findByGoogleSubject(identity.subject)?.let { account ->
+                return@tx AuthResponse(account.toDto(), openSession(account.id))
+            }
+
+            val existing = accounts.findByEmailForUpdate(identity.email)
+            if (existing != null) {
+                // Otra cuenta de Google ya usó este email, por ejemplo una dirección de una
+                // organización que se reasignó a otra persona: no se entra a la cuenta de la anterior.
+                if (existing.googleSubject != null) throw EmailAlreadyInUseException()
+                if (existing.emailVerifiedAt == null) {
+                    // La contraseña y las sesiones pudo crearlas otra persona que registró este
+                    // email antes que su dueño (secuestro previo de la cuenta): no sobreviven.
+                    sessions.deleteAllForAccount(existing.id)
+                    accounts.linkGoogleReplacingPassword(existing.id, identity.subject, now)
+                } else {
+                    accounts.linkGoogle(existing.id, identity.subject)
+                }
+                val linked = accounts.findById(existing.id) ?: error("La cuenta ${existing.id} desapareció dentro de la transacción")
+                return@tx AuthResponse(linked.toDto(), openSession(linked.id))
+            }
+
+            // Primer ingreso: nada se guarda hasta que acepte los términos (RN-CTA-02).
+            if (!request.acceptTerms) throw TermsRequiredException()
+            val firstName = request.firstName?.trim().orEmpty()
+            val lastName = request.lastName?.trim().orEmpty()
+            if (firstName.isBlank() || lastName.isBlank()) throw InvalidInputException("Completá nombre y apellido")
+            val account = accounts.insertGoogleGuardian(identity.email, firstName, lastName, identity.subject, now)
+            consents.insertTerms(account.id, termsVersion, now)
+            AuthResponse(account.toDto(), openSession(account.id))
+        }
+    }
 
     /** RF-CTA-02, CA1: reenvía el link de verificación si la cuenta existe y no está verificada. */
     suspend fun resendEmailVerification(request: EmailVerificationRequest) {
@@ -265,16 +320,6 @@ class AuthService(
             throw InvalidInputException("La contraseña tiene que tener al menos 8 caracteres, con letras y números")
         }
     }
-
-    private fun Account.toDto() = AccountDto(
-        id = id.toString(),
-        email = email,
-        firstName = firstName,
-        lastName = lastName,
-        emailVerified = emailVerifiedAt != null,
-        isGuardian = isGuardian,
-        lastMode = lastMode,
-    )
 
     private fun Duration.toMinutesRoundedUp(): Long = (toSeconds() + 59) / 60
 

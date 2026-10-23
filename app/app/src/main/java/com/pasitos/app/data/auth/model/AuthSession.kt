@@ -10,6 +10,8 @@ data class AuthSession(
     val lastName: String,
     val isGuardian: Boolean = true,
     val lastMode: AccountMode? = null,
+    /** Falso en cuentas creadas con Google: ven "Crear una contraseña" (RF-CTA-11, CA4). */
+    val hasPassword: Boolean = true,
 ) {
     val displayName: String get() = "$firstName $lastName".trim()
 }

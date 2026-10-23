@@ -11,6 +11,7 @@ import com.pasitos.backend.auth.PasswordHasher
 import com.pasitos.backend.auth.PasswordPolicy
 import com.pasitos.backend.auth.SessionExpiredException
 import com.pasitos.backend.auth.SessionRepository
+import com.pasitos.backend.auth.toDto
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.Caller
 import com.pasitos.backend.common.InvalidInputException
@@ -113,16 +114,6 @@ class AccountService(
     suspend fun acceptConsents(caller: Caller) {
         tx { consents.insertTerms(caller.accountId, termsVersion, clock.now()) }
     }
-
-    private fun Account.toDto() = AccountDto(
-        id = id.toString(),
-        email = email,
-        firstName = firstName,
-        lastName = lastName,
-        emailVerified = emailVerifiedAt != null,
-        isGuardian = isGuardian,
-        lastMode = lastMode,
-    )
 
     companion object {
         /** Sin RN explícita para este caso: mismo plazo que verificar un email recién creado (RN-CTA-06). */

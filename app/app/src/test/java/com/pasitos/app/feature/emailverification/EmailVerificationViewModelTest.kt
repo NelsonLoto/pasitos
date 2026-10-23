@@ -106,7 +106,7 @@ class EmailVerificationViewModelTest {
         override val currentSession: StateFlow<AuthSession?> = MutableStateFlow(null)
 
         override suspend fun login(email: String, password: String) = Result.success(AuthSession("1", email, "Ana", "Pérez"))
-        override suspend fun loginWithGoogle() = Result.failure<AuthSession>(Exception("No disponible"))
+        override suspend fun loginWithGoogle(idToken: String, acceptTerms: Boolean, firstName: String?, lastName: String?) = Result.failure<AuthSession>(Exception("No disponible"))
         override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean, accountType: String, dni: String?, licenseNumber: String?, specialty: String?) =
             Result.success(AuthSession("1", email, firstName, lastName))
 

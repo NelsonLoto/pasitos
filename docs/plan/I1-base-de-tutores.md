@@ -110,10 +110,12 @@ RN-CTA-06
 **Requerimientos:** RF-CTA-03, RN-CTA-04
 
 **Qué hacer**
-- `POST /auth/google`: verificar firma (claves públicas de Google), `aud`, `iss` y vencimiento
-  del ID token.
-- Primer ingreso: crear la cuenta, pedir términos (la respuesta lo indica).
-- Email coincidente con cuenta verificada: asociar `google_subject` e ingresar (RN-CTA-04).
+- `POST /auth/google`: verificar firma (claves públicas de Google), `aud`, `iss`, vencimiento y
+  `email_verified` del ID token.
+- Primer ingreso: pedir los términos antes de crear la cuenta (409 `terms_required`, sin guardar
+  nada) y crearla con el nombre y el apellido que la persona confirma.
+- Email coincidente con cuenta verificada: asociar `google_subject` e ingresar. Con cuenta sin
+  verificar: además verificarla, borrar su contraseña y cerrar sus sesiones (RN-CTA-04, D-69).
 
 **Criterios de aceptación**
 - [ ] Pruebas con tokens firmados por una clave de prueba: válido, vencido, `aud` incorrecto,

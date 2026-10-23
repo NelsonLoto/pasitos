@@ -1,6 +1,7 @@
 package com.pasitos.backend.auth
 
 import com.pasitos.backend.common.toUtc
+import com.pasitos.shared.api.auth.AccountDto
 import com.pasitos.shared.api.auth.AccountMode
 import java.time.Instant
 import java.util.UUID
@@ -16,6 +17,7 @@ data class Account(
     val firstName: String,
     val lastName: String,
     val passwordHash: String?,
+    val googleSubject: String? = null,
     val emailVerifiedAt: Instant? = null,
     val isGuardian: Boolean = true,
     val lastMode: AccountMode? = null,
@@ -24,6 +26,18 @@ data class Account(
     val dni: String? = null,
     val licenseNumber: String? = null,
     val specialty: String? = null,
+)
+
+/** La cuenta como la ve la app: en login, registro, `GET /me` y `PATCH /me`. */
+fun Account.toDto() = AccountDto(
+    id = id.toString(),
+    email = email,
+    firstName = firstName,
+    lastName = lastName,
+    emailVerified = emailVerifiedAt != null,
+    isGuardian = isGuardian,
+    lastMode = lastMode,
+    hasPassword = passwordHash != null,
 )
 
 /** Todas las funciones asumen una transacción abierta. */
@@ -67,6 +81,47 @@ class AccountRepository {
             it[Accounts.lastMode] = lastMode?.name
         }
         return Account(id, email, firstName, lastName, passwordHash, isGuardian = isGuardian, lastMode = lastMode, dni = dni, licenseNumber = licenseNumber, specialty = specialty)
+    }
+
+    /** RF-CTA-03: la cuenta que ya ingresó con esa cuenta de Google, aunque su email haya cambiado. */
+    fun findByGoogleSubject(googleSubject: String): Account? =
+        Accounts.selectAll().where { Accounts.googleSubject eq googleSubject }.firstOrNull()?.toAccount()
+
+    /** RF-CTA-03, CA1: cuenta de tutor creada con Google, sin contraseña y con el email ya verificado. */
+    fun insertGoogleGuardian(email: String, firstName: String, lastName: String, googleSubject: String, verifiedAt: Instant): Account {
+        val id = UUID.randomUUID()
+        Accounts.insert {
+            it[Accounts.id] = id
+            it[Accounts.email] = email
+            it[Accounts.firstName] = firstName
+            it[Accounts.lastName] = lastName
+            it[Accounts.googleSubject] = googleSubject
+            it[emailVerifiedAt] = verifiedAt.toUtc()
+            it[isGuardian] = true
+        }
+        return Account(id, email, firstName, lastName, passwordHash = null, googleSubject = googleSubject, emailVerifiedAt = verifiedAt)
+    }
+
+    /** RN-CTA-04: asocia el inicio con Google a una cuenta que ya verificó su email. */
+    fun linkGoogle(id: UUID, googleSubject: String) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[Accounts.googleSubject] = googleSubject
+        }
+    }
+
+    /**
+     * RN-CTA-04, cuenta sin verificar: Google demuestra que la persona controla el email, así que
+     * queda verificado y se borra la contraseña, que pudo cargar otra persona antes de la
+     * verificación. Las sesiones las cierra quien llama.
+     */
+    fun linkGoogleReplacingPassword(id: UUID, googleSubject: String, verifiedAt: Instant) {
+        Accounts.update({ Accounts.id eq id }) {
+            it[Accounts.googleSubject] = googleSubject
+            it[emailVerifiedAt] = verifiedAt.toUtc()
+            it[passwordHash] = null
+            it[failedLoginCount] = 0
+            it[lockedUntil] = null
+        }
     }
 
     /** Guarda los intentos fallidos consecutivos y, si corresponde, hasta cuándo queda bloqueada. */
@@ -115,6 +170,7 @@ class AccountRepository {
         licenseNumber = this[Accounts.licenseNumber],
         specialty = this[Accounts.specialty],
         passwordHash = this[Accounts.passwordHash],
+        googleSubject = this[Accounts.googleSubject],
         emailVerifiedAt = this[Accounts.emailVerifiedAt]?.toInstant(),
         isGuardian = this[Accounts.isGuardian],
         lastMode = this[Accounts.lastMode]?.let(AccountMode::valueOf),
