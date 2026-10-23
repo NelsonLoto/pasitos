@@ -65,7 +65,7 @@ incorporan en el incremento que las necesita, con la última versión estable co
 | WorkManager (con Hilt Work 1.4.0) | 2.12.0 | Sincronización en segundo plano |
 | DataStore | 1.2.1 | Preferencias y sesión |
 | Tink | 1.23.0 | Cifrado de tokens y clave de la base con el Android Keystore |
-| Credential Manager + Google ID | Nueva | Inicio con Google (ADR-11) |
+| Credential Manager (`androidx.credentials`, con `credentials-play-services-auth`) y Google ID (`googleid`) | 1.6.0 y 1.2.1 | Inicio con Google (ADR-11, I1-A2) |
 | Firebase Cloud Messaging | Nueva | Recepción de avisos |
 | Biometric | Nueva | Bloqueo con huella o PIN (RF-CTA-08) |
 | Sentry Android | Nueva | Errores |

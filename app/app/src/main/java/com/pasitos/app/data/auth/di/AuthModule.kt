@@ -6,6 +6,8 @@ import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.auth.SessionRepository
 import com.pasitos.app.data.auth.SessionRevocation
 import com.pasitos.app.data.auth.WorkManagerSessionRevocation
+import com.pasitos.app.data.auth.google.CredentialManagerGoogleCredentials
+import com.pasitos.app.data.auth.google.GoogleCredentials
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,4 +27,7 @@ abstract class AuthModule {
 
     @Binds
     abstract fun bindSessionRevocation(impl: WorkManagerSessionRevocation): SessionRevocation
+
+    @Binds
+    abstract fun bindGoogleCredentials(impl: CredentialManagerGoogleCredentials): GoogleCredentials
 }
