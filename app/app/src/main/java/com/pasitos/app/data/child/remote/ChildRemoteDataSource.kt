@@ -4,6 +4,7 @@ import com.pasitos.app.core.network.toApiException
 import com.pasitos.app.core.network.withConnection
 import com.pasitos.shared.api.child.ChildResponse
 import com.pasitos.shared.api.child.CreateChildRequest
+import com.pasitos.shared.api.child.CreatePatientRequest
 import com.pasitos.shared.api.child.DeletionPreviewResponse
 import com.pasitos.shared.api.child.PatchChildRequest
 import io.ktor.client.HttpClient
@@ -28,6 +29,14 @@ class ChildRemoteDataSource @Inject constructor(private val httpClient: HttpClie
     suspend fun create(request: CreateChildRequest): ChildResponse =
         send(HttpStatusCode.Created) {
             httpClient.post("/api/v1/children") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        }.body()
+
+    suspend fun createPatient(request: CreatePatientRequest): ChildResponse =
+        send(HttpStatusCode.Created) {
+            httpClient.post("/api/v1/patients") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }

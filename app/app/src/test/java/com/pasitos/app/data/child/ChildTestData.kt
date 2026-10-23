@@ -85,7 +85,7 @@ class SignedInAuthRepository(session: AuthSession = ChildTestData.session) : Aut
 
     override suspend fun login(email: String, password: String) = Result.success(currentSession.value!!)
     override suspend fun loginWithGoogle() = Result.success(currentSession.value!!)
-    override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean) =
+    override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean, accountType: String, dni: String?, licenseNumber: String?, specialty: String?) =
         Result.success(currentSession.value!!)
 
     override suspend fun resendEmailVerification(email: String): Result<Unit> = Result.success(Unit)
@@ -119,6 +119,8 @@ class FakeChildRepository(children: List<Child> = emptyList()) : ChildRepository
             added += input to representationDeclared
             input.toChild("new-child")
         }
+
+    override suspend fun addPatient(input: ChildInput): Result<Child> = saveResult.map { input.toChild("new-patient") }
 
     override suspend fun updateChild(childId: String, input: ChildInput): Result<Child> =
         saveResult.map {

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pasitos.app.R
 import com.pasitos.app.ui.theme.PsColor
@@ -24,17 +25,19 @@ enum class PsTabItem(val label: String, val iconRes: Int) {
     Growth("Crecimiento", R.drawable.ic_tab_growth),
     Vaccines("Vacunas", R.drawable.ic_tab_vaccines),
     Advice("Consejos", R.drawable.ic_tab_advice),
+    Patients("Pacientes", R.drawable.ic_tab_profile),
     Profile("Perfil", R.drawable.ic_tab_profile),
 }
 
 /** Tab bar inferior de 5 secciones (patrón de pantalla del Design System). */
 @Composable
-fun PsTabBar(selected: PsTabItem, onSelect: (PsTabItem) -> Unit) {
+fun PsTabBar(selected: PsTabItem, onSelect: (PsTabItem) -> Unit, isProfessional: Boolean = false) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.border(BorderStroke(1.dp, PsColor.Border)),
     ) {
-        PsTabItem.entries.forEach { item ->
+        (if (isProfessional) listOf(PsTabItem.Home, PsTabItem.Patients, PsTabItem.Growth, PsTabItem.Vaccines, PsTabItem.Advice, PsTabItem.Profile)
+        else listOf(PsTabItem.Home, PsTabItem.Growth, PsTabItem.Vaccines, PsTabItem.Advice, PsTabItem.Profile)).forEach { item ->
             NavigationBarItem(
                 selected = item == selected,
                 onClick = { onSelect(item) },
@@ -44,7 +47,15 @@ fun PsTabBar(selected: PsTabItem, onSelect: (PsTabItem) -> Unit) {
                         contentDescription = item.label,
                     )
                 },
-                label = { Text(item.label, style = PsType.Caption) },
+                label = {
+                    Text(
+                        text = if (isProfessional && item == PsTabItem.Growth) "Crecim." else item.label,
+                        style = PsType.Caption,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Clip,
+                    )
+                },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,

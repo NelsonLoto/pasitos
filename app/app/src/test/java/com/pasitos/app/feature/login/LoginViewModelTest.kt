@@ -162,7 +162,7 @@ class LoginViewModelTest {
         }
 
         override suspend fun loginWithGoogle() = Result.failure<AuthSession>(Exception("No disponible"))
-        override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean) =
+        override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean, accountType: String, dni: String?, licenseNumber: String?, specialty: String?) =
             Result.success(AuthSession("1", email, firstName, lastName))
 
         override suspend fun resendEmailVerification(email: String): Result<Unit> {

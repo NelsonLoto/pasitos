@@ -1,11 +1,15 @@
 package com.pasitos.app.data.auth.model
 
+import com.pasitos.shared.api.auth.AccountMode
+
 /** Cuenta con sesión iniciada. Los tokens no salen de `SessionRepository` y el cliente de la API. */
 data class AuthSession(
     val userId: String,
     val email: String,
     val firstName: String,
     val lastName: String,
+    val isGuardian: Boolean = true,
+    val lastMode: AccountMode? = null,
 ) {
     val displayName: String get() = "$firstName $lastName".trim()
 }

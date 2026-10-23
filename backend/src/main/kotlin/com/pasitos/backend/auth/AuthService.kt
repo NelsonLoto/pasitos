@@ -11,6 +11,7 @@ import com.pasitos.backend.common.tx
 import com.pasitos.backend.mail.MailService
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.auth.AccountDto
+import com.pasitos.shared.api.auth.AccountMode
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.EmailVerificationRequest
 import com.pasitos.shared.api.auth.LoginRequest
@@ -18,6 +19,7 @@ import com.pasitos.shared.api.auth.MeResponse
 import com.pasitos.shared.api.auth.PasswordResetRequest
 import com.pasitos.shared.api.auth.RefreshRequest
 import com.pasitos.shared.api.auth.RegisterRequest
+import com.pasitos.shared.api.auth.RegistrationAccountType
 import com.pasitos.shared.api.auth.TokenPair
 import java.time.Duration
 import java.time.Instant
@@ -75,7 +77,14 @@ class AuthService(
 
         val result = tx {
             if (accounts.findByEmail(email) != null) throw EmailAlreadyInUseException()
-            val account = accounts.insertGuardian(email, firstName, lastName, passwordHash)
+            val account = accounts.insertGuardian(
+                email, firstName, lastName, passwordHash,
+                dni = request.dni?.trim()?.takeIf { request.accountType == RegistrationAccountType.FAMILY },
+                licenseNumber = request.licenseNumber?.trim()?.takeIf { request.accountType == RegistrationAccountType.PROFESSIONAL },
+                specialty = request.specialty?.trim()?.takeIf { request.accountType == RegistrationAccountType.PROFESSIONAL },
+                isGuardian = request.accountType == RegistrationAccountType.FAMILY,
+                lastMode = if (request.accountType == RegistrationAccountType.PROFESSIONAL) AccountMode.PEDIATRICIAN else AccountMode.GUARDIAN,
+            )
             consents.insertTerms(account.id, termsVersion, clock.now())
             emailTokens.insert(account.id, EmailTokenPurpose.VERIFY_EMAIL, OpaqueToken.hash(verificationToken), clock.now().plus(VERIFY_EMAIL_LIFETIME))
             AuthResponse(account.toDto(), openSession(account.id))
