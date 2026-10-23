@@ -1,6 +1,7 @@
 package com.pasitos.backend.auth
 
 import com.pasitos.backend.common.toUtc
+import com.pasitos.shared.api.auth.AccountDto
 import com.pasitos.shared.api.auth.AccountMode
 import java.time.Instant
 import java.util.UUID
@@ -22,6 +23,18 @@ data class Account(
     val lastMode: AccountMode? = null,
     val failedLoginCount: Int = 0,
     val lockedUntil: Instant? = null,
+)
+
+/** La cuenta como la ve la app: en login, registro, `GET /me` y `PATCH /me`. */
+fun Account.toDto() = AccountDto(
+    id = id.toString(),
+    email = email,
+    firstName = firstName,
+    lastName = lastName,
+    emailVerified = emailVerifiedAt != null,
+    isGuardian = isGuardian,
+    lastMode = lastMode,
+    hasPassword = passwordHash != null,
 )
 
 /** Todas las funciones asumen una transacción abierta. */

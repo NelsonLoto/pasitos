@@ -50,6 +50,7 @@ class AuthRoutesTest {
         assertEquals("Pérez", body.account.lastName)
         assertEquals(false, body.account.emailVerified)
         assertEquals(true, body.account.isGuardian)
+        assertEquals(true, body.account.hasPassword)
         assertEquals(
             listOf("TERMS ${TestDatabase.TERMS_VERSION}"),
             TestDatabase.column<String>("SELECT type || ' ' || version FROM consents"),

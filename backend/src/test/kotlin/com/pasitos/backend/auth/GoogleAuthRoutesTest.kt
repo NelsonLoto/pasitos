@@ -54,6 +54,7 @@ class GoogleAuthRoutesTest {
         assertEquals("Pérez", body.account.lastName)
         assertEquals(true, body.account.emailVerified)
         assertEquals(true, body.account.isGuardian)
+        assertEquals(false, body.account.hasPassword)
         assertEquals(listOf("google-ana"), TestDatabase.column<String>("SELECT google_subject FROM accounts"))
         assertEquals(1L, TestDatabase.column<Long>("SELECT count(*) FROM accounts WHERE password_hash IS NULL").single())
         assertEquals(
@@ -95,6 +96,7 @@ class GoogleAuthRoutesTest {
         val account = response.body<AuthResponse>().account
         assertEquals(registered.account.id, account.id)
         assertEquals("Ana", account.firstName)
+        assertEquals(true, account.hasPassword)
         assertEquals(listOf("google-ana"), TestDatabase.column<String>("SELECT google_subject FROM accounts"))
         // La contraseña sigue funcionando: la cuenta ahora tiene los dos métodos.
         assertEquals(HttpStatusCode.OK, client.login("ana@gmail.com", PASSWORD).status)
@@ -111,6 +113,7 @@ class GoogleAuthRoutesTest {
         val body = response.body<AuthResponse>()
         assertEquals(earlier.account.id, body.account.id)
         assertEquals(true, body.account.emailVerified)
+        assertEquals(false, body.account.hasPassword)
         assertEquals(1L, TestDatabase.column<Long>("SELECT count(*) FROM accounts WHERE password_hash IS NULL").single())
 
         val oldLogin = client.login("ana@gmail.com", PASSWORD)

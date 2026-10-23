@@ -14,7 +14,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -45,6 +48,9 @@ fun ProfileScreen(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    onEditNameClick: () -> Unit,
+    onChangeEmailClick: () -> Unit,
+    onChangePasswordClick: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -54,6 +60,9 @@ fun ProfileScreen(
         onMyChildrenClick = onMyChildrenClick,
         onNotificationsClick = onNotificationsClick,
         onExportReportsClick = onExportReportsClick,
+        onEditNameClick = onEditNameClick,
+        onChangeEmailClick = onChangeEmailClick,
+        onChangePasswordClick = onChangePasswordClick,
         onLogoutClick = viewModel::onLogoutClick,
     )
 
@@ -66,9 +75,9 @@ fun ProfileScreen(
     }
 }
 
-/** RF-CTA-07, CA2. */
+/** RF-CTA-07, CA2. También la usa "Actualizamos los términos" al cerrar sesión. */
 @Composable
-private fun PendingChangesDialog(pending: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun PendingChangesDialog(pending: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val changes = if (pending == 1) "1 cambio que todavía no se sincronizó" else "$pending cambios que todavía no se sincronizaron"
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -91,6 +100,9 @@ private fun ProfileContent(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    onEditNameClick: () -> Unit,
+    onChangeEmailClick: () -> Unit,
+    onChangePasswordClick: () -> Unit,
     onLogoutClick: () -> Unit,
 ) {
     Column(
@@ -118,6 +130,23 @@ private fun ProfileContent(
                     Text(text = state.displayName, style = PsType.BodyMedium)
                     Text(text = state.email, style = PsType.BodySmall, color = PsColor.TextSecondary)
                 }
+            }
+
+            // RF-CTA-11: una pantalla por dato, porque cada cambio funciona distinto
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                SectionLabel(text = "DATOS DE LA CUENTA")
+                MenuGroupCard {
+                    PsMenuRow(icon = Icons.Filled.Badge, label = "Nombre y apellido", onClick = onEditNameClick)
+                    HorizontalDivider(color = PsColor.Border)
+                    PsMenuRow(icon = Icons.Filled.Email, label = "Email", onClick = onChangeEmailClick)
+                    HorizontalDivider(color = PsColor.Border)
+                    PsMenuRow(
+                        icon = Icons.Filled.Key,
+                        label = if (state.hasPassword) "Contraseña" else "Crear una contraseña",
+                        onClick = onChangePasswordClick,
+                    )
+                }
+                Text(text = state.lastSyncText, style = PsType.Caption, color = PsColor.TextSecondary)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -191,10 +220,18 @@ private fun MenuGroupCard(content: @Composable () -> Unit) {
 private fun ProfileScreenPreview() {
     PsTheme {
         ProfileContent(
-            state = ProfileUiState(displayName = "María Gómez", email = "maria@email.com", avatarInitial = "M"),
+            state = ProfileUiState(
+                displayName = "María Gómez",
+                email = "maria@email.com",
+                avatarInitial = "M",
+                lastSyncText = "Última sincronización: hoy a las 14:32",
+            ),
             onMyChildrenClick = {},
             onNotificationsClick = {},
             onExportReportsClick = {},
+            onEditNameClick = {},
+            onChangeEmailClick = {},
+            onChangePasswordClick = {},
             onLogoutClick = {},
         )
     }
