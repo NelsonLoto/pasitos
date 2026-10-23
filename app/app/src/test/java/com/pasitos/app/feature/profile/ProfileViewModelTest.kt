@@ -98,7 +98,7 @@ class ProfileViewModelTest {
         override val currentSession: StateFlow<AuthSession?> = MutableStateFlow(session)
 
         override suspend fun login(email: String, password: String) = Result.success(session)
-        override suspend fun loginWithGoogle() = Result.success(session)
+        override suspend fun loginWithGoogle(idToken: String, acceptTerms: Boolean, firstName: String?, lastName: String?) = Result.success(session)
         override suspend fun register(firstName: String, lastName: String, email: String, password: String, acceptTerms: Boolean) =
             Result.success(session)
         override suspend fun resendEmailVerification(email: String) = Result.success(Unit)
