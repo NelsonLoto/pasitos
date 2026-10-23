@@ -30,7 +30,7 @@ revisión, quedan confirmados al mergear:
 | Supuesto | Dónde |
 |---|---|
 | Límite de 120 requests por minuto por cuenta y 10 por minuto por IP en `/auth/login` | [20](20-seguridad.md) |
-| `/auth/register` también limitado a 10 por minuto por IP; `/auth/refresh` sin límite propio, porque exige un token de renovación imposible de adivinar | [20](20-seguridad.md) |
+| `/auth/register` y `/auth/google` también limitados a 10 por minuto por IP; `/auth/refresh` sin límite propio, porque exige un token de renovación imposible de adivinar | [20](20-seguridad.md) |
 | Hasta 50 pacientes con detalle guardado en el teléfono del pediatra | [14](14-sincronizacion.md#4-alcance-por-rol-adr-16) |
 | Páginas de hasta 500 filas en la sincronización | [14](14-sincronizacion.md#2-traer-cambios) |
 | Copias de seguridad: 14 diarias y 8 semanales | [30](30-infraestructura.md#copias-de-seguridad) |

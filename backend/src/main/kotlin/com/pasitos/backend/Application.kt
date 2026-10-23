@@ -1,8 +1,10 @@
 package com.pasitos.backend
 
+import com.auth0.jwt.interfaces.RSAKeyProvider
 import com.pasitos.backend.account.accountRoutes
 import com.pasitos.backend.auth.authRoutes
 import com.pasitos.backend.auth.configureAuthentication
+import com.pasitos.backend.auth.google.GooglePublicKeys
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
 import com.pasitos.backend.config.DatabaseFactory
@@ -39,9 +41,13 @@ fun main(args: Array<String>) {
 
 /**
  * [clock] es el reloj de todo el backend. Las pruebas pasan uno propio para adelantar la hora
- * (vencimiento de tokens y sesiones, bloqueo por intentos).
+ * (vencimiento de tokens y sesiones, bloqueo por intentos). [googleKeys] son las claves con las
+ * que se verifican los ID tokens de Google; las pruebas pasan una clave propia.
  */
-fun Application.module(clock: Clock = Clock.systemUTC()) {
+fun Application.module(
+    clock: Clock = Clock.systemUTC(),
+    googleKeys: RSAKeyProvider = GooglePublicKeys.remote(),
+) {
     install(ContentNegotiation) {
         json()
     }
@@ -50,7 +56,7 @@ fun Application.module(clock: Clock = Clock.systemUTC()) {
     val dataSource = DatabaseFactory.init(environment.config)
     monitor.subscribe(ApplicationStopped) { dataSource.close() }
 
-    val dependencies = Dependencies(environment.config, clock)
+    val dependencies = Dependencies(environment.config, clock, googleKeys)
     configureAuthentication(dependencies.jwtService, dependencies.authService)
     install(Thymeleaf) {
         TemplateEngineFactory.configure(this)
