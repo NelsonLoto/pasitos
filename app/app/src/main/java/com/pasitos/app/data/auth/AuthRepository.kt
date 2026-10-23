@@ -5,8 +5,8 @@ import com.pasitos.app.data.auth.model.SessionState
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Cuenta y sesión (RF-CTA-01, 04, 06 y 07). Implementación: [AuthApiRepository], contra
- * `/api/v1/auth`. `loginWithGoogle()` todavía no está disponible: llega con I1-A2.
+ * Cuenta y sesión (RF-CTA-01, 03, 04, 06 y 07). Implementación: [AuthApiRepository], contra
+ * `/api/v1/auth`.
  */
 interface AuthRepository {
     val sessionState: StateFlow<SessionState>
@@ -16,7 +16,16 @@ interface AuthRepository {
 
     suspend fun login(email: String, password: String): Result<AuthSession>
 
-    suspend fun loginWithGoogle(): Result<AuthSession>
+    /**
+     * RF-CTA-03 con el ID token de Google. En el primer ingreso falla con `terms_required` hasta
+     * que se reenvía el mismo token con [acceptTerms] y el nombre y el apellido confirmados.
+     */
+    suspend fun loginWithGoogle(
+        idToken: String,
+        acceptTerms: Boolean = false,
+        firstName: String? = null,
+        lastName: String? = null,
+    ): Result<AuthSession>
 
     suspend fun register(
         firstName: String,
