@@ -30,4 +30,7 @@ sealed interface PsRoute {
     @Serializable data object ProfessionalPatients : PsRoute
     @Serializable data object ProfessionalGrowth : PsRoute
     @Serializable data object ProfessionalVaccines : PsRoute
+    @Serializable data object EditName : PsRoute // RF-CTA-11
+    @Serializable data object ChangeEmail : PsRoute // RF-CTA-11, CA1
+    @Serializable data object ChangePassword : PsRoute // RF-CTA-11, CA2 y CA4
 }

@@ -117,7 +117,7 @@ necesitar cambios grandes.
 | Renovación automática | El plugin `Auth` de Ktor Client agrega el token de acceso a cada pedido. Si el servidor responde 401, renueva los tokens y repite el pedido sin que el usuario lo note. Detalles abajo |
 | Estado de sesión | `SessionRepository` expone `StateFlow<SessionState>`: restaurando, iniciada (con la cuenta) o cerrada (vencida o no). Al abrir la app se restaura desde DataStore, también sin conexión (RF-CTA-06, CA1 y CA3). Mientras se restaura no se muestra ni el login ni el inicio |
 | Sincronización | Solo con sesión iniciada: al iniciarla o restaurarla se programa la periódica y se pide una inmediata; al vencer o cerrarla se cancelan |
-| Google | Credential Manager con `GetGoogleIdOption` (client ID web del proyecto). El ID token se envía a `POST /auth/google`. Hasta I1-A2 el botón avisa que todavía no está disponible |
+| Google | Credential Manager con `GetSignInWithGoogleOption` y el ID del cliente web del proyecto (`GoogleConfig.WEB_CLIENT_ID`, [30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)). El ID token se envía a `POST /auth/google` ([11](11-backend.md#inicio-con-google-i1-b2)). Detalles abajo |
 | Bloqueo con huella o PIN | `BiometricPrompt` con `BIOMETRIC_STRONG` o credencial del dispositivo. Se pide al abrir la app y al volver después de 5 minutos en segundo plano. Con el bloqueo activo se marca la ventana con `FLAG_SECURE` (RNF-SEG-08) |
 
 **Renovación de tokens.** El backend revoca la sesión completa si recibe dos veces el mismo token
@@ -151,6 +151,37 @@ toma como un robo: revoca la sesión y el usuario vuelve a iniciarla, sin perder
 El backend registra cada revocación por reuso y la app cada renovación rechazada, así se puede
 medir cuánto pasa (con Sentry desde I0-10). Si pasa seguido, se puede agregar en el backend un
 margen de unos segundos para aceptar el token anterior, sin cambiar la app.
+
+**Inicio con Google (I1-A2).**
+
+- `data/auth/google/`: la interfaz `GoogleCredentials` y su implementación con Credential Manager.
+- **Por qué `GetSignInWithGoogleOption` y no `GetGoogleIdOption`:** es la opción para un botón
+  explícito. Si el teléfono no tiene una cuenta de Google, ofrece agregarla. Si la persona cierra
+  el diálogo varias veces, no deja de mostrarse por un tiempo, como sí pasa con la hoja de
+  `GetGoogleIdOption`.
+- **Contexto:** Credential Manager muestra el diálogo sobre la Activity. `LoginScreen` le pasa
+  `LocalContext.current` a `LoginViewModel.onGoogleSignInClick`, que no lo retiene.
+- **Cancelar:** si la persona cierra el diálogo, sigue en el login sin error (RF-CTA-03, CA3).
+- **Primer ingreso:** el backend responde 409 `terms_required` sin guardar nada. El login pasa al
+  paso "Completá tu cuenta", dentro de la misma pantalla, como el de "verificá tu email":
+  - muestra la cuenta de Google elegida;
+  - nombre y apellido precargados con los de Google y editables;
+  - la casilla de términos sin marcar, con `PsTermsCheckbox`, la misma del registro.
+- **"Crear cuenta":** reenvía **el mismo ID token** con `acceptTerms`, nombre y apellido.
+  - Si pasó más de una hora y el token venció (401 `invalid_google_token`), vuelve al login con
+    "Pasó mucho tiempo. Tocá «Continuar con Google» de nuevo".
+  - "Cancelar" y "atrás" descartan el token.
+- **El ID token** permite iniciar sesión como esa persona durante una hora. Entre el 409 y "Crear
+  cuenta" queda solo en una variable privada de `LoginViewModel`. No va en el `UiState`, ni en el
+  `SavedStateHandle`, ni en los argumentos de navegación, que Android puede escribir en disco. Si
+  el sistema cierra la app en ese paso, se pierde y la persona vuelve a tocar el botón.
+  `GoogleCredentialResult.Success.toString()` lo oculta.
+- **Cerrar sesión** llama a `clearCredentialState()`, así el próximo ingreso con Google vuelve a
+  preguntar qué cuenta usar.
+- **Requisitos para probar:** el certificado que firma la app tiene que estar registrado en un
+  cliente Android del proyecto, y la cuenta de Google en "Usuarios de prueba"
+  ([30](30-infraestructura.md#certificados-de-debug)). El emulador necesita una imagen con Google
+  Play.
 
 ## 5. Modos tutor y pediatra
 
@@ -223,3 +254,14 @@ cuerpos y cualquier texto ingresado por el usuario (ADR-08).
 | Otras vacunas | `PsRoute.OtherVaccine(childId, vaccineId?)`: una pantalla para crear, editar y eliminar, con sugerencias que completan el nombre ("Antigripal", "Fiebre amarilla", "Fiebre hemorrágica argentina") (RF-VAC-05) |
 | Solo en línea | `NetworkMonitor` deshabilita registrar, editar y eliminar sin red, y la pantalla lo avisa. El calendario y los detalles se ven sin conexión |
 | Límites de texto | Los de SUP-24, con las constantes de `shared/api/vaccination`: la app valida antes de enviar y muestra un contador |
+
+## 13. Perfil y cuenta (I1-A3)
+
+| Tema | Implementación |
+|---|---|
+| Datos | `AccountRepository` (`AccountApiRepository`) contra `/api/v1/me`. `GET /me` y `PATCH /me` guardan la cuenta que devuelve el servidor con `SessionRepository.updateAccount`, sin tocar los tokens. Todo necesita conexión (RF-CTA-11) |
+| Datos actualizados y términos nuevos | `PasitosApplication` llama a `GET /me` al iniciar o restaurar la sesión, y cada vez que la app pasa a primer plano con sesión. Así se actualizan nombre, email (por ejemplo, después de confirmar un cambio desde la web) y `hasPassword`. Sin conexión falla y se ignora |
+| Términos nuevos (RN-CTA-02) | Si `GET /me` informa `pendingTermsVersion`, `PsApp` muestra `TermsUpdateScreen` en lugar de toda la app, sin "atrás": la casilla sin marcar (`PsTermsCheckbox`), "Aceptar y continuar" (`POST /me/consents`) y "Cerrar sesión", con el aviso de cambios sin sincronizar. Su ViewModel vive mientras viva la Activity, así que vuelve a su estado inicial al aceptar y al dejar de mostrarse: si los términos cambian otra vez con la app abierta, la casilla no aparece marcada |
+| Pantallas | En el perfil, la sección "Datos de la cuenta" abre una pantalla por dato (`PsRoute.EditName`, `ChangeEmail` y `ChangePassword`), porque cada cambio funciona distinto. Comparten `AccountFormScaffold`, que avisa si no hay conexión. Nombre y apellido se guardan al instante. El email pide la contraseña actual y muestra "Revisá tu email": no cambia hasta que se confirma (RF-CTA-11, CA1). La contraseña pide la actual y la nueva dos veces, con las reglas de RN-CTA-01, y cierra las demás sesiones (CA2) |
+| Cuentas sin contraseña (RF-CTA-11, CA4) | `AccountDto.hasPassword` es falso en las cuentas creadas con Google y en las que perdieron la contraseña por RN-CTA-04. La fila dice "Crear una contraseña": la pantalla manda el email de recuperación a la cuenta propia (`POST /auth/password-reset`, sin token) y avisa que, al crearla, se cierran todas las sesiones, también esta. "Email" pide crear la contraseña primero |
+| Última sincronización (RNF-OFF-04) | `SyncStatus` (`RoomSyncStatus`) expone `lastSyncedAt` de `sync_state` y la cantidad de cambios pendientes. El perfil muestra "Última sincronización: hoy a las 14:32 · 2 cambios sin sincronizar", en hora argentina ("hoy", "ayer" o la fecha) |

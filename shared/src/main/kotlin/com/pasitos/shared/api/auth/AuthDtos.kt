@@ -31,6 +31,23 @@ data class LoginRequest(
     val password: String,
 )
 
+/**
+ * `POST /auth/google` (RF-CTA-03). Si la cuenta de Google ya ingresó antes, o su email coincide con
+ * una cuenta existente (RN-CTA-04), solo se usa [idToken]. Si es el primer ingreso, el backend
+ * responde 409 `terms_required` hasta que llegue [acceptTerms] en `true`, con el nombre y el
+ * apellido que la persona confirmó: recién ahí crea la cuenta.
+ */
+@Serializable
+data class GoogleAuthRequest(
+    /** ID token que entrega Credential Manager. El email se toma de él, nunca del pedido. */
+    val idToken: String,
+    /** Aceptación expresa de la versión vigente de los términos (RN-CTA-02). */
+    val acceptTerms: Boolean = false,
+    /** Precargado en la app con el de Google; la persona puede editarlo. Solo para el primer ingreso. */
+    val firstName: String? = null,
+    val lastName: String? = null,
+)
+
 /** `POST /auth/refresh` (RF-CTA-06). */
 @Serializable
 data class RefreshRequest(
@@ -82,6 +99,12 @@ data class AccountDto(
     val isGuardian: Boolean,
     /** Último modo usado, para abrir la app en él (RF-CTA-04, CA1). Nulo si nunca eligió. */
     val lastMode: AccountMode?,
+    /**
+     * Falso en las cuentas creadas con Google y en las que perdieron la contraseña por RN-CTA-04:
+     * ven "Crear una contraseña" en lugar de "Cambiar contraseña" (RF-CTA-11, CA4). Verdadero por
+     * defecto, para leer las sesiones guardadas antes de que existiera.
+     */
+    val hasPassword: Boolean = true,
 )
 
 /** `GET /me` (RF-CTA-09). */

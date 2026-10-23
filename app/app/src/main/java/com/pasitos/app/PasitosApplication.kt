@@ -8,6 +8,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.pasitos.app.core.sync.SyncScheduler
 import com.pasitos.app.core.sync.SyncTrigger
+import com.pasitos.app.data.account.AccountRepository
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.auth.model.SessionState
 import dagger.hilt.android.HiltAndroidApp
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class PasitosApplication : Application(), Configuration.Provider {
@@ -32,6 +34,9 @@ class PasitosApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var authRepository: AuthRepository
+
+    @Inject
+    lateinit var accountRepository: AccountRepository
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -53,6 +58,7 @@ class PasitosApplication : Application(), Configuration.Provider {
                 if (signedIn) {
                     syncScheduler.schedulePeriodic()
                     syncScheduler.requestSync(SyncTrigger.APP_FOREGROUND)
+                    refreshAccount()
                 } else {
                     syncScheduler.cancelAll()
                 }
@@ -62,8 +68,18 @@ class PasitosApplication : Application(), Configuration.Provider {
             override fun onStart(owner: LifecycleOwner) {
                 if (authRepository.sessionState.value is SessionState.SignedIn) {
                     syncScheduler.requestSync(SyncTrigger.APP_FOREGROUND)
+                    refreshAccount()
                 }
             }
         })
+    }
+
+    /**
+     * Trae los datos de la cuenta y los términos pendientes (RN-CTA-02) cada vez que la app queda en
+     * primer plano con sesión: la sesión dura meses sin volver a iniciarla. Sin conexión falla y se
+     * ignora; se vuelve a intentar la próxima vez.
+     */
+    private fun refreshAccount() {
+        applicationScope.launch { accountRepository.refresh() }
     }
 }

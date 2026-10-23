@@ -13,7 +13,7 @@ Medidas técnicas que implementan los requerimientos de seguridad (`RNF-SEG`) y 
 | RNF-SEG-04 | Sesiones en tabla `sessions`; cada request valida `sid`; rotación del token de renovación con detección de reutilización ([11](11-backend.md#3-autenticación)) |
 | RNF-SEG-05 | `AccessPolicy` en cada servicio, 404 cuando no hay acceso, DTOs distintos según el rol (los de tutor no tienen campos privados), pruebas de matriz de permisos en la integración continua |
 | RNF-SEG-06 | Tabla `audit_log` de solo inserción, escrita por los servicios; limpieza a los 2 años |
-| RNF-SEG-07 | Plugin `RateLimit` de Ktor: 120 requests por minuto por cuenta; `/auth/login` y `/auth/password-reset` 10 por minuto por IP; búsqueda por matrícula 20 por hora por cuenta. Bloqueo por intentos fallidos (RN-CTA-05) |
+| RNF-SEG-07 | Plugin `RateLimit` de Ktor: 120 requests por minuto por cuenta; `/auth/login`, `/auth/google` y `/auth/password-reset` 10 por minuto por IP; búsqueda por matrícula 20 por hora por cuenta. Bloqueo por intentos fallidos (RN-CTA-05) |
 | RNF-SEG-08 | `FLAG_SECURE` en la ventana cuando el bloqueo está activado |
 | RNF-SEG-09 | `pg_dump` diario cifrado y enviado a un almacenamiento externo, con 14 copias diarias y 8 semanales. Restauración probada antes del piloto ([30](30-infraestructura.md#copias-de-seguridad)) |
 

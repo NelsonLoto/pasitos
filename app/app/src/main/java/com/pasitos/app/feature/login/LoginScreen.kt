@@ -1,5 +1,6 @@
 package com.pasitos.app.feature.login
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +39,7 @@ import com.pasitos.app.R
 import com.pasitos.app.core.designsystem.component.PsButton
 import com.pasitos.app.core.designsystem.component.PsButtonVariant
 import com.pasitos.app.core.designsystem.component.PsInputField
+import com.pasitos.app.core.designsystem.component.PsTermsCheckbox
 import com.pasitos.app.ui.theme.PsColor
 import com.pasitos.app.ui.theme.PsTheme
 import com.pasitos.app.ui.theme.PsType
@@ -49,9 +52,26 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    // La Activity: Credential Manager muestra el diálogo de Google sobre ella
+    val activityContext = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.navigateToHome.collect { onLoginSuccess() }
+    }
+
+    state.googleSignUp?.let { signUp ->
+        BackHandler(onBack = viewModel::onGoogleSignUpCancel)
+        GoogleSignUpContent(
+            state = signUp,
+            isLoading = state.isLoading,
+            generalError = state.generalError,
+            onFirstNameChange = viewModel::onGoogleFirstNameChange,
+            onLastNameChange = viewModel::onGoogleLastNameChange,
+            onAcceptTermsChange = viewModel::onGoogleAcceptTermsChange,
+            onSubmit = viewModel::onGoogleSignUpSubmit,
+            onCancelClick = viewModel::onGoogleSignUpCancel,
+        )
+        return
     }
 
     if (state.emailVerificationPending) {
@@ -73,10 +93,94 @@ fun LoginScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
         onSubmit = viewModel::onSubmit,
-        onGoogleSignInClick = viewModel::onGoogleSignInClick,
+        onGoogleSignInClick = { viewModel.onGoogleSignInClick(activityContext) },
         onRegisterClick = onRegisterClick,
         onForgotPasswordClick = onForgotPasswordClick,
     )
+}
+
+/** RF-CTA-03, CA1: primer ingreso con Google. Nada se guarda hasta "Crear cuenta". */
+@Composable
+private fun GoogleSignUpContent(
+    state: GoogleSignUpUiState,
+    isLoading: Boolean,
+    generalError: String?,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onAcceptTermsChange: (Boolean) -> Unit,
+    onSubmit: () -> Unit,
+    onCancelClick: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+            .padding(top = 100.dp, bottom = 24.dp),
+    ) {
+        Text(text = "🌱", fontSize = 40.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Completá tu cuenta", style = PsType.H2, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Vas a crear tu cuenta de Pasitos con ${state.email ?: "tu cuenta de Google"}. Revisá cómo querés que figure tu nombre.",
+            style = PsType.BodySmall,
+            color = PsColor.TextSecondary,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+        PsInputField(
+            label = "Nombre",
+            value = state.firstName,
+            onValueChange = onFirstNameChange,
+            errorText = state.firstNameError,
+            enabled = !isLoading,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        PsInputField(
+            label = "Apellido",
+            value = state.lastName,
+            onValueChange = onLastNameChange,
+            errorText = state.lastNameError,
+            enabled = !isLoading,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        PsTermsCheckbox(
+            checked = state.acceptTerms,
+            onCheckedChange = onAcceptTermsChange,
+            enabled = !isLoading,
+            errorText = state.termsError,
+        )
+
+        generalError?.let { error ->
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = error, style = PsType.BodySmall, color = MaterialTheme.colorScheme.error)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        PsButton(
+            text = "Crear cuenta",
+            onClick = onSubmit,
+            variant = PsButtonVariant.Primary,
+            enabled = !isLoading,
+            isLoading = isLoading,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Cancelar",
+            style = PsType.BodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable(enabled = !isLoading, onClick = onCancelClick),
+        )
+    }
 }
 
 /** RF-CTA-02, CA1: pantalla "Verificá tu email", con reenviar y "Ya verifiqué". */
@@ -304,6 +408,23 @@ private fun EmailVerificationPendingPreview() {
             onResendClick = {},
             onAlreadyVerifiedClick = {},
             onBackClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Completá tu cuenta (Google)")
+@Composable
+private fun GoogleSignUpPreview() {
+    PsTheme {
+        GoogleSignUpContent(
+            state = GoogleSignUpUiState(email = "familia@gmail.com", firstName = "Ana", lastName = "Pérez"),
+            isLoading = false,
+            generalError = null,
+            onFirstNameChange = {},
+            onLastNameChange = {},
+            onAcceptTermsChange = {},
+            onSubmit = {},
+            onCancelClick = {},
         )
     }
 }

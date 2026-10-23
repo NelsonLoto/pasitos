@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 1.5.3 |
-| **Fecha** | 19/10/2026 |
+| **Versión** | 1.5.5 |
+| **Fecha** | 23/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Reemplaza a** | `docs/Documento_Funcional_App_Nino_Sano.docx` (v1.0, 17/08/2026) como documento de referencia funcional |
 
@@ -91,6 +91,8 @@ en el registro de cambios.
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.5.5 | 23/10/2026 | RF-CTA-11 CA4: una cuenta sin contraseña la crea con el email de recuperación, y hasta tenerla no puede cambiar su email. RN-CTA-02: los términos nuevos se piden cada vez que la app se abre con conexión, aunque la sesión siga iniciada, y hasta aceptarlos solo se puede cerrar sesión | Decisiones revisadas con el equipo al implementar el perfil y la cuenta en la app (#49): con Google no había forma de cambiar la contraseña ni el email, y con sesiones de meses los términos nuevos no se pedían nunca |
+| 1.5.4 | 22/10/2026 | RF-CTA-03 CA1: en el primer ingreso con Google la persona confirma nombre y apellido, y no se guarda ningún dato hasta que acepta los términos. RN-CTA-04: con el email de una cuenta sin verificar, el inicio con Google la verifica, le borra la contraseña y le cierra las sesiones (D-69); si el email ya está asociado a otra cuenta de Google, no se ingresa | Decisiones revisadas con el equipo al implementar el inicio con Google en el backend (#40): la regla anterior dejaba la contraseña y la sesión de quien hubiera registrado el email antes que su dueño |
 | 1.5.3 | 19/10/2026 | RF-VAC-04 CA1: con "Sí", el tutor ve todas las dosis anteriores marcadas y confirma, con la posibilidad de desmarcar alguna, en lugar de que queden aplicadas en el momento | Un toque por error registraba de golpe todas las dosis anteriores de un niño, y deshacerlo era borrarlas una por una; decidido al implementar las vacunas en la app (#53) |
 | 1.5.2 | 19/10/2026 | Límites de los textos de vacunas en SUP-24: lote hasta 40 caracteres, vacunatorio o lugar hasta 120, nombre de otra vacuna hasta 120 y su nota hasta 280 (RF-VAC-02, RF-VAC-05) | RNF-PRI-03 pide límites para los textos libres y la SPEC no los tenía; decididos al implementar la vacunación en el backend (#46) |
 | 1.5.1 | 19/10/2026 | Valores iniciales de los rangos absolutos de las medidas al nacer, fuera de los cuales se pide revisar el valor (RF-HIJ-01, CA4): en I1 son los únicos límites, porque el puntaje Z llega con el motor de crecimiento de I2 (PVM-06) | Al implementar el alta de hijos en la app (#50): RN-CRE-11 preveía rangos absolutos configurables sin valores |

@@ -12,4 +12,20 @@ data class LoginUiState(
     val emailVerificationPending: Boolean = false,
     val isResendingVerification: Boolean = false,
     val verificationMessage: String? = null,
+    /** RF-CTA-03, CA1: primer ingreso con Google, antes de crear la cuenta. */
+    val googleSignUp: GoogleSignUpUiState? = null,
+)
+
+/**
+ * "Completá tu cuenta": nombre y apellido precargados con los de Google y la casilla de términos
+ * sin marcar (RN-CTA-02). El ID token no está acá: lo guarda el ViewModel, solo en memoria.
+ */
+data class GoogleSignUpUiState(
+    val email: String?,
+    val firstName: String,
+    val lastName: String,
+    val acceptTerms: Boolean = false,
+    val firstNameError: String? = null,
+    val lastNameError: String? = null,
+    val termsError: String? = null,
 )

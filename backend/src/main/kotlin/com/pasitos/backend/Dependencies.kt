@@ -1,5 +1,6 @@
 package com.pasitos.backend
 
+import com.auth0.jwt.interfaces.RSAKeyProvider
 import com.pasitos.backend.account.AccountService
 import com.pasitos.backend.auth.AccountRepository
 import com.pasitos.backend.auth.AuthService
@@ -8,6 +9,7 @@ import com.pasitos.backend.auth.EmailTokenRepository
 import com.pasitos.backend.auth.JwtConfig
 import com.pasitos.backend.auth.JwtService
 import com.pasitos.backend.auth.SessionRepository
+import com.pasitos.backend.auth.google.GoogleTokenVerifier
 import com.pasitos.backend.child.ChildRepository
 import com.pasitos.backend.child.ChildService
 import com.pasitos.backend.child.PatientOwnershipRepository
@@ -40,9 +42,10 @@ import java.time.Clock
 /**
  * Crea los servicios y repositorios a mano, sin framework de inyección (11 · Backend §1). Cada
  * dominio nuevo agrega aquí su repositorio y su servicio. Todo usa el mismo [clock], que las
- * pruebas reemplazan para adelantar la hora.
+ * pruebas reemplazan para adelantar la hora. Las claves de Google ([googleKeys]) también: las pruebas
+ * firman sus tokens con una clave propia, sin consultar a Google.
  */
-class Dependencies(config: ApplicationConfig, clock: Clock) {
+class Dependencies(config: ApplicationConfig, clock: Clock, googleKeys: RSAKeyProvider) {
 
     private val argentinaClock = ArgentinaClock(clock)
 
@@ -75,6 +78,7 @@ class Dependencies(config: ApplicationConfig, clock: Clock) {
         consents = consentRepository,
         emailTokens = emailTokenRepository,
         jwt = jwtService,
+        google = GoogleTokenVerifier(config.property("google.clientId").getString(), googleKeys, clock),
         mail = mailService,
         clock = argentinaClock,
         termsVersion = termsVersion,

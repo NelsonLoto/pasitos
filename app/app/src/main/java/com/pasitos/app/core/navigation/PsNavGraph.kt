@@ -21,6 +21,9 @@ import com.pasitos.app.feature.measurementhistory.MeasurementHistoryScreen
 import com.pasitos.app.feature.othervaccine.OtherVaccineScreen
 import com.pasitos.app.feature.previousdoses.PreviousDosesScreen
 import com.pasitos.app.feature.profile.ProfileScreen
+import com.pasitos.app.feature.profile.account.ChangeEmailScreen
+import com.pasitos.app.feature.profile.account.ChangePasswordScreen
+import com.pasitos.app.feature.profile.account.EditNameScreen
 import com.pasitos.app.feature.register.RegisterScreen
 import com.pasitos.app.feature.reportexport.ReportExportScreen
 import com.pasitos.app.feature.vaccination.VaccinationCalendarScreen
@@ -200,6 +203,9 @@ fun PsNavGraph(
                 onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
                 onExportReportsClick = { navController.navigate(PsRoute.ReportExport) },
                 isProfessional = isProfessional,
+                onEditNameClick = { navController.navigate(PsRoute.EditName) },
+                onChangeEmailClick = { navController.navigate(PsRoute.ChangeEmail) },
+                onChangePasswordClick = { navController.navigate(PsRoute.ChangePassword) },
             )
         }
         composable<PsRoute.ProfessionalHome> {
@@ -224,6 +230,21 @@ fun PsNavGraph(
         }
         composable<PsRoute.ProfessionalVaccines> {
             ProfessionalVaccinesScreen(onPatientsClick = { navController.navigate(PsRoute.ProfessionalPatients) })
+        }
+        composable<PsRoute.EditName> {
+            EditNameScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable<PsRoute.ChangeEmail> {
+            ChangeEmailScreen(
+                onBackClick = { navController.popBackStack() },
+                // Sin contraseña, primero hay que crearla (RF-CTA-11, CA4)
+                onCreatePasswordClick = {
+                    navController.navigate(PsRoute.ChangePassword) { popUpTo(PsRoute.ChangeEmail) { inclusive = true } }
+                },
+            )
+        }
+        composable<PsRoute.ChangePassword> {
+            ChangePasswordScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

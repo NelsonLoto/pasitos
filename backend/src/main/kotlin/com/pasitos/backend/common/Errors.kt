@@ -35,6 +35,9 @@ open class LockedException(code: ErrorCode, message: String) : ApiException(code
 /** Regla de negocio incumplida; [rule] es su ID en la SPEC, por ejemplo `RN-CRE-12`. */
 class BusinessRuleException(val rule: String, message: String) : ApiException(ErrorCode.BUSINESS_RULE, message)
 
+/** Un servicio externo del que depende el pedido no respondió, por ejemplo Google al verificar un token. */
+open class ServiceUnavailableException(code: ErrorCode, message: String) : ApiException(code, message)
+
 fun Application.configureErrorHandling() {
     install(StatusPages) {
         exception<ApiException> { call, cause ->
@@ -70,5 +73,6 @@ private fun ApiException.httpStatus(): HttpStatusCode = when (this) {
     is ConflictException -> HttpStatusCode.Conflict
     is LockedException -> HttpStatusCode.Locked
     is BusinessRuleException -> HttpStatusCode.UnprocessableEntity
+    is ServiceUnavailableException -> HttpStatusCode.ServiceUnavailable
     else -> HttpStatusCode.InternalServerError
 }
