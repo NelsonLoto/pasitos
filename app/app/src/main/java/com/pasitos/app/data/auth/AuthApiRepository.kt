@@ -8,10 +8,12 @@ import com.pasitos.app.core.network.withoutSession
 import com.pasitos.app.core.process.ProcessRestarter
 import com.pasitos.app.core.sync.SyncScheduler
 import com.pasitos.app.core.sync.local.PendingMutationDao
+import com.pasitos.app.data.auth.google.GoogleCredentials
 import com.pasitos.app.data.auth.model.AuthSession
 import com.pasitos.app.data.auth.model.SessionState
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.EmailVerificationRequest
+import com.pasitos.shared.api.auth.GoogleAuthRequest
 import com.pasitos.shared.api.auth.LoginRequest
 import com.pasitos.shared.api.auth.MeResponse
 import com.pasitos.shared.api.auth.PasswordResetRequest
@@ -42,6 +44,7 @@ class AuthApiRepository @Inject constructor(
     private val syncScheduler: SyncScheduler,
     private val sessionRevocation: SessionRevocation,
     private val processRestarter: ProcessRestarter,
+    private val googleCredentials: GoogleCredentials,
 ) : AuthRepository {
 
     override val sessionState: StateFlow<SessionState> = sessionRepository.state
@@ -57,8 +60,26 @@ class AuthApiRepository @Inject constructor(
             }
         }
 
-    override suspend fun loginWithGoogle(): Result<AuthSession> =
-        Result.failure(Exception("Muy pronto vas a poder ingresar con Google. Por ahora, usá tu email."))
+    override suspend fun loginWithGoogle(
+        idToken: String,
+        acceptTerms: Boolean,
+        firstName: String?,
+        lastName: String?,
+    ): Result<AuthSession> =
+        signIn(HttpStatusCode.OK) {
+            httpClient.post("/api/v1/auth/google") {
+                withoutSession()
+                contentType(ContentType.Application.Json)
+                setBody(
+                    GoogleAuthRequest(
+                        idToken = idToken,
+                        acceptTerms = acceptTerms,
+                        firstName = firstName?.trim(),
+                        lastName = lastName?.trim(),
+                    )
+                )
+            }
+        }
 
     override suspend fun register(
         firstName: String,
@@ -124,6 +145,7 @@ class AuthApiRepository @Inject constructor(
         // Desde acá la limpieza termina aunque el usuario salga de la pantalla
         withContext(NonCancellable) {
             if (!revoked) scheduleRevocation()
+            googleCredentials.clear()
             // Antes de borrar la base, para que ninguna sincronización escriba en ella
             syncScheduler.cancelAll()
             sessionRepository.clear()
