@@ -29,7 +29,7 @@ Así hay **un solo camino** para cada escritura sincronizable, sea con o sin con
 |---|---|---|
 | `POST /auth/register` | Registro con email y contraseña, consentimiento y perfiles | RF-CTA-01 |
 | `POST /auth/login` | Inicio de sesión. Devuelve tokens de acceso y renovación | RF-CTA-04 |
-| `POST /auth/google` | Inicio o registro con ID token de Google | RF-CTA-03 |
+| `POST /auth/google` | Inicio o registro con ID token de Google: `{ idToken, acceptTerms, firstName, lastName }`. En el primer ingreso responde 409 `terms_required` hasta recibir `acceptTerms` con nombre y apellido ([11](11-backend.md#inicio-con-google-i1-b2)) | RF-CTA-03 |
 | `POST /auth/refresh` | Rota el token de renovación | RF-CTA-06 |
 | `POST /auth/logout` | Revoca la sesión actual | RF-CTA-07 |
 | `POST /auth/email-verification` | Reenvía el email de verificación | RF-CTA-02 |

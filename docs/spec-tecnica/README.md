@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.26 |
+| **Versión** | 1.2.27 |
 | **Fecha** | 22/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
-| **Implementa** | [SPEC funcional v1.5.3](../spec/README.md) |
+| **Implementa** | [SPEC funcional v1.5.4](../spec/README.md) |
 
 ## Propósito
 
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.27 | 22/10/2026 | Inicio con Google en el backend: `GoogleTokenVerifier` y `GooglePublicKeys` con `java-jwt` y `jwks-rsa` 0.24.1 (firma RS256, `iss`, `aud` exacto, vencimiento con 60 segundos de tolerancia y `email_verified`; claves en caché un día y como mucho 10 pedidos por minuto); búsqueda por `google_subject` y después por email; 409 `terms_required` sin guardar nada en el primer ingreso; cuenta sin verificar: se verifica, se borra la contraseña y se cierran sus sesiones; errores `invalid_google_token` (401) y `google_unavailable` (503); `GOOGLE_CLIENT_ID` con el cliente web de `pasitos-751c4` por defecto ([11](11-backend.md#inicio-con-google-i1-b2), [12](12-api.md), [01](01-stack.md), [20](20-seguridad.md)); implementa la SPEC funcional 1.5.4 | Decisiones tomadas al implementar el inicio con Google en el backend, revisadas una por una con el equipo (#40) |
 | 1.2.26 | 22/10/2026 | Proyecto de Google Cloud y Firebase `pasitos-751c4`: cuenta dueña del equipo, pantalla de consentimiento en estado "Prueba", ID del cliente web (el `aud` del backend y el `serverClientId` de la app), un cliente Android por cada clave de debug y `google-services.json` para I6 ([30](30-infraestructura.md#proyecto-de-google-cloud-y-firebase)); referencias en [11](11-backend.md#7-configuración) y [15](15-android.md#4-sesión); P-05 resuelto ([92](92-pendientes.md)) | T-08 (#62), con las decisiones revisadas con el equipo |
 | 1.2.25 | 19/10/2026 | Vacunas en la app: `ReferenceData`, registrado con `@IntoSet` y refrescado por `SyncWorker` después de cada sincronización con su `ETag`, sin hacerla fallar ([14](14-sincronizacion.md#61-implementación-en-la-app-i1-a4)); calendario en una fila JSON de Room (`vaccination_calendar`), dosis y otras vacunas por sincronización (`APPLIED_DOSE`, `OTHER_VACCINE`) y escrituras por REST con `withLock`; estados con `doseStatuses()` de `shared`; calendario agrupado por edad con resumen, filtro y secciones, detalle con registro y edición, carga retroactiva después del alta y desde Vacunas, y otras vacunas ([15](15-android.md#12-vacunas-i1-a7)); `PsBadge` suma el tono `Neutral` y un ícono; `DoseStatusResolver.kt`, `VaccineDetailViewModel.kt` y `VaccineDetailScreen.kt` salen de la lista de `LocalDate.now()` ([31](31-calidad-y-ci.md)); implementa la SPEC funcional 1.5.3 | Decisiones tomadas al implementar las vacunas en la app, revisadas una por una con el equipo (#53) |
 | 1.2.24 | 19/10/2026 | Mediciones por sincronización: `MEASUREMENT` es la primera entidad que escribe por `/sync/push` (ADR-28), con `MeasurementSyncEntity` cubriendo alta y edición (mismo `id`, RF-CRE-02) en la misma función; se borraron los endpoints REST viejos en español (`POST`/`GET /children/{id}/measurements`); rango absoluto de entrada (RN-CRE-11) y la validación de forma de medición desde los 60 meses (RN-CRE-03) viven en `shared/growth/MeasurementValidation.kt` para que la app las repita antes de enviar; editar o borrar exige ser el autor, si no se responde igual que si no existiera; RN-CRE-12 (una medición por autor y fecha) se revisa excluyendo la propia fila al editar ([11](11-backend.md), [14](14-sincronizacion.md), [10](10-modulo-compartido.md)) | Decisiones tomadas al implementar las mediciones por sincronización, revisadas una por una con el equipo (#44) |
