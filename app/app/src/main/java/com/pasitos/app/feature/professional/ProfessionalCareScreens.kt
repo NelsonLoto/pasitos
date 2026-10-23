@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.pasitos.app.core.designsystem.component.PsButton
 import com.pasitos.app.core.designsystem.component.PsButtonVariant
 import com.pasitos.app.core.designsystem.component.PsCard
@@ -38,8 +39,16 @@ import com.pasitos.shared.vaccination.DoseStatus
 import java.time.LocalDate
 
 @Composable
-fun ProfessionalGrowthScreen(onPatientsClick: () -> Unit) {
-    var date by remember { mutableStateOf(LocalDate.now()) }
+fun ProfessionalGrowthScreen(
+    onPatientsClick: () -> Unit,
+    viewModel: ProfessionalGrowthViewModel = hiltViewModel(),
+) {
+    ProfessionalGrowthContent(onPatientsClick = onPatientsClick, today = viewModel.today())
+}
+
+@Composable
+private fun ProfessionalGrowthContent(onPatientsClick: () -> Unit, today: LocalDate) {
+    var date by remember { mutableStateOf(today) }
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
     var headCircumference by remember { mutableStateOf("") }
@@ -52,7 +61,7 @@ fun ProfessionalGrowthScreen(onPatientsClick: () -> Unit) {
                 Text("No hay pacientes vinculados a tu cuenta.", style = PsType.Caption, color = PsColor.TextSecondary, modifier = Modifier.padding(top = 4.dp))
             }
             Text("NUEVA MEDICIÓN", style = PsType.Caption, color = PsColor.TextSecondary, modifier = Modifier.padding(top = 18.dp, bottom = 8.dp))
-            PsDatePickerField(label = "Fecha", selectedDate = date, onDateSelected = { date = it })
+            PsDatePickerField(label = "Fecha", selectedDate = date, onDateSelected = { date = it }, maxDate = today)
             Spacer(Modifier.height(12.dp))
             PsInputField("Peso (kg)", weight, { weight = it }, placeholder = "Ej: 7,8", keyboardType = KeyboardType.Decimal)
             Spacer(Modifier.height(12.dp))
@@ -103,5 +112,5 @@ private fun DoseStatus.professionalLabel(): String = when (this) {
 @Preview(showBackground = true)
 @Composable
 private fun ProfessionalGrowthPreview() {
-    PsTheme { ProfessionalGrowthScreen(onPatientsClick = {}) }
+    PsTheme { ProfessionalGrowthContent(onPatientsClick = {}, today = LocalDate.of(2026, 10, 23)) }
 }

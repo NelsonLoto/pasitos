@@ -27,7 +27,6 @@ import com.pasitos.app.core.designsystem.component.ChildAvatar
 import com.pasitos.app.core.designsystem.component.childAvatarColor
 import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ageAndSexLabel
-import java.time.LocalDate
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -141,7 +140,7 @@ fun ProfessionalPatientsScreen(
                         ChildAvatar(patient.avatarKey, patient.firstName.take(1).uppercase(), childAvatarColor(patient.id), size = 46.dp)
                         Column(Modifier.padding(start = 12.dp)) {
                             Text("${patient.firstName} ${patient.lastName}", style = PsType.BodyMedium)
-                            Text(patient.ageAndSexLabel(LocalDate.now()), style = PsType.Caption, color = PsColor.TextSecondary)
+                            Text(patient.ageAndSexLabel(viewModel.today()), style = PsType.Caption, color = PsColor.TextSecondary)
                         }
                     }
                 }
