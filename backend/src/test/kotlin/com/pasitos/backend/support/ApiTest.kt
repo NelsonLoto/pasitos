@@ -1,5 +1,6 @@
 package com.pasitos.backend.support
 
+import com.auth0.jwt.interfaces.RSAKeyProvider
 import com.pasitos.backend.module
 import com.pasitos.shared.api.auth.AuthResponse
 import com.pasitos.shared.api.auth.RegisterRequest
@@ -27,10 +28,13 @@ import kotlin.test.assertEquals
 
 /**
  * Levanta el backend completo contra el PostgreSQL de prueba, con todas las tablas vacías. Con
- * [clock] la prueba controla la hora del backend: tokens, sesiones y bloqueos vencen según él.
+ * [clock] la prueba controla la hora del backend: tokens, sesiones y bloqueos vencen según él. Los
+ * ID tokens de Google se verifican con [googleKeys], las de [TestGoogle] salvo que la prueba pida
+ * otras.
  */
 fun apiTest(
     clock: Clock = Clock.systemUTC(),
+    googleKeys: RSAKeyProvider = TestGoogle.keys,
     block: suspend ApplicationTestBuilder.(client: HttpClient) -> Unit,
 ) = testApplication {
     TestDatabase.reset()
@@ -38,9 +42,10 @@ fun apiTest(
     environment {
         config = TestDatabase.config().apply {
             TestMailServer.config().forEach { (path, value) -> put(path, value) }
+            put("google.clientId", TestGoogle.CLIENT_ID)
         }
     }
-    application { module(clock) }
+    application { module(clock, googleKeys) }
     val client = createClient {
         install(ContentNegotiation) { json() }
     }

@@ -36,7 +36,7 @@ incorporan en el incremento que las necesita, con la última versión estable co
 | HikariCP | 7.1.0 | Pool de conexiones |
 | Flyway | 13.9.0 | Migraciones |
 | java-jwt (Auth0) | 4.6.2 | Tokens de acceso |
-| jwks-rsa (Auth0) | Nueva | Verificación de tokens de Google |
+| jwks-rsa (Auth0) | 0.24.1 | Claves públicas de Google para verificar sus ID tokens (I1-B2) |
 | bcrypt (at.favre) | 0.10.2 | Contraseñas, costo 12 |
 | db-scheduler | Nueva | Tareas programadas persistidas en PostgreSQL (ADR-18) |
 | Thymeleaf (vía `ktor-server-thymeleaf`) | 3.6.0 | Plantillas del panel, páginas públicas y PDFs (ADR-09, ADR-10) |
