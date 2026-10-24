@@ -80,9 +80,12 @@ class ChildProfileViewModel @Inject constructor(
 
     fun onConfirmDeletion() {
         if (!uiState.value.canConfirmDeletion) return
+        val leaving = deletion.value.deletion == DeletionStep.ConfirmLeave
         viewModelScope.launch {
             deletion.update { it.copy(isWorking = true, error = null) }
-            childRepository.deleteChild(childId)
+            // Con otros tutores, dejar de serlo avisa al principal (RF-HIJ-07, CA2)
+            val result = if (leaving) childRepository.leaveChild(childId) else childRepository.deleteChild(childId)
+            result
                 .onSuccess {
                     deletion.update { it.copy(isWorking = false, deletion = DeletionStep.None) }
                     _deleted.send(Unit)

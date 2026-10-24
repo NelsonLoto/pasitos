@@ -107,10 +107,12 @@ class FakeChildRepository(children: List<Child> = emptyList()) : ChildRepository
     var onlyGuardian: Result<Boolean> = Result.success(true)
     var saveResult: Result<Unit> = Result.success(Unit)
     var deleteResult: Result<Unit> = Result.success(Unit)
+    var leaveResult: Result<Unit> = Result.success(Unit)
 
     val added = mutableListOf<Pair<ChildInput, Boolean>>()
     val updated = mutableListOf<Pair<String, ChildInput>>()
     val deleted = mutableListOf<String>()
+    val left = mutableListOf<String>()
 
     override fun observeRole(childId: String): Flow<GuardianRole?> = state.map { role }
 
@@ -132,6 +134,9 @@ class FakeChildRepository(children: List<Child> = emptyList()) : ChildRepository
 
     override suspend fun deleteChild(childId: String): Result<Unit> =
         deleteResult.onSuccess { deleted += childId }
+
+    override suspend fun leaveChild(childId: String): Result<Unit> =
+        leaveResult.onSuccess { left += childId }
 
     override suspend fun selectChild(childId: String) {
         activeChildId.value = childId

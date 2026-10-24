@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
@@ -48,6 +49,7 @@ fun ProfileScreen(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    onInvitationsClick: () -> Unit,
     isProfessional: Boolean = false,
     onEditNameClick: () -> Unit,
     onChangeEmailClick: () -> Unit,
@@ -61,6 +63,7 @@ fun ProfileScreen(
         onMyChildrenClick = onMyChildrenClick,
         onNotificationsClick = onNotificationsClick,
         onExportReportsClick = onExportReportsClick,
+        onInvitationsClick = onInvitationsClick,
         isProfessional = isProfessional,
         onEditNameClick = onEditNameClick,
         onChangeEmailClick = onChangeEmailClick,
@@ -102,6 +105,7 @@ private fun ProfileContent(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    onInvitationsClick: () -> Unit = {},
     isProfessional: Boolean = false,
     onEditNameClick: () -> Unit,
     onChangeEmailClick: () -> Unit,
@@ -157,6 +161,11 @@ private fun ProfileContent(
                 MenuGroupCard {
                     PsMenuRow(icon = Icons.Filled.Person, label = if (isProfessional) "Pacientes y solicitudes" else "Mis hijos/as", onClick = onMyChildrenClick)
                     HorizontalDivider(color = PsColor.Border)
+                    if (!isProfessional) {
+                        // RF-HIJ-06: invitaciones de tutor recibidas
+                        PsMenuRow(icon = Icons.Filled.MarkEmailUnread, label = "Invitaciones", onClick = onInvitationsClick)
+                        HorizontalDivider(color = PsColor.Border)
+                    }
                     PsMenuRow(icon = Icons.Filled.Notifications, label = "Notificaciones", onClick = onNotificationsClick)
                     HorizontalDivider(color = PsColor.Border)
                     PsMenuRow(icon = Icons.Filled.Description, label = "Exportar reportes", onClick = onExportReportsClick)

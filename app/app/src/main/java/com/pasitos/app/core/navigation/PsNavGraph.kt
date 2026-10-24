@@ -13,7 +13,9 @@ import com.pasitos.app.feature.childprofile.ChildProfileScreen
 import com.pasitos.app.feature.childselector.ChildSelectorScreen
 import com.pasitos.app.feature.emailverification.EmailVerificationScreen
 import com.pasitos.app.feature.growthchart.GrowthChartScreen
+import com.pasitos.app.feature.guardians.GuardiansScreen
 import com.pasitos.app.feature.home.HomeScreen
+import com.pasitos.app.feature.invitations.InvitationsScreen
 import com.pasitos.app.feature.login.ForgotPasswordScreen
 import com.pasitos.app.feature.login.LoginScreen
 import com.pasitos.app.feature.measurement.MeasurementFormScreen
@@ -66,9 +68,11 @@ fun PsNavGraph(
         composable<PsRoute.EmailVerification> { backStackEntry ->
             val route = backStackEntry.toRoute<PsRoute.EmailVerification>()
             EmailVerificationScreen(
-                onVerified = {
+                onVerified = { hasInvitations ->
                     val destination = when {
                         isProfessional -> PsRoute.ProfessionalHome
+                        // Lo invitaron antes de registrarse: primero ve las invitaciones (RF-HIJ-05, CA2)
+                        hasInvitations -> PsRoute.Invitations(afterRegistration = true)
                         route.afterVerifiedGoHome -> PsRoute.Home
                         else -> PsRoute.ChildForm()
                     }
@@ -115,7 +119,25 @@ fun PsNavGraph(
             ChildProfileScreen(
                 onBackClick = { navController.popBackStack() },
                 onEditClick = { childId -> navController.navigate(PsRoute.ChildForm(childId)) },
+                onGuardiansClick = { childId -> navController.navigate(PsRoute.Guardians(childId)) },
                 onDeleted = { navController.popBackStack() },
+            )
+        }
+        composable<PsRoute.Guardians> {
+            GuardiansScreen(
+                onBackClick = { navController.popBackStack() },
+                // Dejó de ser tutor: el perfil del niño tampoco existe ya en el teléfono
+                onLeft = { navController.popBackStack<PsRoute.ChildProfile>(inclusive = true) },
+            )
+        }
+        composable<PsRoute.Invitations> {
+            InvitationsScreen(
+                onBackClick = { navController.popBackStack() },
+                onContinue = { goHome ->
+                    navController.navigate(if (goHome) PsRoute.Home else PsRoute.ChildForm()) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                },
             )
         }
         composable<PsRoute.Home> {
@@ -126,6 +148,7 @@ fun PsNavGraph(
                 onVaccinesClick = { navController.navigate(PsRoute.VaccinationCalendar) },
                 onAdviceClick = { navController.navigate(PsRoute.AdviceList) },
                 onAddChildClick = { navController.navigate(PsRoute.ChildForm()) },
+                onInvitationsClick = { navController.navigate(PsRoute.Invitations()) },
             )
         }
         composable<PsRoute.MeasurementForm> { entry ->
@@ -213,6 +236,7 @@ fun PsNavGraph(
                 },
                 onNotificationsClick = { navController.navigate(PsRoute.NotificationCenter) },
                 onExportReportsClick = { navController.navigate(PsRoute.ReportExport) },
+                onInvitationsClick = { navController.navigate(PsRoute.Invitations()) },
                 isProfessional = isProfessional,
                 onEditNameClick = { navController.navigate(PsRoute.EditName) },
                 onChangeEmailClick = { navController.navigate(PsRoute.ChangeEmail) },

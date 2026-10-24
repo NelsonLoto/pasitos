@@ -64,6 +64,7 @@ fun HomeScreen(
     onVaccinesClick: () -> Unit,
     onAdviceClick: () -> Unit,
     onAddChildClick: () -> Unit,
+    onInvitationsClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,6 +77,7 @@ fun HomeScreen(
         onVaccinesClick = onVaccinesClick,
         onAdviceClick = onAdviceClick,
         onAddChildClick = onAddChildClick,
+        onInvitationsClick = onInvitationsClick,
     )
 }
 
@@ -88,6 +90,7 @@ private fun HomeContent(
     onVaccinesClick: () -> Unit,
     onAdviceClick: () -> Unit,
     onAddChildClick: () -> Unit,
+    onInvitationsClick: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -138,6 +141,26 @@ private fun HomeContent(
                 .padding(top = 6.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // RF-HIJ-06: también sin hijos, para quien se registró por una invitación (RF-HIJ-05, CA2)
+            state.invitationsText?.let { text ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onInvitationsClick)
+                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), shape = RoundedCornerShape(14.dp))
+                        .padding(14.dp),
+                ) {
+                    Text(text = text, style = PsType.BodyMedium)
+                    Text(
+                        text = if (state.invitations.size == 1) "Ver invitación →" else "Ver invitaciones →",
+                        style = PsType.Caption,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 5.dp),
+                    )
+                }
+            }
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
