@@ -46,6 +46,7 @@ import com.pasitos.app.data.child.model.Child
 import com.pasitos.app.data.child.model.ChildSex
 import com.pasitos.app.data.child.model.ageAndSexLabel
 import com.pasitos.app.data.child.model.ageLabel
+import com.pasitos.app.data.child.model.toDecimalText
 import com.pasitos.app.data.measurement.model.Measurement
 import com.pasitos.app.ui.theme.PsColor
 import com.pasitos.app.ui.theme.PsTheme
@@ -148,7 +149,7 @@ private fun HomeContent(
                     StatCard(
                         icon = Icons.Filled.Scale,
                         label = "ÚLTIMO PESO",
-                        value = "${"%.1f".format(lastMeasurement.weightKg)} kg · ${lastMeasurement.date.format(HomeDateFormatter)}",
+                        value = "${lastMeasurement.weightKg.toDecimalText()} kg · ${lastMeasurement.date.format(HomeDateFormatter)}",
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
@@ -158,7 +159,7 @@ private fun HomeContent(
                     StatCardEmpty(
                         label = "ÚLTIMO PESO",
                         message = "Todavía no registraste mediciones.",
-                        actionLabel = "Registrar medición →",
+                        actionLabel = "Registrar medición →".takeUnless { state.activeChild?.finalized == true },
                         onClick = { state.activeChild?.let { onMeasurementClick(it.id) } },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
@@ -232,13 +233,14 @@ private fun HomeContent(
 private fun StatCardEmpty(
     label: String,
     message: String,
-    actionLabel: String,
+    /** Nulo si no hay nada que ofrecer, por ejemplo cargar mediciones en un perfil finalizado (RF-CRE-01, CA6). */
+    actionLabel: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .then(if (actionLabel != null) Modifier.clickable(onClick = onClick) else Modifier)
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(14.dp))
             .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp))
             .padding(13.dp),
@@ -250,7 +252,7 @@ private fun StatCardEmpty(
             color = PsColor.TextSecondary,
             modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
         )
-        Text(text = actionLabel, style = PsType.Caption, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+        actionLabel?.let { Text(text = it, style = PsType.Caption, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary) }
     }
 }
 
