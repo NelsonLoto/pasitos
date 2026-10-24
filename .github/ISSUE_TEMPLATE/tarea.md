@@ -12,9 +12,10 @@ assignees: []
 > 2. No hay una rama remota con su número (`git fetch --prune` y `git branch -r | grep "/<número>-"`).
 > 3. No hay un PR abierto que lo mencione (`gh pr list --search "<número>"`).
 > 4. Las tareas de las que depende están en `Hecho`.
+> 5. Tu `develop` local tiene lo último de GitHub (`git rev-list --count develop..origin/develop` da `0`); si no, actualizalo antes de crear la rama.
 >
-> Si algo falla, no la tomes. Un agente de IA informa el resultado y se detiene si encuentra
-> trabajo en curso.
+> Si falla alguno de los puntos 1 a 4, no la tomes; si falla el 5, actualizá `develop` y seguí. Un
+> agente de IA informa el resultado y se detiene si encuentra trabajo en curso.
 
 ## Tarea del plan
 
