@@ -26,7 +26,7 @@ Prefijos de las tareas: **S** shared · **B** backend · **A** app · **W** pane
 | I2-B1 | Datos de referencia versionados en el backend, importación desde `seed`, `GET /reference-data` y su versión | I2-D1, I2-D2 |
 | I2-B2 | `GET /children/{id}/growth` y validación de plausibilidad por Z en `/sync/push` | I2-S2, I2-B1 |
 | I2-A1 | Datos de referencia en Room y `GrowthEngine` en la app | I2-B1, I2-S1 |
-| I2-A2 | Carga e historial con percentil y estado para tutores | I2-A1, I2-S2 |
+| I2-A2 | Carga e historial con percentil y estado para tutores, y confirmación de valores atípicos (RF-CRE-01, CA3) | I2-A1, I2-S2 |
 | I2-A3 | Curvas: `Canvas`, líneas de la referencia, marca OMS / SAP, marcadores por autor, tramos y vista en tabla | I2-A1 |
 | I2-A4 | Inicio con el resumen del estado y "Sin datos recientes" | I2-A2 |
 | I2-Q1 | Aceptación y demo | Todas |

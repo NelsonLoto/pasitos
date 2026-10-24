@@ -67,6 +67,7 @@ class RoomChildRepositoryTest {
                 syncStateDao = database.syncStateDao(),
                 pendingMutationDao = database.pendingMutationDao(),
                 entities = setOf(ChildSyncedEntity(dao), GuardianshipSyncedEntity(dao)),
+                outboxEntities = emptySet(),
                 clock = ChildTestData.clock,
             ),
             syncScheduler = scheduler,

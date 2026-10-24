@@ -357,13 +357,14 @@ aceptar o perder acceso, la sincronización trae o borra el niño.
 **Qué hacer**
 - Guardar en Room y en `pending_mutations`; envío por `/sync/push`; marca de pendiente y error.
 - Formulario con forma de medición sugerida por edad y ayuda (RF-CRE-10); perímetro cefálico solo
-  hasta los 5 años; confirmación de valores fuera de rango.
+  hasta los 5 años; rechazo con el motivo de los valores fuera del rango absoluto. La confirmación
+  de valores atípicos (RF-CRE-01, CA3) pasa a I2-A2, porque depende del puntaje Z (RN-CRE-11).
 - Historial con autor ("Familia" o profesional) y edad corregida cuando aplica; edición y borrado
   solo de lo propio.
 - Percentiles y estado: **no** en I1 (llegan en I2); la pantalla deja el lugar sin datos falsos.
 
 **Criterios de aceptación**
-- [ ] Cada CA de RF-CRE-01 (1 a 4, 6), 02 (1, 2), 03 (1, 2) y 10 verificado en dispositivo.
+- [ ] Cada CA de RF-CRE-01 (1, 2, 4 y 6), 02 (1, 2), 03 (1, 2) y 10 verificado en dispositivo.
 - [ ] Una medición cargada por un tutor aparece en el teléfono del otro tutor.
 
 ---

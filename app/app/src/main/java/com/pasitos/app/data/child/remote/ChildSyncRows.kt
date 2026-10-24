@@ -5,6 +5,7 @@ import com.pasitos.app.data.child.local.GuardianshipEntity
 import com.pasitos.app.data.child.model.ChildSex
 import com.pasitos.app.data.child.model.GuardianRole
 import com.pasitos.shared.api.child.ChildResponse
+import com.pasitos.shared.api.child.ChildStatus
 import com.pasitos.shared.api.child.Sex
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
@@ -25,6 +26,7 @@ internal data class ChildRow(
     val allergies: String? = null,
     val relevantHistory: String? = null,
     val avatarKey: String? = null,
+    val status: ChildStatus = ChildStatus.ACTIVE,
     val deleted: Boolean = false,
 ) {
     fun toEntity() = ChildEntity(
@@ -40,6 +42,7 @@ internal data class ChildRow(
         allergies = allergies,
         relevantHistory = relevantHistory,
         avatarKey = avatarKey,
+        finalized = status == ChildStatus.FINALIZED,
     )
 }
 
@@ -67,6 +70,7 @@ internal fun ChildResponse.toEntity() = ChildEntity(
     allergies = allergies,
     relevantHistory = relevantHistory,
     avatarKey = avatarKey,
+    finalized = status == ChildStatus.FINALIZED,
 )
 
 internal fun Sex.toChildSex() = when (this) {
