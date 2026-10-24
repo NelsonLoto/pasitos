@@ -291,6 +291,26 @@ class MeasurementSyncEntityTest {
         assertEquals(1L, TestDatabase.column<Long>("SELECT count(*) FROM measurements").single())
     }
 
+    @Test
+    fun `reenviar el alta de una medicion ya borrada se rechaza sin frenar el resto del lote`() = apiTest { client ->
+        val auth = client.register()
+        val caller = Caller(UUID.fromString(auth.account.id), UUID.randomUUID())
+        val child = client.createChild(auth.tokens.accessToken)
+        val sync = service()
+        val id = UUID.randomUUID()
+        val batch = listOf(upsert(id, child.id, "2026-10-01", weightKg = 6.4), delete(id))
+        sync.push(caller, batch)
+
+        // La respuesta no llegó: el teléfono reenvía el mismo lote, con un cambio nuevo detrás
+        val results = sync.push(caller, batch + upsert(UUID.randomUUID(), child.id, "2026-10-02", weightKg = 6.5)).results
+
+        assertEquals(SyncMutationStatus.REJECTED, results[0].status)
+        assertEquals(ErrorCode.MEASUREMENT_NOT_FOUND, results[0].code)
+        assertEquals(SyncMutationStatus.APPLIED, results[1].status)
+        assertEquals(SyncMutationStatus.APPLIED, results[2].status)
+        assertEquals(2L, TestDatabase.column<Long>("SELECT count(*) FROM measurements").single())
+    }
+
     private fun seedSecondaryGuardianship(childId: String, accountId: String) {
         TestDatabase.connect().use {
             it.createStatement().execute(
