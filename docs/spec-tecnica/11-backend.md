@@ -170,6 +170,11 @@ una corra una sola vez aunque el servidor se reinicie.
 Las notificaciones que dependen de un evento (N-04 a N-07, N-09 a N-12) no esperan a la tarea
 diaria: las crea el servicio en el momento.
 
+Hasta que llegue `expire-invitations` (I6), una invitación de tutor vencida sigue en `PENDING` y
+el vencimiento se calcula al leer (`expires_at`): no se puede aceptar ni rechazar, el principal
+la ve como vencida en `GET /children/{id}/guardian-invitations` y la reenvía, o invita de nuevo
+al mismo email, lo que la pasa a `CANCELLED` (RF-HIJ-05, CA3).
+
 ## 7. Configuración
 
 Todo por variables de entorno, con `.env` solo en desarrollo local (nunca versionado):
