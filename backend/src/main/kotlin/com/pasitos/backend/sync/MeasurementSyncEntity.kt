@@ -64,10 +64,16 @@ class MeasurementSyncEntity(
         }
     }
 
-    /** RF-CRE-01 (alta) y RF-CRE-02 (edición, mismo `id`): solo el autor edita (RF-CRE-02). */
+    /**
+     * RF-CRE-01 (alta) y RF-CRE-02 (edición, mismo `id`): solo el autor edita (RF-CRE-02). Una
+     * medición borrada no vuelve: reenviar su alta o editarla desde otro teléfono se rechaza como
+     * si no existiera, en lugar de insertar otra vez el mismo `id`.
+     */
     private fun upsert(caller: Caller, id: UUID, obj: Map<String, JsonElement>): EntityChange {
-        val existing = measurements.findById(id)?.takeIf { it.deletedAt == null }
-        if (existing != null && existing.authorAccountId != caller.accountId) throw MeasurementNotFoundException()
+        val existing = measurements.findById(id)
+        if (existing != null && (existing.deletedAt != null || existing.authorAccountId != caller.accountId)) {
+            throw MeasurementNotFoundException()
+        }
 
         val childId = existing?.childId ?: obj.requireUuid("childId")
         val child = if (patientOwnership.owns(childId, caller.accountId)) {
