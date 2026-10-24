@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.29 |
-| **Fecha** | 23/10/2026 |
+| **Versión** | 1.2.30 |
+| **Fecha** | 24/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.5.5](../spec/README.md) |
 
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.30 | 24/10/2026 | Un registro borrado no vuelve por `/sync/push`: su `UPSERT` es `REJECTED` con el código "no encontrado" de la entidad, en lugar de insertarse otra vez con el mismo `id` ([14](14-sincronizacion.md#3-enviar-cambios)) | Reenviar el alta de una medición ya borrada respondía 500 y trababa la bandeja de salida del teléfono (#125) |
 | 1.2.29 | 23/10/2026 | Perfil y cuenta en la app ([15](15-android.md#13-perfil-y-cuenta-i1-a3)): `AccountRepository` contra `/me`; `GET /me` al iniciar sesión y cada vez que la app pasa a primer plano, que actualiza la cuenta guardada y muestra `TermsUpdateScreen` si hay términos pendientes; una pantalla por dato (nombre, email y contraseña); "Crear una contraseña" con el email de recuperación en las cuentas sin contraseña; `SyncStatus` con la última sincronización y los cambios pendientes. `AccountDto.hasPassword` en `shared` y en el backend, que arma `AccountDto` en un solo lugar ([12](12-api.md)); implementa la SPEC funcional 1.5.5 | Decisiones tomadas al implementar el perfil y la cuenta en la app, revisadas una por una con el equipo (#49) |
 | 1.2.28 | 22/10/2026 | Inicio con Google en la app: Credential Manager con `GetSignInWithGoogleOption` en lugar de `GetGoogleIdOption`, porque deja agregar una cuenta y no deja de mostrarse si la persona cierra el diálogo; paso "Completá tu cuenta" dentro del login ante el 409 `terms_required`, con nombre y apellido precargados y `PsTermsCheckbox` compartida con el registro; el ID token solo en memoria del ViewModel; `clearCredentialState()` al cerrar sesión ([15](15-android.md#4-sesión)); Credential Manager 1.6.0 y `googleid` 1.2.1 ([01](01-stack.md)) | Decisiones tomadas al implementar el inicio con Google en la app, revisadas una por una con el equipo (#48) |
 | 1.2.27 | 22/10/2026 | Inicio con Google en el backend: `GoogleTokenVerifier` y `GooglePublicKeys` con `java-jwt` y `jwks-rsa` 0.24.1 (firma RS256, `iss`, `aud` exacto, vencimiento con 60 segundos de tolerancia y `email_verified`; claves en caché un día y como mucho 10 pedidos por minuto); búsqueda por `google_subject` y después por email; 409 `terms_required` sin guardar nada en el primer ingreso; cuenta sin verificar: se verifica, se borra la contraseña y se cierran sus sesiones; errores `invalid_google_token` (401) y `google_unavailable` (503); `GOOGLE_CLIENT_ID` con el cliente web de `pasitos-751c4` por defecto ([11](11-backend.md#inicio-con-google-i1-b2), [12](12-api.md), [01](01-stack.md), [20](20-seguridad.md)); implementa la SPEC funcional 1.5.4 | Decisiones tomadas al implementar el inicio con Google en el backend, revisadas una por una con el equipo (#40) |
