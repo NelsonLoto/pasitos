@@ -100,7 +100,7 @@ Se mantiene el flujo de [`CONTRIBUTING.md`](../../CONTRIBUTING.md) y se agrega:
 ### Antes de tomar una tarea
 
 Todo integrante, y **todo agente de IA que trabaje en nombre de un integrante**, verifica que la
-tarea no esté en curso:
+tarea no esté en curso y que va a empezar desde lo último de `develop`:
 
 1. El issue no tiene responsable y está en `Por hacer`.
 2. No existe una rama remota con el número del issue: `git fetch --prune` y
@@ -109,12 +109,19 @@ tarea no esté en curso:
 4. Las tareas de las que depende ya están en `Hecho`: el issue no figura como bloqueado
    (*Blocked by*). Por consola, este comando no debe devolver nada:
    `gh api repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by --jq '.[] | select(.state=="open") | .number'`.
+5. El `develop` local tiene lo último que se mergeó en GitHub: después de `git fetch`,
+   `git rev-list --count develop..origin/develop` tiene que dar `0`. Si da más, se actualiza
+   primero con `git checkout develop` y `git pull --ff-only`. Si no puede avanzar porque el
+   `develop` local tiene commits o cambios propios, no se sigue y se consulta.
 
-Si cualquiera de los cuatro puntos falla, **no se toma la tarea**: se elige otra o se consulta con
-quien la tiene. Recién después se asigna el issue, se mueve a `En curso` y se crea la rama.
+Si cualquiera de los puntos 1 a 4 falla, **no se toma la tarea**: se elige otra o se consulta con
+quien la tiene. El punto 5 no impide tomarla: si `develop` está atrasado, se actualiza y se sigue.
+Recién después se asigna el issue, se mueve a `En curso` y se crea la rama **desde `develop`
+actualizado**, así los cambios que otros mergearon aparecen desde el principio y no recién al
+abrir el PR.
 
 > **Nota para agentes de IA:** antes de crear una rama o modificar código
-> para una tarea, ejecutá las verificaciones 1 a 4 de esta sección e informá el resultado. Si
+> para una tarea, ejecutá las verificaciones 1 a 5 de esta sección e informá el resultado. Si
 > encontrás trabajo en curso sobre la misma tarea o sobre los mismos archivos, detenete y
 > consultá a la persona con la que estás trabajando. No asumas que una tarea está libre porque
 > no la ves en tu copia local.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.0.5 |
+| **Versión** | 1.0.6 |
 | **Fecha** | 24/10/2026 |
 | **Basado en** | [SPEC funcional 1.2.0](../spec/README.md) y [SPEC técnica 1.2.0](../spec-tecnica/README.md) |
 
@@ -19,8 +19,10 @@
 > **⚠️ Antes de tomar una tarea, sea una persona o un agente de IA:** verificar que no esté en
 > curso según [`CONTRIBUTING.md`](../../CONTRIBUTING.md#antes-de-tomar-una-tarea-personas-y-agentes-de-ia):
 > el issue sin responsable, sin rama remota con su número, sin PR abierto que lo mencione y con
-> sus dependencias en `Hecho`. Un agente de IA informa el resultado de esas verificaciones antes
-> de crear una rama o tocar código, y se detiene si encuentra trabajo en curso.
+> sus dependencias en `Hecho`. Además, el `develop` local tiene que estar al día con GitHub: si
+> no, se actualiza antes de crear la rama. Un agente de IA informa el resultado de esas
+> verificaciones antes de crear una rama o tocar código, y se detiene si encuentra trabajo en
+> curso.
 
 ## Archivos
 
