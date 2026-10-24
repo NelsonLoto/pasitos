@@ -48,6 +48,7 @@ fun ProfileScreen(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    isProfessional: Boolean = false,
     onEditNameClick: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
@@ -60,6 +61,7 @@ fun ProfileScreen(
         onMyChildrenClick = onMyChildrenClick,
         onNotificationsClick = onNotificationsClick,
         onExportReportsClick = onExportReportsClick,
+        isProfessional = isProfessional,
         onEditNameClick = onEditNameClick,
         onChangeEmailClick = onChangeEmailClick,
         onChangePasswordClick = onChangePasswordClick,
@@ -100,6 +102,7 @@ private fun ProfileContent(
     onMyChildrenClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onExportReportsClick: () -> Unit,
+    isProfessional: Boolean = false,
     onEditNameClick: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
@@ -111,7 +114,7 @@ private fun ProfileContent(
             .background(MaterialTheme.colorScheme.background),
     ) {
         Text(
-            text = "Perfil",
+            text = if (isProfessional) "Perfil profesional" else "Perfil",
             style = PsType.H3,
             modifier = Modifier.padding(horizontal = 20.dp).padding(top = 30.dp, bottom = 14.dp),
         )
@@ -152,7 +155,7 @@ private fun ProfileContent(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SectionLabel(text = "CUENTA")
                 MenuGroupCard {
-                    PsMenuRow(icon = Icons.Filled.Person, label = "Mis hijos/as", onClick = onMyChildrenClick)
+                    PsMenuRow(icon = Icons.Filled.Person, label = if (isProfessional) "Pacientes y solicitudes" else "Mis hijos/as", onClick = onMyChildrenClick)
                     HorizontalDivider(color = PsColor.Border)
                     PsMenuRow(icon = Icons.Filled.Notifications, label = "Notificaciones", onClick = onNotificationsClick)
                     HorizontalDivider(color = PsColor.Border)
@@ -233,6 +236,7 @@ private fun ProfileScreenPreview() {
             onChangeEmailClick = {},
             onChangePasswordClick = {},
             onLogoutClick = {},
+            isProfessional = false,
         )
     }
 }

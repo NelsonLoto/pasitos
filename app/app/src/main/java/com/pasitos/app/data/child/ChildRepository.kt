@@ -28,6 +28,9 @@ interface ChildRepository {
     /** Alta (RF-HIJ-01): el usuario queda como tutor principal y el niño como hijo activo (CA1). */
     suspend fun addChild(input: ChildInput, representationDeclared: Boolean): Result<Child>
 
+    /** Alta de paciente propio por un profesional, sin crear tutoría. */
+    suspend fun addPatient(input: ChildInput): Result<Child>
+
     /** Edición del perfil, alergias y antecedentes (RF-HIJ-02, RF-HIJ-03). */
     suspend fun updateChild(childId: String, input: ChildInput): Result<Child>
 

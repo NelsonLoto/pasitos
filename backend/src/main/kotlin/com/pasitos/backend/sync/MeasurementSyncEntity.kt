@@ -1,6 +1,7 @@
 package com.pasitos.backend.sync
 
 import com.pasitos.backend.child.ChildRepository
+import com.pasitos.backend.child.PatientOwnershipRepository
 import com.pasitos.backend.child.ChildStatus
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.common.AuthorRole
@@ -43,6 +44,7 @@ class MeasurementSyncEntity(
     private val measurements: MeasurementRepository,
     private val children: ChildRepository,
     private val clock: ArgentinaClock,
+    private val patientOwnership: PatientOwnershipRepository = PatientOwnershipRepository(),
 ) : SyncEntity {
 
     override val name: String = "MEASUREMENT"
@@ -62,13 +64,23 @@ class MeasurementSyncEntity(
         }
     }
 
-    /** RF-CRE-01 (alta) y RF-CRE-02 (edición, mismo `id`): solo el autor edita (RF-CRE-02). */
+    /**
+     * RF-CRE-01 (alta) y RF-CRE-02 (edición, mismo `id`): solo el autor edita (RF-CRE-02). Una
+     * medición borrada no vuelve: reenviar su alta o editarla desde otro teléfono se rechaza como
+     * si no existiera, en lugar de insertar otra vez el mismo `id`.
+     */
     private fun upsert(caller: Caller, id: UUID, obj: Map<String, JsonElement>): EntityChange {
-        val existing = measurements.findById(id)?.takeIf { it.deletedAt == null }
-        if (existing != null && existing.authorAccountId != caller.accountId) throw MeasurementNotFoundException()
+        val existing = measurements.findById(id)
+        if (existing != null && (existing.deletedAt != null || existing.authorAccountId != caller.accountId)) {
+            throw MeasurementNotFoundException()
+        }
 
         val childId = existing?.childId ?: obj.requireUuid("childId")
-        val child = children.findForGuardian(childId, caller.accountId) ?: throw ChildNotFoundException()
+        val child = if (patientOwnership.owns(childId, caller.accountId)) {
+            children.findById(childId)?.takeIf { it.deletedAt == null }
+        } else {
+            children.findForGuardian(childId, caller.accountId)
+        } ?: throw ChildNotFoundException()
         // RF-CRE-01, CA6: un perfil finalizado no admite mediciones nuevas (no afecta a editar las que ya tiene).
         if (existing == null && child.status != ChildStatus.ACTIVE) {
             throw BusinessRuleException("RF-CRE-01-CA6", "Este perfil está finalizado, ya no admite mediciones nuevas")
@@ -119,8 +131,8 @@ class MeasurementSyncEntity(
         )
 
         if (existing == null) {
-            // Siempre tutor: el pediatra no tiene todavía ningún vínculo con un niño (reservado para I3).
-            measurements.insert(id, childId, caller.accountId, AuthorRole.GUARDIAN, edits)
+            val role = if (patientOwnership.owns(childId, caller.accountId)) AuthorRole.PEDIATRICIAN else AuthorRole.GUARDIAN
+            measurements.insert(id, childId, caller.accountId, role, edits)
         } else {
             measurements.update(id, edits)
         }
@@ -130,7 +142,7 @@ class MeasurementSyncEntity(
     /** RF-CRE-02: borrado lógico, solo por el autor; idempotente (ADR-15). */
     private fun delete(caller: Caller, id: UUID): EntityChange {
         val existing = measurements.findById(id) ?: throw MeasurementNotFoundException()
-        children.findForGuardian(existing.childId, caller.accountId) ?: throw ChildNotFoundException()
+        if (!patientOwnership.owns(existing.childId, caller.accountId) && children.findForGuardian(existing.childId, caller.accountId) == null) throw ChildNotFoundException()
         if (existing.authorAccountId != caller.accountId) throw MeasurementNotFoundException()
         measurements.softDelete(id, clock.now())
         return requireNotNull(measurements.findById(id)).toChange()

@@ -15,6 +15,7 @@ import com.pasitos.app.data.child.remote.ChildRemoteDataSource
 import com.pasitos.app.data.child.remote.toEntity
 import com.pasitos.app.data.child.remote.toSex
 import com.pasitos.shared.api.child.CreateChildRequest
+import com.pasitos.shared.api.child.CreatePatientRequest
 import com.pasitos.shared.api.child.PatchChildRequest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -77,6 +78,16 @@ class RoomChildRepository @Inject constructor(
         child
     }
 
+    override suspend fun addPatient(input: ChildInput): Result<Child> = runCatching {
+        val child = syncEngine.withLock {
+            val created = remote.createPatient(input.toCreatePatientRequest()).toEntity()
+            dao.insertPatient(created)
+            created.toDomain()
+        }
+        syncScheduler.requestSync(SyncTrigger.LOCAL_CHANGE)
+        child
+    }
+
     override suspend fun updateChild(childId: String, input: ChildInput): Result<Child> = runCatching {
         val child = syncEngine.withLock {
             val updated = remote.update(childId, input.toPatchRequest()).toEntity()
@@ -114,6 +125,18 @@ class RoomChildRepository @Inject constructor(
         birthHeadCircumferenceCm = birthHeadCircumferenceCm,
         avatarKey = avatarKey,
         representationDeclared = representationDeclared,
+    )
+
+    private fun ChildInput.toCreatePatientRequest() = CreatePatientRequest(
+        firstName = firstName.trim(),
+        lastName = lastName.trim(),
+        sex = sex.toSex(),
+        birthDate = birthDate.toString(),
+        gestationalWeeks = gestationalWeeks,
+        birthWeightKg = birthWeightKg,
+        birthLengthCm = birthLengthCm,
+        birthHeadCircumferenceCm = birthHeadCircumferenceCm,
+        avatarKey = avatarKey,
     )
 
     private fun ChildInput.toPatchRequest() = PatchChildRequest(

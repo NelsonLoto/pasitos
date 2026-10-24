@@ -28,7 +28,7 @@ class SyncService(
 
     /** `GET /sync/changes` (14 · Sincronización §2). */
     suspend fun changes(caller: Caller, cursor: Long, patients: Set<UUID>?): SyncChangesResponse = tx {
-        val guardianScope = syncRepository.scopeForGuardian(caller.accountId)
+        val guardianScope = syncRepository.scopeForAccount(caller.accountId)
         // "patients" acota el alcance del tutor (uso real recién con el pediatra, I3) - si no
         // viene, el alcance es todos sus hijos.
         val scope = if (patients != null) guardianScope.intersect(patients) else guardianScope
@@ -46,7 +46,10 @@ class SyncService(
             cursor = newCursor,
             hasMore = fetched.size > PAGE_LIMIT,
             changes = page.groupBy({ it.first }, { it.second.json }),
-            newChildIds = syncRepository.newChildIdsSince(caller.accountId, cursor).map { it.toString() },
+            newChildIds = (
+                syncRepository.newChildIdsSince(caller.accountId, cursor) +
+                    syncRepository.newPatientIdsSince(caller.accountId, cursor)
+                ).distinct().map { it.toString() },
             revokedChildIds = syncRepository.revokedChildIdsSince(caller.accountId, cursor).map { it.toString() },
         )
     }
@@ -54,7 +57,7 @@ class SyncService(
     /** `GET /sync/snapshot/{childId}`: foto completa para un niño que entró al alcance (newChildIds). */
     suspend fun snapshot(caller: Caller, childId: UUID): SyncSnapshotResponse = tx {
         // 404, no 403: para quien no tiene acceso, el niño no existe (11 · Backend §4).
-        if (childId !in syncRepository.scopeForGuardian(caller.accountId)) throw ChildNotFoundException()
+        if (childId !in syncRepository.scopeForAccount(caller.accountId)) throw ChildNotFoundException()
 
         val rows = registry.all.flatMap { entity -> entity.snapshot(childId).map { entity.name to it } }
         SyncSnapshotResponse(

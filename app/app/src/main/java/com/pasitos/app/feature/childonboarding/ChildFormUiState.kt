@@ -10,6 +10,7 @@ data class SavedChild(val childId: String, val offerPreviousDoses: Boolean)
 data class ChildFormUiState(
     /** Nulo en el alta; en la edición, el niño que se edita. */
     val childId: String? = null,
+    val professionalPatient: Boolean = false,
     val firstName: String = "",
     val lastName: String = "",
     val sex: ChildSex? = null,

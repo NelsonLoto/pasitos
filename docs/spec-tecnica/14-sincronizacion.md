@@ -73,7 +73,7 @@ POST /api/v1/sync/push
 | Regla | Detalle |
 |---|---|
 | Entidades admitidas | `MEASUREMENT`, `HABIT`, `EVENT`, `MILESTONE_ACHIEVEMENT` (ADR-28) |
-| Idempotencia | `UPSERT` por `id` (UUID generado en el teléfono): reenviar el mismo lote produce el mismo resultado. `DELETE` de algo ya borrado es `APPLIED` |
+| Idempotencia | `UPSERT` por `id` (UUID generado en el teléfono): reenviar el mismo lote produce el mismo resultado. `DELETE` de algo ya borrado es `APPLIED`. Un registro borrado no vuelve: su `UPSERT` (un alta reenviada, o una edición desde otro teléfono del mismo usuario) es `REJECTED` con el código "no encontrado" de la entidad, por ejemplo `measurement_not_found` |
 | Validación | El servidor aplica las mismas reglas que en línea: permisos, autoría, rangos, reglas de negocio |
 | Orden | Las mutaciones se aplican en el orden recibido, cada una en su propia transacción |
 | Conflictos | Solo el autor edita un registro, así que solo pueden chocar dos teléfonos del mismo usuario: gana el último que llega al servidor |
