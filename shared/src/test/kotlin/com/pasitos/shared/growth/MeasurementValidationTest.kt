@@ -37,6 +37,16 @@ class MeasurementValidationTest {
     }
 
     @Test
+    fun `RF-CRE-10 CA3 y RN-CRE-01 desde los 60 meses solo se ofrece de pie y no se ofrece perímetro cefálico`() {
+        val birth = LocalDate.parse("2021-10-16")
+
+        assertTrue(MeasurementValidation.offersLying(birth, LocalDate.parse("2026-10-15")))
+        assertTrue(MeasurementValidation.offersHeadCircumference(birth, LocalDate.parse("2026-10-15")))
+        assertFalse(MeasurementValidation.offersLying(birth, LocalDate.parse("2026-10-16")))
+        assertFalse(MeasurementValidation.offersHeadCircumference(birth, LocalDate.parse("2026-10-16")))
+    }
+
+    @Test
     fun `RF-CRE-10 la forma preseleccionada cambia a los 24 meses`() {
         val birth = LocalDate.parse("2024-10-16")
 

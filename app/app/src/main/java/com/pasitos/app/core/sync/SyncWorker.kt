@@ -13,9 +13,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 /**
- * Sincroniza la base local con el servidor (14 · Sincronización). Por ahora trae cambios; enviar la
- * bandeja de salida llega con I1-A6. Después refresca los datos de referencia, como el calendario
- * de vacunación: si alguno falla, la sincronización no falla y se vuelve a pedir la próxima vez.
+ * Sincroniza la base local con el servidor (14 · Sincronización): envía la bandeja de salida y trae
+ * los cambios. Después refresca los datos de referencia, como el calendario de vacunación: si alguno
+ * falla, la sincronización no falla y se vuelve a pedir la próxima vez.
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
@@ -29,7 +29,11 @@ class SyncWorker @AssistedInject constructor(
         val trigger = inputData.getString(TRIGGER)?.let(SyncTrigger::valueOf) ?: SyncTrigger.PERIODIC
         return try {
             val result = syncEngine.sync()
-            Log.i(TAG, "Sincronización ($trigger): ${result.received} cambios recibidos, ${result.skipped} salteados")
+            Log.i(
+                TAG,
+                "Sincronización ($trigger): ${result.applied} cambios enviados, ${result.rejected} rechazados, " +
+                    "${result.received} recibidos, ${result.skipped} salteados",
+            )
             referenceData.refreshAll()
             Result.success()
         } catch (_: NoConnectionException) {

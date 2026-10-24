@@ -6,6 +6,7 @@ import com.pasitos.app.core.time.ArgentinaClock
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.child.ChildRepository
 import com.pasitos.app.data.measurement.MeasurementRepository
+import com.pasitos.app.data.measurement.model.Measurement
 import com.pasitos.app.data.vaccination.VaccinationRepository
 import com.pasitos.app.data.vaccination.model.VaccinationSummary
 import com.pasitos.app.data.vaccination.model.summary
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,20 +48,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Último peso cargado del hijo activo: puede haber mediciones sin peso (solo talla, por
+     * ejemplo), por eso se busca la más reciente que lo tenga.
+     */
+    private val lastWeight: Flow<Measurement?> = activeChild.flatMapLatest { child ->
+        if (child == null) flowOf(null) else measurementRepository.observeMeasurements(child.id).map { list -> list.firstOrNull { it.weightKg != null } }
+    }
+
     val uiState: StateFlow<HomeUiState> = combine(
         authRepository.currentSession,
         activeChild,
-        measurementRepository.measurements,
+        lastWeight,
         vaccinationSummary,
-    ) { session, activeChild, measurements, vaccinationSummary ->
+    ) { session, activeChild, lastWeight, vaccinationSummary ->
         HomeUiState(
             greetingName = session?.firstName.orEmpty(),
             activeChild = activeChild,
-            // Último peso cargado del hijo activo (RF04) - puede haber mediciones sin peso
-            // (solo talla, por ejemplo), por eso se filtra antes de buscar la más reciente.
-            lastMeasurement = measurements
-                .filter { it.childId == activeChild?.id && it.weightKg != null }
-                .maxByOrNull { it.date },
+            lastMeasurement = lastWeight,
             vaccinationSummary = vaccinationSummary,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

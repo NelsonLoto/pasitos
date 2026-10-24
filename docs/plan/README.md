@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 1.0.4 |
-| **Fecha** | 22/10/2026 |
+| **Versión** | 1.0.5 |
+| **Fecha** | 24/10/2026 |
 | **Basado en** | [SPEC funcional 1.2.0](../spec/README.md) y [SPEC técnica 1.2.0](../spec-tecnica/README.md) |
 
 ## Cómo se usa este plan

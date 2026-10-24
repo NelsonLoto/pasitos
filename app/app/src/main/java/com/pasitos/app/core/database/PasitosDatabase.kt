@@ -11,6 +11,8 @@ import com.pasitos.app.data.child.local.ActiveChildEntity
 import com.pasitos.app.data.child.local.ChildDao
 import com.pasitos.app.data.child.local.ChildEntity
 import com.pasitos.app.data.child.local.GuardianshipEntity
+import com.pasitos.app.data.measurement.local.MeasurementDao
+import com.pasitos.app.data.measurement.local.MeasurementEntity
 import com.pasitos.app.data.vaccination.local.AppliedDoseEntity
 import com.pasitos.app.data.vaccination.local.OtherVaccineEntity
 import com.pasitos.app.data.vaccination.local.VaccinationCalendarEntity
@@ -32,8 +34,9 @@ import com.pasitos.app.data.vaccination.local.VaccinationDao
         VaccinationCalendarEntity::class,
         AppliedDoseEntity::class,
         OtherVaccineEntity::class,
+        MeasurementEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -46,6 +49,8 @@ abstract class PasitosDatabase : RoomDatabase() {
     abstract fun childDao(): ChildDao
 
     abstract fun vaccinationDao(): VaccinationDao
+
+    abstract fun measurementDao(): MeasurementDao
 
     companion object {
         const val NAME = "pasitos.db"

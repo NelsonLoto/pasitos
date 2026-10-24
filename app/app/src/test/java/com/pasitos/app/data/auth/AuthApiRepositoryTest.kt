@@ -19,6 +19,7 @@ import com.pasitos.app.core.security.DatabaseKeyStore
 import com.pasitos.app.core.security.FakeCipher
 import com.pasitos.app.core.sync.SyncScheduler
 import com.pasitos.app.core.sync.SyncTrigger
+import com.pasitos.app.core.sync.local.MutationEntity
 import com.pasitos.app.core.sync.local.PendingMutationDao
 import com.pasitos.app.core.sync.local.PendingMutationEntity
 import com.pasitos.app.data.auth.AuthTestData.account
@@ -341,5 +342,7 @@ class AuthApiRepositoryTest {
         override suspend fun deleteForChild(childId: String) = Unit
         override suspend fun count(): Int = count
         override fun observeCount(): Flow<Int> = flowOf(count)
+        override suspend fun entityIds(entity: MutationEntity): List<String> = emptyList()
+        override suspend fun hasPending(entity: MutationEntity, entityId: String): Boolean = false
     }
 }

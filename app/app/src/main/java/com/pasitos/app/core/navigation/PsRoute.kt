@@ -13,9 +13,10 @@ sealed interface PsRoute {
     @Serializable data class ChildProfile(val childId: String) : PsRoute // RF-HIJ-02, 03, 09
     @Serializable data object ChildSelector : PsRoute // RF02, RF03
     @Serializable data object Home : PsRoute // RF03
-    @Serializable data class MeasurementForm(val childId: String) : PsRoute // RF04
+    /** RF-CRE-01 y 02: alta, o edición o lectura con measurementId. */
+    @Serializable data class MeasurementForm(val childId: String, val measurementId: String? = null) : PsRoute
     @Serializable data class GrowthChart(val childId: String) : PsRoute // RF06-09
-    @Serializable data class MeasurementHistory(val childId: String) : PsRoute // RF04, RF06
+    @Serializable data class MeasurementHistory(val childId: String) : PsRoute // RF-CRE-03
     @Serializable data object VaccinationCalendar : PsRoute // RF10
     @Serializable data class VaccineDetail(val childId: String, val doseCode: String) : PsRoute // RF-VAC-02, 03, 07
     /** Carga retroactiva (RF-VAC-04): después del alta ([afterChildCreated], RF-HIJ-01 CA2) o desde Vacunas. */

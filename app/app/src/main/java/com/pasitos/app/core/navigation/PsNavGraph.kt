@@ -114,10 +114,17 @@ fun PsNavGraph(
                 onAddChildClick = { navController.navigate(PsRoute.ChildForm()) },
             )
         }
-        composable<PsRoute.MeasurementForm> {
+        composable<PsRoute.MeasurementForm> { entry ->
+            val childId = entry.toRoute<PsRoute.MeasurementForm>().childId
             MeasurementFormScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
+                // RF-CRE-01, CA4: la medición que ya existe reemplaza a este formulario
+                onOpenMeasurement = { measurementId ->
+                    navController.navigate(PsRoute.MeasurementForm(childId, measurementId)) {
+                        popUpTo<PsRoute.MeasurementForm> { inclusive = true }
+                    }
+                },
             )
         }
         composable<PsRoute.GrowthChart> {
@@ -128,7 +135,11 @@ fun PsNavGraph(
             )
         }
         composable<PsRoute.MeasurementHistory> {
-            MeasurementHistoryScreen(onBackClick = { navController.popBackStack() })
+            MeasurementHistoryScreen(
+                onBackClick = { navController.popBackStack() },
+                onMeasurementClick = { childId, measurementId -> navController.navigate(PsRoute.MeasurementForm(childId, measurementId)) },
+                onAddClick = { childId -> navController.navigate(PsRoute.MeasurementForm(childId)) },
+            )
         }
         composable<PsRoute.VaccinationCalendar> {
             VaccinationCalendarScreen(

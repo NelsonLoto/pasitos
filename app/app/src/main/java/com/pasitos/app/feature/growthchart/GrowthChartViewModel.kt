@@ -29,16 +29,13 @@ class GrowthChartViewModel @Inject constructor(
 
     val uiState: StateFlow<GrowthChartUiState> = combine(
         childRepository.children,
-        measurementRepository.measurements,
+        measurementRepository.observeMeasurements(childId),
         _selectedMetric,
-    ) { children, allMeasurements, metric ->
-        val childMeasurements = allMeasurements
-            .filter { it.childId == childId }
-            .sortedBy { it.date }
+    ) { children, measurements, metric ->
         GrowthChartUiState(
             childName = children.firstOrNull { it.id == childId }?.firstName.orEmpty(),
             selectedMetric = metric,
-            points = childMeasurements.mapNotNull { it.toChartPoint(metric) },
+            points = measurements.sortedBy { it.date }.mapNotNull { it.toChartPoint(metric) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GrowthChartUiState())
 
@@ -50,7 +47,7 @@ class GrowthChartViewModel @Inject constructor(
 private fun Measurement.toChartPoint(metric: MeasurementMetric): ChartPoint? {
     val value = when (metric) {
         MeasurementMetric.Weight -> weightKg
-        MeasurementMetric.Height -> heightCm
+        MeasurementMetric.Height -> lengthCm
         MeasurementMetric.HeadCircumference -> headCircumferenceCm
     } ?: return null
     return ChartPoint(date = date, value = value)

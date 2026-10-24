@@ -51,8 +51,8 @@ y los PRs encadenados) y en cada push a `develop`:
   archivos anteriores a I0-07 que todavía usan `LocalDate.now()` están en
   `.github/scripts/local-date-now-allowlist.txt`, una lista que solo puede achicarse: el script
   también falla si un archivo de la lista ya no lo usa, así la tarea de I1 que lo reescribe tiene
-  que sacarlo. Quedan cinco:
-  - con lógica: `PsDatePickerField.kt`, `Child.kt` y `MeasurementFormUiState.kt`;
+  que sacarlo. Quedan cuatro:
+  - con lógica: `PsDatePickerField.kt` y `Child.kt`;
   - vistas previas de diseño, que conviene pasar a fechas fijas: `GrowthChartScreen.kt` y
     `HomeScreen.kt`.
 - Los scripts de shell y los `gradlew` se guardan con fin de línea LF (`.gitattributes`), para
