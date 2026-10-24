@@ -1,6 +1,7 @@
 package com.pasitos.app.core.sync.di
 
 import com.pasitos.app.core.database.PasitosDatabase
+import com.pasitos.app.core.sync.OutboxEntity
 import com.pasitos.app.core.sync.ReferenceData
 import com.pasitos.app.core.sync.RoomSyncStatus
 import com.pasitos.app.core.sync.SyncScheduler
@@ -29,6 +30,10 @@ abstract class SyncModule {
     /** Cada dominio agrega su [SyncedEntity] con `@IntoSet`; declararlo acá permite que el conjunto empiece vacío. */
     @Multibinds
     abstract fun syncedEntities(): Set<SyncedEntity>
+
+    /** Las entidades que se escriben en el teléfono agregan su [OutboxEntity] con `@IntoSet` (ADR-28). */
+    @Multibinds
+    abstract fun outboxEntities(): Set<OutboxEntity>
 
     /** Igual que [syncedEntities]: cada dominio agrega sus datos de referencia con `@IntoSet`. */
     @Multibinds

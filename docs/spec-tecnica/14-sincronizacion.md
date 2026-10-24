@@ -172,17 +172,19 @@ sequenceDiagram
   - **Una sola a la vez:** usa un `Mutex`; la que llega segunda espera a que termine la primera.
   - **Nunca pisar con algo más viejo:** las filas del servidor no traen su `sync_version`, así
     que la regla se cumple con el mismo `Mutex`, que también toman las escrituras por REST
-    (6.1). Cómo se protegen las filas locales con cambios sin enviar lo define la bandeja de
-    salida (I1-A6).
+    (6.1). Las escrituras en el teléfono no lo toman, para no esperar a una sincronización en
+    curso: al traer cambios, el motor no pisa un registro que todavía tiene cambios en la
+    bandeja (6.2).
 
-- Cada fila local tiene `syncState`: `SYNCED`, `PENDING` o `ERROR` (RNF-OFF-04).
+- Cada fila local que se escribe en el teléfono tiene `syncState`: `SYNCED`, `PENDING` o `ERROR`
+  (RNF-OFF-04).
 - La app guarda la fecha de la última sincronización exitosa y la muestra en Perfil.
 - Al cerrar sesión se borran la base local y su clave (RF-CTA-07). Si hay mutaciones pendientes,
   primero se advierte (RF-CTA-07, CA2).
 
 ### 6.1 Implementación en la app (I1-A4)
 
-`SyncEngine` (`core/sync`) trae los cambios; enviar la bandeja de salida llega con I1-A6. Igual
+`SyncEngine` (`core/sync`) trae los cambios; el envío de la bandeja de salida está en 6.2. Igual
 que en el backend, el motor no conoce ninguna entidad: cada dominio implementa `SyncedEntity` y la
 registra con `@IntoSet` en su módulo de Hilt (`data/x/di/`).
 
@@ -224,3 +226,22 @@ Cada página se procesa así:
   sincronización ni a los demás: se vuelve a pedir en el próximo disparador. Una pantalla que
   necesita el calendario antes, por ejemplo la carga retroactiva justo después de registrarse,
   lo pide en el momento.
+
+### 6.2 Bandeja de salida (I1-A6)
+
+Las entidades que se escriben en el teléfono (ADR-28; en I1, `MEASUREMENT`) implementan además
+`OutboxEntity` y la registran con `@IntoSet`, igual que su `SyncedEntity`.
+
+| Paso | Qué pasa |
+|---|---|
+| Escribir | El repositorio guarda la fila con `syncState = PENDING` y su cambio en `pending_mutations`, en la misma transacción, y pide una sincronización inmediata. El `id` lo genera el teléfono. Funciona sin conexión y no espera a una sincronización en curso |
+| Enviar | Cada sincronización empieza por la bandeja: `POST /sync/push` de a 100 cambios, del más viejo al más nuevo. Cada cambio respondido sale de la bandeja y su entidad recibe el resultado (`onApplied` u `onRejected`), en una transacción por lote. Recién después trae los cambios, así lo que baja ya incluye lo enviado. Si el envío falla, no trae cambios |
+| Sin respuesta | Si el servidor no responde algún cambio del lote, queda en la bandeja y no se vuelve a pedir en esa sincronización, porque mandaría lo mismo |
+| Aplicado | La fila queda `SYNCED`, con lo enviado como copia del servidor. Si el tutor la volvió a editar mientras se enviaba, sigue `PENDING`: la bandeja todavía tiene ese cambio |
+| Rechazado | La fila queda `ERROR` con el motivo del servidor (el texto, sin datos personales, y nunca en el log). El tutor la corrige guardando de nuevo o la **descarta**: una nueva se borra y una edición vuelve a la copia del servidor. Si el servidor responde que el registro o el niño ya no existen, se borra del teléfono directamente, porque no hay nada que corregir. Un rechazo no se reenvía solo |
+| Traer cambios | El motor no pisa un registro que tiene cambios en la bandeja: la próxima sincronización los envía primero y recién después baja la versión del servidor. Sin esto, la pantalla volvería a mostrar el valor viejo y un registro borrado reaparecería hasta la próxima sincronización. Una fila con `ERROR` no tiene cambios en la bandeja, así que la versión del servidor la reemplaza |
+| Copia del servidor | Cada fila guarda la última versión que confirmó el servidor (`server_copy`, la fila en JSON), que es la que vuelve al descartar. Es nula si el servidor todavía no la tiene |
+| Borrar | La fila se borra enseguida y el `DELETE` va a la bandeja. Si el servidor nunca la tuvo ni la va a recibir (por ejemplo, una nueva rechazada), solo se borra en el teléfono |
+
+El aviso general de errores de sincronización y la lista de registros rechazados llegan con
+I5-A5.

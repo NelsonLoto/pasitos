@@ -25,9 +25,20 @@ object MeasurementValidation {
 
     fun isHeadCircumferenceInRange(cm: Double): Boolean = cm.isFinite() && cm in HEAD_CIRCUMFERENCE_CM_RANGE
 
+    /** RF-CRE-01: decimales que se guardan de cada valor. */
+    const val WEIGHT_DECIMALS = 3
+    const val LENGTH_DECIMALS = 1
+    const val HEAD_CIRCUMFERENCE_DECIMALS = 1
+
     /** RN-CRE-03: desde los 60 meses solo se admite medir de pie. */
     fun isLengthPositionValid(birthDate: LocalDate, measuredOn: LocalDate, standing: Boolean): Boolean =
-        standing || ageInMonths(birthDate, measuredOn) < 60
+        standing || offersLying(birthDate, measuredOn)
+
+    /** RF-CRE-10, CA3: antes de los 60 meses se ofrecen las dos formas de medición; después, solo de pie. */
+    fun offersLying(birthDate: LocalDate, measuredOn: LocalDate): Boolean = ageInMonths(birthDate, measuredOn) < 60
+
+    /** RF-CRE-01 y RN-CRE-01: el perímetro cefálico se registra hasta los 5 años. */
+    fun offersHeadCircumference(birthDate: LocalDate, measuredOn: LocalDate): Boolean = ageInMonths(birthDate, measuredOn) < 60
 
     /**
      * Forma de medición que viene preseleccionada (RF-CRE-10): acostado antes de los 24 meses, de
