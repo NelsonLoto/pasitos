@@ -12,6 +12,7 @@ import com.pasitos.backend.auth.SessionRepository
 import com.pasitos.backend.auth.google.GoogleTokenVerifier
 import com.pasitos.backend.child.ChildRepository
 import com.pasitos.backend.child.ChildService
+import com.pasitos.backend.child.PatientOwnershipRepository
 import com.pasitos.backend.common.AccessPolicy
 import com.pasitos.backend.common.ArgentinaClock
 import com.pasitos.backend.guardianship.GuardianshipRepository
@@ -56,6 +57,7 @@ class Dependencies(config: ApplicationConfig, clock: Clock, googleKeys: RSAKeyPr
 
     private val childRepository = ChildRepository()
     private val guardianshipRepository = GuardianshipRepository()
+    private val patientOwnershipRepository = PatientOwnershipRepository()
 
     // Compartidos entre AuthService (login y sesión) y AccountService (edición de la cuenta propia).
     private val accountRepository = AccountRepository()
@@ -64,7 +66,7 @@ class Dependencies(config: ApplicationConfig, clock: Clock, googleKeys: RSAKeyPr
     private val emailTokenRepository = EmailTokenRepository()
     private val termsVersion = config.property("terms.version").getString()
     private val declarationVersion = config.property("declaration.version").getString()
-    private val accessPolicy = AccessPolicy(guardianshipRepository)
+    private val accessPolicy = AccessPolicy(guardianshipRepository, patientOwnershipRepository)
 
     private val calendarRepository = CalendarRepository()
     private val appliedDoseRepository = AppliedDoseRepository()
@@ -100,6 +102,8 @@ class Dependencies(config: ApplicationConfig, clock: Clock, googleKeys: RSAKeyPr
         // Lo que cada dominio borra al eliminarse el perfil de un niño (RN-HIJ-08). Cada dominio
         // nuevo con datos del niño agrega aquí el suyo.
         purgers = listOf(VaccinationDataPurger(appliedDoseRepository, otherVaccineRepository)),
+        accounts = accountRepository,
+        patientOwnership = patientOwnershipRepository,
     )
     private val invitationRepository = InvitationRepository()
     val invitationService = InvitationService(
@@ -139,7 +143,7 @@ class Dependencies(config: ApplicationConfig, clock: Clock, googleKeys: RSAKeyPr
     val syncRegistry = SyncRegistry().apply {
         register(ChildSyncEntity(childRepository))
         register(GuardianshipSyncEntity(guardianshipRepository))
-        register(MeasurementSyncEntity(measurementRepository, childRepository, argentinaClock))
+        register(MeasurementSyncEntity(measurementRepository, childRepository, argentinaClock, patientOwnershipRepository))
         register(AppliedDoseSyncEntity(appliedDoseRepository))
         register(OtherVaccineSyncEntity(otherVaccineRepository))
     }

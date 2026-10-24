@@ -15,7 +15,14 @@ data class RegisterRequest(
     val password: String,
     /** Aceptación expresa de la versión vigente de los términos (RN-CTA-02). */
     val acceptTerms: Boolean,
+    val accountType: RegistrationAccountType = RegistrationAccountType.FAMILY,
+    val dni: String? = null,
+    val licenseNumber: String? = null,
+    val specialty: String? = null,
 )
+
+@Serializable
+enum class RegistrationAccountType { FAMILY, PROFESSIONAL }
 
 /** `POST /auth/login` (RF-CTA-04). */
 @Serializable

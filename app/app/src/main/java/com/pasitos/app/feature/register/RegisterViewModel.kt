@@ -26,6 +26,11 @@ class RegisterViewModel @Inject constructor(
     private val _navigateToEmailVerification = Channel<String>(Channel.BUFFERED)
     val navigateToEmailVerification = _navigateToEmailVerification.receiveAsFlow()
 
+    fun onAccountTypeChange(value: String) { _uiState.update { it.copy(accountType = value, dniError = null, licenseNumberError = null) } }
+    fun onDniChange(value: String) { _uiState.update { it.copy(dni = value.filter(Char::isDigit).take(8), dniError = null) } }
+    fun onLicenseNumberChange(value: String) { _uiState.update { it.copy(licenseNumber = value, licenseNumberError = null) } }
+    fun onSpecialtyChange(value: String) { _uiState.update { it.copy(specialty = value) } }
+
     fun onFirstNameChange(value: String) {
         _uiState.update { it.copy(firstName = value, firstNameError = null, generalError = null) }
     }
@@ -67,6 +72,8 @@ class RegisterViewModel @Inject constructor(
             passwordError = validatePassword(state.password),
             confirmPasswordError = validateConfirmPassword(state.password, state.confirmPassword),
             termsError = if (state.acceptTerms) null else "Para crear la cuenta tenés que aceptar los términos y la política de privacidad",
+            dniError = if (state.accountType == "FAMILY" && state.dni.isBlank()) "Ingresá tu DNI" else null,
+            licenseNumberError = if (state.accountType == "PROFESSIONAL" && state.licenseNumber.isBlank()) "Ingresá tu matrícula" else null,
         )
         val hasErrors = listOfNotNull(
             validated.firstNameError,
@@ -75,6 +82,8 @@ class RegisterViewModel @Inject constructor(
             validated.passwordError,
             validated.confirmPasswordError,
             validated.termsError,
+            validated.dniError,
+            validated.licenseNumberError,
         ).isNotEmpty()
         if (hasErrors) {
             _uiState.value = validated
@@ -82,7 +91,10 @@ class RegisterViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, generalError = null) }
-            authRepository.register(state.firstName, state.lastName, state.email, state.password, state.acceptTerms)
+            authRepository.register(state.firstName, state.lastName, state.email, state.password, state.acceptTerms,
+                state.accountType, state.dni.takeIf { state.accountType == "FAMILY" },
+                state.licenseNumber.takeIf { state.accountType == "PROFESSIONAL" },
+                state.specialty.takeIf { state.accountType == "PROFESSIONAL" })
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
                     _navigateToEmailVerification.send(state.email)

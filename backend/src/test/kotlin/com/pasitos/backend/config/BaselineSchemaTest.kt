@@ -24,7 +24,7 @@ class BaselineSchemaTest {
         val expected = setOf(
             "accounts", "consents", "sessions", "email_tokens", "children", "guardianships", "invitations",
             "measurements", "vaccines", "calendar_versions", "calendar_doses", "applied_doses",
-            "other_vaccines", "access_revocations",
+            "other_vaccines", "access_revocations", "pediatrician_patients",
         )
         assertEquals(expected, tables.toSet() - "flyway_schema_history")
     }
