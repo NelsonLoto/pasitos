@@ -21,6 +21,7 @@ import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.guardianship.AcceptInvitationRequest
 import com.pasitos.shared.api.guardianship.InvitationResponse
 import com.pasitos.shared.api.guardianship.InviteGuardianRequest
+import com.pasitos.shared.api.guardianship.SentInvitationResponse
 import java.time.Duration
 import java.util.UUID
 
@@ -63,6 +64,8 @@ class InvitationService(
             if (invitations.findPending(childId, email, InvitationType.GUARDIAN, now) != null) {
                 throw InvitationAlreadyPendingException()
             }
+            // La vencida deja de figurar en la lista del principal: la reemplaza la nueva (RF-HIJ-05, CA3)
+            invitations.cancelExpired(childId, email, InvitationType.GUARDIAN, now)
             val inviter = accounts.findById(caller.accountId) ?: throw ChildNotFoundException()
             invitations.insert(InvitationType.GUARDIAN, childId, caller.accountId, email, now.plus(INVITATION_LIFETIME))
             Triple(child.fullName, inviter, invitedAccount)
@@ -72,6 +75,25 @@ class InvitationService(
             mail.sendGuardianInvitation(email, invitedAccount.firstName, inviter.firstName, childName)
         } else {
             mail.sendGuardianInvitationNewAccount(email, inviter.firstName, childName)
+        }
+    }
+
+    /** RF-HIJ-05, CA3: las invitaciones de tutor pendientes del niño, vigentes y vencidas. Solo el tutor principal las ve. */
+    suspend fun listSent(caller: Caller, childId: UUID): List<SentInvitationResponse> = tx {
+        if (accessPolicy.require(caller, childId) != ChildAccess.PRINCIPAL_GUARDIAN) {
+            throw ForbiddenException(ErrorCode.FORBIDDEN, "Solo el tutor principal puede ver las invitaciones enviadas")
+        }
+        val now = clock.now()
+        invitations.listPendingForChild(childId, InvitationType.GUARDIAN).mapNotNull { invitation ->
+            val email = invitation.email ?: return@mapNotNull null
+            SentInvitationResponse(
+                id = invitation.id.toString(),
+                email = email,
+                sentAt = invitation.sentAt,
+                expiresAt = invitation.expiresAt,
+                // El mismo corte que findPending: vigente mientras expires_at sea posterior a ahora
+                expired = !invitation.expiresAt.isAfter(now),
+            )
         }
     }
 
@@ -118,6 +140,8 @@ class InvitationService(
         val result = tx {
             val invitation = invitations.findById(invitationId) ?: throw InvitationNotFoundException()
             if (invitation.inviterAccountId != caller.accountId) throw InvitationNotFoundException()
+            // Una aceptada, rechazada o cancelada ya no se reenvía: no se le escribe a quien ya es tutor
+            if (invitation.status != InvitationStatus.PENDING) throw InvitationNotFoundException()
             if (accessPolicy.require(caller, invitation.childId) != ChildAccess.PRINCIPAL_GUARDIAN) {
                 throw ForbiddenException(ErrorCode.FORBIDDEN, "Solo el tutor principal puede reenviar la invitación")
             }
