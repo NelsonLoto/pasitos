@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.data.auth.AuthRepository
+import com.pasitos.app.data.invitation.InvitationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class EmailVerificationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val invitationRepository: InvitationRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -31,7 +33,12 @@ class EmailVerificationViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EmailVerificationUiState(email = route.email))
     val uiState: StateFlow<EmailVerificationUiState> = _uiState.asStateFlow()
 
-    private val _navigateNext = Channel<Unit>(Channel.BUFFERED)
+    private val _navigateNext = Channel<Boolean>(Channel.BUFFERED)
+
+    /**
+     * Verificado. Lleva `true` si tiene invitaciones de tutor: lo invitaron con este email antes de
+     * registrarse y las ve primero (RF-HIJ-05, CA2). Si no se pudieron consultar, sigue como sin ellas.
+     */
     val navigateNext = _navigateNext.receiveAsFlow()
 
     val afterVerifiedGoHome: Boolean get() = route.afterVerifiedGoHome
@@ -50,8 +57,9 @@ class EmailVerificationViewModel @Inject constructor(
             authRepository.isEmailVerified()
                 .onSuccess { verified ->
                     if (verified) {
+                        val hasInvitations = invitationRepository.refresh().isSuccess && invitationRepository.pending.value.isNotEmpty()
                         _uiState.update { it.copy(isChecking = false) }
-                        _navigateNext.send(Unit)
+                        _navigateNext.send(hasInvitations)
                     } else {
                         _uiState.update {
                             it.copy(isChecking = false, message = "Todavía no verificaste tu email. Revisá tu bandeja de entrada.")

@@ -11,6 +11,7 @@ import com.pasitos.app.core.sync.SyncTrigger
 import com.pasitos.app.data.account.AccountRepository
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.auth.model.SessionState
+import com.pasitos.app.data.invitation.InvitationRepository
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,9 @@ class PasitosApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var accountRepository: AccountRepository
 
+    @Inject
+    lateinit var invitationRepository: InvitationRepository
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     // WorkManager se inicia acá y no con su inicializador automático (quitado en el manifest),
@@ -61,6 +65,7 @@ class PasitosApplication : Application(), Configuration.Provider {
                     refreshAccount()
                 } else {
                     syncScheduler.cancelAll()
+                    invitationRepository.clear()
                 }
             }
             .launchIn(applicationScope)
@@ -76,10 +81,12 @@ class PasitosApplication : Application(), Configuration.Provider {
 
     /**
      * Trae los datos de la cuenta y los términos pendientes (RN-CTA-02) cada vez que la app queda en
-     * primer plano con sesión: la sesión dura meses sin volver a iniciarla. Sin conexión falla y se
-     * ignora; se vuelve a intentar la próxima vez.
+     * primer plano con sesión: la sesión dura meses sin volver a iniciarla. También las invitaciones
+     * de tutor, para la tarjeta de Inicio (RF-HIJ-06). Sin conexión falla y se ignora; se vuelve a
+     * intentar la próxima vez.
      */
     private fun refreshAccount() {
         applicationScope.launch { accountRepository.refresh() }
+        applicationScope.launch { invitationRepository.refresh() }
     }
 }

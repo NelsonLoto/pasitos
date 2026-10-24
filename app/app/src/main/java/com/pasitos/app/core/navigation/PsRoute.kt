@@ -11,6 +11,9 @@ sealed interface PsRoute {
     @Serializable data object ForgotPassword : PsRoute // RF01, RF-CTA-05
     @Serializable data class ChildForm(val childId: String? = null, val professionalPatient: Boolean = false) : PsRoute // alta/edición de hijo o paciente
     @Serializable data class ChildProfile(val childId: String) : PsRoute // RF-HIJ-02, 03, 09
+    @Serializable data class Guardians(val childId: String) : PsRoute // RF-HIJ-05, 07, 08
+    /** RF-HIJ-06. [afterRegistration]: recién verificó el email y tiene invitaciones (RF-HIJ-05, CA2). */
+    @Serializable data class Invitations(val afterRegistration: Boolean = false) : PsRoute
     @Serializable data object ChildSelector : PsRoute // RF02, RF03
     @Serializable data object Home : PsRoute // RF03
     /** RF-CRE-01 y 02: alta, o edición o lectura con measurementId. */
