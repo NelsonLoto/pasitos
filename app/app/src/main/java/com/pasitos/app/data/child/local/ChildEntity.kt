@@ -25,6 +25,8 @@ data class ChildEntity(
     val allergies: String?,
     @ColumnInfo(name = "relevant_history") val relevantHistory: String?,
     @ColumnInfo(name = "avatar_key") val avatarKey: String?,
+    /** El perfil ya no admite registros nuevos, por ejemplo mediciones (RF-CRE-01, CA6). */
+    val finalized: Boolean = false,
 ) {
     fun toDomain() = Child(
         id = id,
@@ -39,6 +41,7 @@ data class ChildEntity(
         allergies = allergies,
         relevantHistory = relevantHistory,
         avatarKey = avatarKey,
+        finalized = finalized,
     )
 }
 

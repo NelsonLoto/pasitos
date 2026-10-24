@@ -1,6 +1,7 @@
 package com.pasitos.app.feature.measurementhistory
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,26 +22,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pasitos.app.core.designsystem.component.PsBadge
+import com.pasitos.app.core.designsystem.component.PsBadgeTone
+import com.pasitos.app.core.designsystem.component.PsButton
 import com.pasitos.app.core.designsystem.component.PsCard
 import com.pasitos.app.core.designsystem.component.PsTopAppBar
-import com.pasitos.app.data.measurement.model.Measurement
+import com.pasitos.app.core.sync.SyncState
 import com.pasitos.app.ui.theme.PsColor
 import com.pasitos.app.ui.theme.PsTheme
 import com.pasitos.app.ui.theme.PsType
-import java.time.LocalDate
 
 @Composable
 fun MeasurementHistoryScreen(
     onBackClick: () -> Unit,
+    onMeasurementClick: (childId: String, measurementId: String) -> Unit,
+    onAddClick: (childId: String) -> Unit,
     viewModel: MeasurementHistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    MeasurementHistoryContent(state = state, onBackClick = onBackClick)
+    MeasurementHistoryContent(
+        state = state,
+        onBackClick = onBackClick,
+        onMeasurementClick = { onMeasurementClick(viewModel.childId, it) },
+        onAddClick = { onAddClick(viewModel.childId) },
+    )
 }
 
 @Composable
-private fun MeasurementHistoryContent(state: MeasurementHistoryUiState, onBackClick: () -> Unit) {
+private fun MeasurementHistoryContent(
+    state: MeasurementHistoryUiState,
+    onBackClick: () -> Unit,
+    onMeasurementClick: (measurementId: String) -> Unit,
+    onAddClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,65 +63,60 @@ private fun MeasurementHistoryContent(state: MeasurementHistoryUiState, onBackCl
     ) {
         PsTopAppBar(title = "Historial de mediciones", showBack = true, onBackClick = onBackClick)
 
-        if (state.measurements.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "Todavía no hay mediciones registradas.",
-                    style = PsType.BodySmall,
-                    color = PsColor.TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(top = 14.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (state.canAdd) {
+                PsButton(text = "Registrar medición", onClick = onAddClick, modifier = Modifier.fillMaxWidth())
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 14.dp, bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                state.measurements.forEach { measurement ->
-                    MeasurementRow(measurement)
+            if (state.rows.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Todavía no hay mediciones registradas.",
+                        style = PsType.BodySmall,
+                        color = PsColor.TextSecondary,
+                        textAlign = TextAlign.Center,
+                    )
                 }
+            }
+            state.rows.forEach { row ->
+                MeasurementRow(row = row, onClick = row.measurementId?.let { id -> { onMeasurementClick(id) } })
             }
         }
     }
 }
 
 @Composable
-private fun MeasurementRow(measurement: Measurement) {
-    PsCard(modifier = Modifier.fillMaxWidth()) {
+private fun MeasurementRow(row: MeasurementHistoryRowUi, onClick: (() -> Unit)?) {
+    PsCard(modifier = Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(text = formatDate(measurement.date), style = PsType.BodySmall)
-
-            Column(horizontalAlignment = Alignment.End) {
-                measurement.weightKg?.let {
-                    Text(text = "${formatDecimal(it)} kg", style = PsType.H3, color = PsColor.TextPrimary)
-                }
-                val secondaryLine = buildList {
-                    measurement.heightCm?.let { add("${formatDecimal(it)} cm") }
-                    measurement.headCircumferenceCm?.let { add("PC ${formatDecimal(it)} cm") }
-                }.joinToString(" · ")
-                if (secondaryLine.isNotBlank()) {
-                    Text(text = secondaryLine, style = PsType.Caption, color = PsColor.TextSecondary)
-                }
+            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                Text(text = row.dateText, style = PsType.BodySmall)
+                Text(text = row.ageText, style = PsType.Caption, color = PsColor.TextSecondary)
+                row.authorText?.let { Text(text = it, style = PsType.Caption, color = PsColor.TextSecondary) }
             }
+            Column(horizontalAlignment = Alignment.End) {
+                row.primaryValue?.let { Text(text = it, style = PsType.H3, color = PsColor.TextPrimary) }
+                row.secondaryValues?.let { Text(text = it, style = PsType.Caption, color = PsColor.TextSecondary) }
+            }
+        }
+        // RNF-OFF-04: lo que todavía no llegó al servidor se marca
+        when (row.syncState) {
+            SyncState.PENDING -> PsBadge(text = "Pendiente de sincronizar", tone = PsBadgeTone.Neutral, modifier = Modifier.padding(top = 8.dp))
+            SyncState.ERROR -> PsBadge(text = "No se pudo guardar", tone = PsBadgeTone.Error, modifier = Modifier.padding(top = 8.dp))
+            SyncState.SYNCED -> Unit
         }
     }
 }
-
-private val MonthAbbreviations = listOf(
-    "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic",
-)
-
-private fun formatDate(date: LocalDate): String = "${date.dayOfMonth} ${MonthAbbreviations[date.monthValue - 1]} ${date.year}"
-
-private fun formatDecimal(value: Double): String = "%.1f".format(value).replace('.', ',')
 
 @Preview(showBackground = true)
 @Composable
@@ -115,13 +125,16 @@ private fun MeasurementHistoryScreenPreview() {
         MeasurementHistoryContent(
             state = MeasurementHistoryUiState(
                 childName = "Lucía",
-                measurements = listOf(
-                    Measurement("1", "child-1", LocalDate.of(2026, 8, 12), 7.8, 68.0, 44.0),
-                    Measurement("2", "child-1", LocalDate.of(2026, 7, 14), 7.3, 66.0, 43.0),
-                    Measurement("3", "child-1", LocalDate.of(2026, 5, 18), 6.1, 61.0, 41.0),
+                canAdd = true,
+                rows = listOf(
+                    MeasurementHistoryRowUi("1", "12/08/2026", "10 meses", "7,8 kg", "68 cm acostado · PC 44 cm", "Familia", SyncState.PENDING),
+                    MeasurementHistoryRowUi("2", "14/07/2026", "9 meses", "7,3 kg", "66 cm acostado", "Familia"),
+                    MeasurementHistoryRowUi(null, "16/10/2025", "Al nacer", "3,25 kg", "49 cm · PC 34 cm", null),
                 ),
             ),
             onBackClick = {},
+            onMeasurementClick = {},
+            onAddClick = {},
         )
     }
 }

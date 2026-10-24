@@ -23,6 +23,8 @@ data class Child(
     val relevantHistory: String? = null,
     /** Una de `AVATAR_KEYS` de `shared`, o nulo sin avatar (RN-HIJ-11). */
     val avatarKey: String? = null,
+    /** Perfil finalizado: no admite mediciones nuevas (RF-CRE-01, CA6). */
+    val finalized: Boolean = false,
 ) {
     val fullName: String get() = "$firstName $lastName"
 }

@@ -75,6 +75,7 @@ class RoomVaccinationRepositoryTest {
                 syncStateDao = database.syncStateDao(),
                 pendingMutationDao = database.pendingMutationDao(),
                 entities = setOf(AppliedDoseSyncedEntity(dao), OtherVaccineSyncedEntity(dao)),
+                outboxEntities = emptySet(),
                 clock = ChildTestData.clock,
             ),
             syncScheduler = scheduler,

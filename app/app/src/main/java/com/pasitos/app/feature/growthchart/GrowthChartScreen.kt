@@ -136,17 +136,19 @@ private fun GrowthChartContent(
             } else {
                 Row {
                     Text(
-                        text = "Todavía no cargaste ${state.selectedMetric.label.lowercase()} · ",
+                        text = "Todavía no cargaste ${state.selectedMetric.label.lowercase()}" + if (state.canAdd) " · " else ".",
                         style = PsType.BodySmall,
                         color = PsColor.TextSecondary,
                     )
-                    Text(
-                        text = "Registrar medición →",
-                        style = PsType.BodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable { onRegisterMeasurementClick(childId) },
-                    )
+                    if (state.canAdd) {
+                        Text(
+                            text = "Registrar medición →",
+                            style = PsType.BodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { onRegisterMeasurementClick(childId) },
+                        )
+                    }
                 }
             }
         }

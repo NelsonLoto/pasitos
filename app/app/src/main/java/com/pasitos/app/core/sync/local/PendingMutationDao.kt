@@ -26,6 +26,14 @@ interface PendingMutationDao {
     @Query("SELECT COUNT(*) FROM pending_mutations")
     suspend fun count(): Int
 
+    /** Registros de [entity] con algún cambio sin confirmar: la sincronización no los pisa con la copia del servidor. */
+    @Query("SELECT DISTINCT entity_id FROM pending_mutations WHERE entity = :entity")
+    suspend fun entityIds(entity: MutationEntity): List<String>
+
+    /** Si el registro todavía tiene cambios sin confirmar, por ejemplo uno hecho mientras se enviaba el anterior. */
+    @Query("SELECT EXISTS(SELECT 1 FROM pending_mutations WHERE entity = :entity AND entity_id = :entityId)")
+    suspend fun hasPending(entity: MutationEntity, entityId: String): Boolean
+
     /** Para advertir antes de cerrar sesión que hay cambios sin sincronizar (RF-CTA-07, CA2). */
     @Query("SELECT COUNT(*) FROM pending_mutations")
     fun observeCount(): Flow<Int>
