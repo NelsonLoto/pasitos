@@ -66,12 +66,17 @@ rama**:
    (*Blocked by*). Las dependencias están cargadas como dependencias nativas de GitHub, así que
    alcanza con mirar el issue o con que este comando no devuelva nada:
    `gh api repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by --jq '.[] | select(.state=="open") | .number'`.
+5. Tu `develop` local tiene lo último que se mergeó en GitHub: después de `git fetch`,
+   `git rev-list --count develop..origin/develop` tiene que dar `0`. Si da más, actualizalo
+   primero con `git checkout develop` y `git pull --ff-only`. Si no puede avanzar porque tu
+   `develop` tiene commits o cambios propios, no sigas y consultá.
 
-Si alguno de los cuatro puntos falla, **no tomes la tarea**: elegí otra o consultá con quien la
-tiene. Recién después asignate el issue, movelo a `En curso` y creá la rama.
+Si alguno de los puntos 1 a 4 falla, **no tomes la tarea**: elegí otra o consultá con quien la
+tiene. El punto 5 no impide tomarla: si `develop` está atrasado, se actualiza y se sigue. Recién
+después asignate el issue, movelo a `En curso` y creá la rama **desde `develop` actualizado**.
 
 > **Nota para agentes de IA:** antes de crear una rama o modificar código
-> para una tarea, ejecutá las verificaciones 1 a 4 e informá el resultado a la persona con la que
+> para una tarea, ejecutá las verificaciones 1 a 5 e informá el resultado a la persona con la que
 > estás trabajando. Si encontrás trabajo en curso sobre la misma tarea o sobre los mismos
 > archivos, detenete y consultá antes de seguir. No asumas que una tarea está libre porque no la
 > ves en tu copia local: el estado real está en GitHub.
