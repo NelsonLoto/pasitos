@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.32 |
+| **Versión** | 1.2.33 |
 | **Fecha** | 24/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.5.5](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.33 | 24/10/2026 | Invitaciones de tutor enviadas: `GET /children/{id}/guardian-invitations` devuelve al principal las pendientes del niño, vigentes y vencidas, con `expired` calculado en el servidor (`SentInvitationResponse` en `shared`); `POST /invitations/{id}/resend` solo acepta invitaciones pendientes, y una aceptada, rechazada o cancelada responde 404; invitar de nuevo a un email con una invitación vencida la cancela ([12](12-api.md), [11](11-backend.md#6-tareas-programadas-adr-18)) | Sin la lista, la app no podía reenviar una invitación vencida (RF-HIJ-05, CA3), y el reenvío le volvía a escribir a quien ya había aceptado o rechazado (#131) |
 | 1.2.32 | 24/10/2026 | Las verificaciones antes de tomar una tarea suman un quinto punto: el `develop` local tiene que tener lo último de GitHub (`git rev-list --count develop..origin/develop` da `0`) y, si no, se actualiza con `git pull --ff-only` antes de crear la rama, que sale de `develop` actualizado. No impide tomar la tarea; la nota para agentes de IA pasa a "verificaciones 1 a 5" ([32](32-proceso-de-desarrollo.md#antes-de-tomar-una-tarea)). También en `CONTRIBUTING.md`, la plantilla de tareas y el plan | La rama de #52 salió de un `develop` local atrasado y recién al abrir el PR aparecieron los cambios de #124 (#129) |
 | 1.2.31 | 24/10/2026 | Mediciones en la app: `RoomMeasurementRepository` con Room y la bandeja de salida, que funciona sin conexión; `SyncEngine` envía la bandeja antes de traer cambios (`POST /sync/push` de a 100) y no pisa un registro con cambios sin enviar; `OutboxEntity` recibe la respuesta a cada cambio; `syncState` y `server_copy` por fila para marcar pendientes y errores, corregir o descartar un rechazo ([14](14-sincronizacion.md#62-bandeja-de-salida-i1-a6)); una pantalla para cargar, editar o ver en modo lectura, forma de medición y ayuda según la edad, perímetro cefálico hasta los 5 años, una medición por fecha con la oferta de editar la existente, historial con edad corregida, autor, marcas y medidas al nacer; `ChildEntity` guarda el `status` del niño para no ofrecer mediciones en un perfil finalizado, tampoco desde Inicio ni Curvas, e Inicio muestra el último peso con coma decimal ([15](15-android.md#14-mediciones-i1-a6)); `offersLying` y `offersHeadCircumference` en `shared`; `MeasurementFormUiState.kt` sale de la lista de `LocalDate.now()` ([31](31-calidad-y-ci.md)). La confirmación de valores atípicos (RF-CRE-01, CA3) pasa a I2, con el puntaje Z | Decisiones tomadas al implementar las mediciones en la app, revisadas una por una con el equipo (#52) |
 | 1.2.30 | 24/10/2026 | Un registro borrado no vuelve por `/sync/push`: su `UPSERT` es `REJECTED` con el código "no encontrado" de la entidad, en lugar de insertarse otra vez con el mismo `id` ([14](14-sincronizacion.md#3-enviar-cambios)) | Reenviar el alta de una medición ya borrada respondía 500 y trababa la bandeja de salida del teléfono (#125) |

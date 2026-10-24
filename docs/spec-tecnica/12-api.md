@@ -52,12 +52,13 @@ Así hay **un solo camino** para cada escritura sincronizable, sea con o sin con
 | `GET /children/{id}` · `PATCH /children/{id}` | Perfil, alergias y antecedentes | RF-HIJ-02, 03 |
 | `GET /children/{id}/deletion-preview` · `DELETE /children/{id}` | Eliminar o dejar de ser tutor | RF-HIJ-09 |
 | `GET /children/{id}/guardians` | Tutores del niño | RF-HIJ-05 a 08 |
-| `POST /children/{id}/guardian-invitations` | Invitar a otro tutor | RF-HIJ-05 |
+| `GET /children/{id}/guardian-invitations` | Invitaciones de tutor pendientes del niño, vigentes y vencidas, de la más nueva a la más vieja (`SentInvitationResponse`, con `expired` calculado en el servidor). Solo para el principal: un secundario recibe 403 | RF-HIJ-05 |
+| `POST /children/{id}/guardian-invitations` | Invitar a otro tutor. Si ese email tenía una invitación vencida, pasa a `CANCELLED` y la reemplaza la nueva | RF-HIJ-05 |
 | `DELETE /children/{id}/guardians/{accountId}` | Quitar tutor o abandonar (si es uno mismo) | RF-HIJ-07 |
 | `POST /children/{id}/principal-transfer` | Transferir el rol principal | RF-HIJ-08 |
 | `GET /me/invitations` | Invitaciones recibidas (tutor y reclamo) | RF-HIJ-06, RF-PED-12 |
 | `POST /invitations/{id}/accept` · `POST /invitations/{id}/reject` | Responder una invitación de tutor | RF-HIJ-06 |
-| `POST /invitations/{id}/resend` | Reenviar una invitación propia | RF-HIJ-05, RF-PED-09 |
+| `POST /invitations/{id}/resend` | Reenviar una invitación propia, solo si sigue pendiente (vigente o vencida). Una aceptada, rechazada o cancelada responde 404 `invitation_not_found` | RF-HIJ-05, RF-PED-09 |
 
 ### Crecimiento
 
