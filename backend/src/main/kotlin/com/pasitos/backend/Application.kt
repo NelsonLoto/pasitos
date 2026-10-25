@@ -7,6 +7,7 @@ import com.pasitos.backend.auth.configureAuthentication
 import com.pasitos.backend.auth.google.GooglePublicKeys
 import com.pasitos.backend.child.childRoutes
 import com.pasitos.backend.common.configureErrorHandling
+import com.pasitos.backend.common.configureRequestLogging
 import com.pasitos.backend.config.DatabaseFactory
 import com.pasitos.backend.guardianship.guardianshipRoutes
 import com.pasitos.backend.invitation.invitationRoutes
@@ -48,6 +49,7 @@ fun Application.module(
     clock: Clock = Clock.systemUTC(),
     googleKeys: RSAKeyProvider = GooglePublicKeys.remote(),
 ) {
+    configureRequestLogging()
     install(ContentNegotiation) {
         json()
     }
