@@ -1,6 +1,7 @@
 package com.pasitos.app.data.guardian
 
 import com.pasitos.app.data.child.model.GuardianRole
+import java.time.Instant
 
 /** Un tutor del niño, como lo ven todos sus tutores (`GET /children/{id}/guardians`). */
 data class Guardian(
@@ -12,6 +13,16 @@ data class Guardian(
 ) {
     val fullName: String get() = "$firstName $lastName"
 }
+
+/** Una invitación de tutor pendiente que mandó el principal (`GET /children/{id}/guardian-invitations`). */
+data class SentInvitation(
+    val id: String,
+    val email: String,
+    val sentAt: Instant,
+    val expiresAt: Instant,
+    /** Lo calcula el servidor (RN-HIJ-07), para no depender del reloj del teléfono. */
+    val expired: Boolean,
+)
 
 /**
  * Tutores de un niño (RF-HIJ-05, 07, 08). Todo va por REST y solo funciona en línea (12 · API): sin
@@ -25,6 +36,12 @@ interface GuardianRepository {
 
     /** RF-HIJ-05: solo el principal. El servidor avisa si ya es tutor (CA4) o si ya hay una invitación vigente. */
     suspend fun invite(childId: String, email: String): Result<Unit>
+
+    /** RF-HIJ-05, CA3: las invitaciones pendientes del niño, vigentes y vencidas. Solo para el principal. */
+    suspend fun sentInvitations(childId: String): Result<List<SentInvitation>>
+
+    /** RF-HIJ-05, CA3; RN-HIJ-07: reemplaza la invitación por una nueva, con un plazo nuevo de 15 días. */
+    suspend fun resend(invitationId: String): Result<Unit>
 
     /** RF-HIJ-07, CA1: el principal quita a un tutor secundario, que recibe un aviso. */
     suspend fun remove(childId: String, accountId: String): Result<Unit>

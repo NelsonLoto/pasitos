@@ -8,6 +8,7 @@ import com.pasitos.app.data.child.model.GuardianRole
 import com.pasitos.shared.api.guardianship.GuardianResponse
 import com.pasitos.shared.api.guardianship.GuardianshipRole
 import com.pasitos.shared.api.guardianship.InviteGuardianRequest
+import com.pasitos.shared.api.guardianship.SentInvitationResponse
 import com.pasitos.shared.api.guardianship.TransferPrincipalRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -22,7 +23,7 @@ import io.ktor.http.contentType
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** [GuardianRepository] contra `/api/v1/children/{id}/guardians` y vecinos (12 · API). */
+/** [GuardianRepository] contra `/api/v1/children/{id}/guardians`, `/invitations/{id}/resend` y vecinos (12 · API). */
 @Singleton
 class GuardianApiRepository @Inject constructor(
     private val httpClient: HttpClient,
@@ -42,6 +43,16 @@ class GuardianApiRepository @Inject constructor(
                 setBody(InviteGuardianRequest(email = email.trim()))
             }
         }
+    }
+
+    override suspend fun sentInvitations(childId: String): Result<List<SentInvitation>> = runCatching {
+        send(HttpStatusCode.OK) { httpClient.get("/api/v1/children/$childId/guardian-invitations") }
+            .body<List<SentInvitationResponse>>()
+            .map { SentInvitation(id = it.id, email = it.email, sentAt = it.sentAt, expiresAt = it.expiresAt, expired = it.expired) }
+    }
+
+    override suspend fun resend(invitationId: String): Result<Unit> = runCatching {
+        send(HttpStatusCode.NoContent) { httpClient.post("/api/v1/invitations/$invitationId/resend") }
     }
 
     override suspend fun remove(childId: String, accountId: String): Result<Unit> = runCatching {
