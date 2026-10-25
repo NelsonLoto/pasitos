@@ -5,6 +5,7 @@ import com.pasitos.app.core.network.ApiException
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.auth.model.AuthSession
 import com.pasitos.app.data.auth.model.SessionState
+import com.pasitos.app.data.invitation.FakeInvitationRepository
 import com.pasitos.shared.api.ErrorCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,7 +18,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
 class EmailVerificationViewModelTest {
 
     private val authRepository = FakeAuthRepository()
+    private val invitationRepository = FakeInvitationRepository()
 
     @Before
     fun setUp() {
@@ -41,6 +42,7 @@ class EmailVerificationViewModelTest {
 
     private fun viewModel(afterVerifiedGoHome: Boolean = false) = EmailVerificationViewModel(
         authRepository,
+        invitationRepository,
         SavedStateHandle(mapOf("email" to "ana@pasitos.test", "afterVerifiedGoHome" to afterVerifiedGoHome)),
     )
 
@@ -48,12 +50,39 @@ class EmailVerificationViewModelTest {
     fun `RF-CTA-02 CA2 ya verifiqué navega si el email ya está verificado`() = runTest {
         authRepository.isEmailVerifiedResult = Result.success(true)
         val viewModel = viewModel()
-        var navigated = false
-        backgroundLaunch { viewModel.navigateNext.collect { navigated = true } }
+        val navigations = mutableListOf<Boolean>()
+        backgroundLaunch { viewModel.navigateNext.collect { navigations += it } }
 
         viewModel.onAlreadyVerifiedClick()
 
-        assertTrue(navigated)
+        assertEquals(listOf(false), navigations)
+    }
+
+    @Test
+    fun `RF-HIJ-05 CA2 si lo invitaron antes de registrarse primero ve las invitaciones`() = runTest {
+        authRepository.isEmailVerifiedResult = Result.success(true)
+        invitationRepository.server = listOf(FakeInvitationRepository.invitation())
+        val viewModel = viewModel()
+        val navigations = mutableListOf<Boolean>()
+        backgroundLaunch { viewModel.navigateNext.collect { navigations += it } }
+
+        viewModel.onAlreadyVerifiedClick()
+
+        assertEquals(listOf(true), navigations)
+    }
+
+    @Test
+    fun `si no se pudieron consultar las invitaciones sigue como sin ellas`() = runTest {
+        authRepository.isEmailVerifiedResult = Result.success(true)
+        invitationRepository.server = listOf(FakeInvitationRepository.invitation())
+        invitationRepository.refreshResult = Result.failure(Exception("sin red"))
+        val viewModel = viewModel()
+        val navigations = mutableListOf<Boolean>()
+        backgroundLaunch { viewModel.navigateNext.collect { navigations += it } }
+
+        viewModel.onAlreadyVerifiedClick()
+
+        assertEquals(listOf(false), navigations)
     }
 
     @Test

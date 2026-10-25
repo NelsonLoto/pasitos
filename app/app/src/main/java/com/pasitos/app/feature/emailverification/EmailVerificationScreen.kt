@@ -31,13 +31,13 @@ import com.pasitos.app.ui.theme.PsType
 /** RF-CTA-01 CA1, RF-CTA-02: pantalla "Verificá tu email" después de crear la cuenta. */
 @Composable
 fun EmailVerificationScreen(
-    onVerified: () -> Unit,
+    onVerified: (hasInvitations: Boolean) -> Unit,
     viewModel: EmailVerificationViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.navigateNext.collect { onVerified() }
+        viewModel.navigateNext.collect { hasInvitations -> onVerified(hasInvitations) }
     }
 
     EmailVerificationContent(

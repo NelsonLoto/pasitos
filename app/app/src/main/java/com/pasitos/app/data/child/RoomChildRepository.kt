@@ -110,6 +110,15 @@ class RoomChildRepository @Inject constructor(
         }
     }
 
+    override suspend fun leaveChild(childId: String): Result<Unit> = runCatching {
+        val accountId = checkNotNull(authRepository.currentSession.value) { "No hay sesión activa" }.userId
+        syncEngine.withLock {
+            remote.leave(childId, accountId)
+            // Como al eliminar: si la app se cierra antes, la borra revokedChildIds
+            syncEngine.forgetChild(childId)
+        }
+    }
+
     override suspend fun selectChild(childId: String) {
         dao.saveActiveChild(ActiveChildEntity(childId = childId))
     }

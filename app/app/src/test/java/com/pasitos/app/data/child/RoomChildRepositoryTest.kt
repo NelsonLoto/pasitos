@@ -161,6 +161,35 @@ class RoomChildRepositoryTest {
     }
 
     @Test
+    fun `RF-HIJ-07 CA2 dejar de ser tutor usa el endpoint que avisa al principal y borra al niño del teléfono`() = runTest {
+        dao.insertCreated(entity(SOFIA), GuardianshipEntity(SOFIA, ACCOUNT_ID, GuardianRole.SECONDARY))
+        dao.upsert(entity(TOMAS))
+        database.pendingMutationDao().insert(pendingMutation(SOFIA))
+        server.routes["/api/v1/children/$SOFIA/guardians/$ACCOUNT_ID"] = { request ->
+            assertEquals(HttpMethod.Delete, request.method)
+            respond("", HttpStatusCode.NoContent)
+        }
+
+        repository.leaveChild(SOFIA).getOrThrow()
+
+        assertEquals(listOf(TOMAS), dao.observeAll().first().map { it.id })
+        assertEquals(null, dao.observeRole(SOFIA, ACCOUNT_ID).first())
+        assertEquals(0, database.pendingMutationDao().count())
+        assertTrue(server.requestsTo("/api/v1/children/$SOFIA").isEmpty())
+    }
+
+    @Test
+    fun `si dejar de ser tutor no llega al servidor no se borra nada`() = runTest {
+        dao.upsert(entity(SOFIA))
+        server.routes["/api/v1/children/$SOFIA/guardians/$ACCOUNT_ID"] = { throw IOException("sin red") }
+
+        val result = repository.leaveChild(SOFIA)
+
+        assertTrue(result.exceptionOrNull() is NoConnectionException)
+        assertEquals(listOf(SOFIA), dao.observeAll().first().map { it.id })
+    }
+
+    @Test
     fun `si la eliminación no llega al servidor no se borra nada`() = runTest {
         dao.upsert(entity(SOFIA))
         server.routes["/api/v1/children/$SOFIA"] = { throw IOException("sin red") }

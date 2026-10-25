@@ -57,6 +57,11 @@ class ChildRemoteDataSource @Inject constructor(private val httpClient: HttpClie
         send(HttpStatusCode.NoContent) { httpClient.delete("/api/v1/children/$childId") }
     }
 
+    /** Deja de ser tutor: el servidor le avisa al principal (RF-HIJ-07, CA2). */
+    suspend fun leave(childId: String, accountId: String) {
+        send(HttpStatusCode.NoContent) { httpClient.delete("/api/v1/children/$childId/guardians/$accountId") }
+    }
+
     private suspend fun send(success: HttpStatusCode, request: suspend () -> HttpResponse): HttpResponse =
         withConnection {
             val response = request()

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import com.pasitos.app.core.designsystem.component.PsButtonVariant
 import com.pasitos.app.core.designsystem.component.PsCard
 import com.pasitos.app.core.designsystem.component.PsInputField
 import com.pasitos.app.core.designsystem.component.PsListRow
+import com.pasitos.app.core.designsystem.component.PsMenuRow
 import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.core.designsystem.component.childAvatarColor
 import com.pasitos.app.data.child.model.Child
@@ -48,6 +51,7 @@ private val ProfileDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 fun ChildProfileScreen(
     onBackClick: () -> Unit,
     onEditClick: (childId: String) -> Unit,
+    onGuardiansClick: (childId: String) -> Unit,
     onDeleted: () -> Unit,
     viewModel: ChildProfileViewModel = hiltViewModel(),
 ) {
@@ -61,6 +65,7 @@ fun ChildProfileScreen(
         state = state,
         onBackClick = onBackClick,
         onEditClick = { onEditClick(viewModel.childId) },
+        onGuardiansClick = { onGuardiansClick(viewModel.childId) },
         onDeleteClick = viewModel::onDeleteClick,
         onTypedNameChange = viewModel::onTypedNameChange,
         onConfirmDeletion = viewModel::onConfirmDeletion,
@@ -73,6 +78,7 @@ private fun ChildProfileContent(
     state: ChildProfileUiState,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
+    onGuardiansClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onTypedNameChange: (String) -> Unit,
     onConfirmDeletion: () -> Unit,
@@ -139,6 +145,12 @@ private fun ChildProfileContent(
                 HealthText(label = "Alergias", text = child.allergies)
                 Spacer(modifier = Modifier.height(12.dp))
                 HealthText(label = "Antecedentes relevantes", text = child.relevantHistory)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            // RF-HIJ-05 a 08: la pantalla avisa si no hay conexión
+            PsCard(modifier = Modifier.fillMaxWidth()) {
+                PsMenuRow(icon = Icons.Filled.Group, label = "Tutores", onClick = onGuardiansClick)
             }
 
             if (!state.isOnline) {
@@ -289,6 +301,7 @@ private fun ChildProfileScreenPreview() {
             ),
             onBackClick = {},
             onEditClick = {},
+            onGuardiansClick = {},
             onDeleteClick = {},
             onTypedNameChange = {},
             onConfirmDeletion = {},
