@@ -43,6 +43,14 @@ interface ChildRepository {
      */
     suspend fun deleteChild(childId: String): Result<Unit>
 
+    /**
+     * Deja de ser tutor de un niño que tiene otros tutores, y el principal recibe un aviso (RF-HIJ-07,
+     * CA2). Si era el principal, el rol pasa al secundario más antiguo (RF-HIJ-09, CA2). El niño y sus
+     * datos desaparecen del teléfono. Solo después de que [isOnlyGuardian] dio falso: al único tutor
+     * el servidor le eliminaría el perfil entero, sin la confirmación con el nombre.
+     */
+    suspend fun leaveChild(childId: String): Result<Unit>
+
     /** Elige el hijo activo (RF-HIJ-04). Funciona sin conexión. */
     suspend fun selectChild(childId: String)
 }

@@ -97,16 +97,20 @@ class ChildProfileViewModelTest {
     }
 
     @Test
-    fun `RF-HIJ-09 CA2 con otros tutores confirma sin escribir el nombre`() = runTest {
+    fun `RF-HIJ-09 CA2 y RF-HIJ-07 CA2 con otros tutores deja de ser tutor sin escribir el nombre`() = runTest {
         repository.onlyGuardian = Result.success(false)
         val state = collectState()
+        val deleted = deletedEvents()
 
         viewModel.onDeleteClick()
 
         assertEquals(DeletionStep.ConfirmLeave, state().deletion)
         assertTrue(state().canConfirmDeletion)
         viewModel.onConfirmDeletion()
-        assertEquals(listOf(ChildTestData.SOFIA), repository.deleted)
+        // Deja de ser tutor por el camino que le avisa al principal, no por la eliminación
+        assertEquals(listOf(ChildTestData.SOFIA), repository.left)
+        assertTrue(repository.deleted.isEmpty())
+        assertEquals(1, deleted())
     }
 
     @Test
@@ -129,8 +133,8 @@ class ChildProfileViewModelTest {
     }
 
     @Test
-    fun `si la eliminación falla se queda en la confirmación con el error`() = runTest {
-        repository.deleteResult = Result.failure(Exception("Ocurrió un error, intentá de nuevo"))
+    fun `si dejar de ser tutor falla se queda en la confirmación con el error`() = runTest {
+        repository.leaveResult = Result.failure(Exception("Ocurrió un error, intentá de nuevo"))
         repository.onlyGuardian = Result.success(false)
         val state = collectState()
 

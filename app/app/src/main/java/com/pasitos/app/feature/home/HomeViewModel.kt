@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pasitos.app.core.time.ArgentinaClock
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.child.ChildRepository
+import com.pasitos.app.data.invitation.InvitationRepository
 import com.pasitos.app.data.measurement.MeasurementRepository
 import com.pasitos.app.data.measurement.model.Measurement
 import com.pasitos.app.data.vaccination.VaccinationRepository
@@ -30,6 +31,7 @@ class HomeViewModel @Inject constructor(
     childRepository: ChildRepository,
     measurementRepository: MeasurementRepository,
     vaccinationRepository: VaccinationRepository,
+    invitationRepository: InvitationRepository,
     clock: ArgentinaClock,
 ) : ViewModel() {
 
@@ -61,12 +63,15 @@ class HomeViewModel @Inject constructor(
         activeChild,
         lastWeight,
         vaccinationSummary,
-    ) { session, activeChild, lastWeight, vaccinationSummary ->
+        // Se actualizan al abrir la app y al volver a ella (PasitosApplication)
+        invitationRepository.pending,
+    ) { session, activeChild, lastWeight, vaccinationSummary, invitations ->
         HomeUiState(
             greetingName = session?.firstName.orEmpty(),
             activeChild = activeChild,
             lastMeasurement = lastWeight,
             vaccinationSummary = vaccinationSummary,
+            invitations = invitations,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 }
