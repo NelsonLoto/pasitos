@@ -25,6 +25,10 @@ fun Route.guardianshipRoutes(guardianshipService: GuardianshipService, invitatio
             call.respond(HttpStatusCode.OK, guardianshipService.list(call.caller(), call.childId()))
         }
 
+        get("/children/{id}/guardian-invitations") {
+            call.respond(HttpStatusCode.OK, invitationService.listSent(call.caller(), call.childId()))
+        }
+
         post("/children/{id}/guardian-invitations") {
             invitationService.invite(call.caller(), call.childId(), call.receive())
             call.respond(HttpStatusCode.NoContent)
