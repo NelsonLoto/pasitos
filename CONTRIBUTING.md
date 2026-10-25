@@ -40,6 +40,10 @@ documentación. Solo corren los jobs de las carpetas que cambiaron. Detalle en
   `ZoneId.systemDefault()` y similares): "hoy" es `ArgentinaClock.today()` (ADR-26). Si tu tarea
   reescribe un archivo de `.github/scripts/local-date-now-allowlist.txt`, sacalo de la lista. Lo
   podés verificar antes de pushear con `.github/scripts/check-local-date-now.sh`.
+- **Si Android Studio propone bajar la versión de AGP o de Gradle, no aceptes: actualizá Android
+  Studio.** Al bajarla regenera el wrapper y borra `distributionSha256Sum`, la línea que verifica
+  que la distribución de Gradle sea la oficial. La integración continua falla si falta
+  (`.github/scripts/check-gradle-wrapper.sh app backend shared`).
 - Dependabot abre los lunes PRs con actualizaciones de dependencias. Se revisan y mergean como
   cualquier otro, siguiendo la
   [política de versiones](docs/spec-tecnica/01-stack.md#política-de-versiones).
