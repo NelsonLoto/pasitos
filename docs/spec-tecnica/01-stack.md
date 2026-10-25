@@ -30,7 +30,7 @@ incorporan en el incremento que las necesita, con la última versión estable co
 | Tecnología | Versión | Uso |
 |---|---|---|
 | Ktor Server (Netty) | 3.6.0, la misma que el cliente | HTTP, autenticación, sesiones del panel |
-| Plugins Ktor | — | `content-negotiation`, `status-pages`, `auth-jwt`, `rate-limit`, `sessions`, `thymeleaf`, `call-logging` |
+| Plugins Ktor | — | `content-negotiation`, `status-pages`, `auth-jwt`, `rate-limit`, `sessions`, `thymeleaf`, `call-logging`, `call-id` |
 | Exposed (DSL) | 0.61.0 | Acceso a datos |
 | PostgreSQL | 16 | Base de datos |
 | HikariCP | 7.1.0 | Pool de conexiones |

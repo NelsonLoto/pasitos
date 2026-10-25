@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.2.34 |
+| **Versión** | 1.2.35 |
 | **Fecha** | 25/10/2026 |
 | **Estado** | Borrador para revisión del equipo |
 | **Implementa** | [SPEC funcional v1.5.5](../spec/README.md) |
@@ -60,6 +60,7 @@ cambio técnico que altere comportamiento visible requiere primero el cambio en 
 
 | Versión | Fecha | Cambio | Motivo |
 |---|---|---|---|
+| 1.2.35 | 25/10/2026 | Registro de requests en el backend ([11](11-backend.md#8-registros-logs)): `CallLogging` con una línea por request (método, ruta sin consulta, estado y duración) y `/health` excluido; `CallId` genera el identificador en el servidor, lo pone en el MDC como `call-id` y lo devuelve en `X-Request-Id`, sin aceptar el del cliente; `loggablePath` enmascara lo que no sea UUID o palabra, y una prueba falla si una ruta agrega un parámetro que no sea UUID; plugin `call-id` en [01](01-stack.md). El JSON de producción queda como P-18 para el despliegue ([92](92-pendientes.md)) | El backend no registraba ningún request: al probar #48 no se pudo ver la secuencia 409 → 200 de `POST /auth/google`. Decisiones revisadas una por una con el equipo (#122) |
 | 1.2.34 | 25/10/2026 | Tutores e invitaciones en la app ([15](15-android.md#15-tutores-e-invitaciones-i1-a5)): `GuardianRepository` e `InvitationRepository` por REST, sin Room; pantalla de tutores desde el perfil del niño, con invitar, menú ⋮ por secundario para ceder el rol principal o quitarlo, invitaciones enviadas con "Reenviar" solo para las vencidas y "Dejar de ser tutor"; `ChildRepository.leaveChild` con `DELETE /children/{id}/guardians/{propio}`, que avisa al principal, también desde "Eliminar perfil" con otros tutores; invitaciones recibidas con la declaración de representación para aceptar, en una tarjeta de Inicio, en Perfil y después de verificar el email, antes del alta de hijo | Decisiones tomadas al implementar los tutores en la app, revisadas una por una con el equipo (#51) |
 | 1.2.33 | 24/10/2026 | Invitaciones de tutor enviadas: `GET /children/{id}/guardian-invitations` devuelve al principal las pendientes del niño, vigentes y vencidas, con `expired` calculado en el servidor (`SentInvitationResponse` en `shared`); `POST /invitations/{id}/resend` solo acepta invitaciones pendientes, y una aceptada, rechazada o cancelada responde 404; invitar de nuevo a un email con una invitación vencida la cancela ([12](12-api.md), [11](11-backend.md#6-tareas-programadas-adr-18)) | Sin la lista, la app no podía reenviar una invitación vencida (RF-HIJ-05, CA3), y el reenvío le volvía a escribir a quien ya había aceptado o rechazado (#131) |
 | 1.2.32 | 24/10/2026 | Las verificaciones antes de tomar una tarea suman un quinto punto: el `develop` local tiene que tener lo último de GitHub (`git rev-list --count develop..origin/develop` da `0`) y, si no, se actualiza con `git pull --ff-only` antes de crear la rama, que sale de `develop` actualizado. No impide tomar la tarea; la nota para agentes de IA pasa a "verificaciones 1 a 5" ([32](32-proceso-de-desarrollo.md#antes-de-tomar-una-tarea)). También en `CONTRIBUTING.md`, la plantilla de tareas y el plan | La rama de #52 salió de un `develop` local atrasado y recién al abrir el PR aparecieron los cambios de #124 (#129) |
