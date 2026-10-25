@@ -194,11 +194,21 @@ Todo por variables de entorno, con `.env` solo en desarrollo local (nunca versio
 
 ## 8. Registros (logs)
 
-- Formato JSON en producción, legible en local.
+- Formato JSON en producción, legible en local. El JSON llega con el despliegue del piloto
+  (P-18, I6-I1); hasta entonces es texto en todos los entornos.
 - Cada request registra método, ruta (sin parámetros de consulta), estado, duración e
   identificador de request.
 - **Nunca** se registran cuerpos de requests o responses, tokens, emails, nombres ni datos de
   salud (RNF-PRI-03). Los identificadores (UUID) sí.
+
+Implementación (`common/RequestLogging.kt`, #122):
+
+| Tema | Cómo |
+|---|---|
+| Línea por request | Plugin `CallLogging`, logger `com.pasitos.backend.Requests`, nivel INFO: `GET /api/v1/children/<uuid> 404 91 ms`. `/health` no se registra, porque Docker lo consulta seguido |
+| Identificador | Plugin `CallId`: lo genera siempre el servidor (UUID), va en el MDC como `call-id`, que `logback.xml` imprime en cada línea, y vuelve en el header `X-Request-Id` para cruzar un error que ve la app con su línea. El que mande el cliente se ignora: nada de lo que manda llega al log |
+| Ruta | `loggablePath` cambia por `*` cada tramo que no sea un UUID, una palabra en minúsculas con guiones o la versión de la API. Así, un pedido a una ruta inexistente no deja el email o el token que haya escrito el cliente |
+| Parámetros de ruta nuevos | Solo se registran tal cual los de `LOGGABLE_PATH_PARAMETERS` (`id`, `childId`, `accountId`, todos UUID). `RequestLoggingTest` recorre todas las rutas y falla si aparece otro, por ejemplo `{fcmToken}` de `PUT /me/devices/{fcmToken}` (I6): antes de agregarlo a la lista hay que decidir cómo se registra |
 
 ## 9. Documentación de la API
 

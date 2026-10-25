@@ -49,8 +49,10 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
-    // Logging
+    // Logging, con una línea por pedido y su identificador (11 · Backend §8)
     implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-id-jvm:$ktorVersion")
 
     // Carga backend/.env en desarrollo local (no versionado); en Docker/CI las
     // variables de entorno ya vienen seteadas y esto no hace nada.

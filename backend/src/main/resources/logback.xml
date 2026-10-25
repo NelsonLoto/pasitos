@@ -1,7 +1,9 @@
 <configuration>
+    <!-- Texto legible en local; el JSON de producción llega con el despliegue del piloto (P-18) -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <!-- %X{call-id}: identificador del pedido, vacío fuera de un pedido (11 · Backend §8) -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %X{call-id} - %msg%n</pattern>
         </encoder>
     </appender>
 
