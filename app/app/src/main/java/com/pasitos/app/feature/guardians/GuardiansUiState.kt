@@ -1,13 +1,18 @@
 package com.pasitos.app.feature.guardians
 
+import com.pasitos.app.core.time.ArgentinaClock
 import com.pasitos.app.data.child.model.GuardianRole
 import com.pasitos.app.data.guardian.Guardian
+import com.pasitos.app.data.guardian.SentInvitation
+import java.time.format.DateTimeFormatter
 
 /** Tutores de un niño (RF-HIJ-05, 07, 08). Todo es solo en línea. */
 data class GuardiansUiState(
     /** Nombre de pila del niño, para los textos. Vacío si ya no está en el teléfono. */
     val childFirstName: String = "",
     val guardians: List<Guardian> = emptyList(),
+    /** Las invitaciones pendientes que mandó el principal (RF-HIJ-05, CA3). Vacía para un secundario. */
+    val sentInvitations: List<SentInvitation> = emptyList(),
     val myAccountId: String? = null,
     val isLoading: Boolean = true,
     /** No se pudo traer la lista: se muestra con "Reintentar". */
@@ -29,6 +34,15 @@ data class GuardiansUiState(
 
     fun isMe(guardian: Guardian): Boolean = guardian.accountId == myAccountId
 }
+
+private val ExpiryFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+/** "Vence el 08/11/2026" o "Venció el 08/11/2026", con el día en hora argentina (ADR-26). */
+val SentInvitation.expiryText: String
+    get() {
+        val date = expiresAt.atZone(ArgentinaClock.ZONE).toLocalDate().format(ExpiryFormatter)
+        return if (expired) "Venció el $date" else "Vence el $date"
+    }
 
 /** El diálogo abierto, si hay uno. Cada acción se confirma antes de enviarse. */
 sealed interface GuardiansDialog {

@@ -49,9 +49,11 @@ import com.pasitos.app.core.designsystem.component.PsInputField
 import com.pasitos.app.core.designsystem.component.PsTopAppBar
 import com.pasitos.app.data.child.model.GuardianRole
 import com.pasitos.app.data.guardian.Guardian
+import com.pasitos.app.data.guardian.SentInvitation
 import com.pasitos.app.ui.theme.PsColor
 import com.pasitos.app.ui.theme.PsTheme
 import com.pasitos.app.ui.theme.PsType
+import java.time.Instant
 
 @Composable
 fun GuardiansScreen(
@@ -73,6 +75,7 @@ fun GuardiansScreen(
             onInviteClick = viewModel::onInviteClick,
             onInviteEmailChange = viewModel::onInviteEmailChange,
             onSendInvite = viewModel::onSendInvite,
+            onResendClick = viewModel::onResendClick,
             onRemoveClick = viewModel::onRemoveClick,
             onConfirmRemove = viewModel::onConfirmRemove,
             onTransferClick = viewModel::onTransferClick,
@@ -90,6 +93,7 @@ internal class GuardiansActions(
     val onInviteClick: () -> Unit = {},
     val onInviteEmailChange: (String) -> Unit = {},
     val onSendInvite: () -> Unit = {},
+    val onResendClick: (SentInvitation) -> Unit = {},
     val onRemoveClick: (Guardian) -> Unit = {},
     val onConfirmRemove: () -> Unit = {},
     val onTransferClick: (Guardian) -> Unit = {},
@@ -202,6 +206,16 @@ private fun ColumnScope.GuardianList(state: GuardiansUiState, actions: Guardians
         }
     }
 
+    if (state.isPrincipal && state.sentInvitations.isNotEmpty()) {
+        Text(text = "Invitaciones enviadas", style = PsType.BodyMedium, modifier = Modifier.padding(top = 4.dp))
+        PsCard(modifier = Modifier.fillMaxWidth()) {
+            state.sentInvitations.forEachIndexed { index, invitation ->
+                SentInvitationRow(invitation = invitation, enabled = state.canAct, onResendClick = { actions.onResendClick(invitation) })
+                if (index < state.sentInvitations.lastIndex) HorizontalDivider(color = PsColor.Border)
+            }
+        }
+    }
+
     Text(
         text = if (state.isPrincipal) {
             "Todos los tutores ven y cargan los datos de ${state.childFirstName}. Solo el tutor principal invita y quita tutores."
@@ -273,6 +287,24 @@ private fun GuardianRow(
                     )
                 }
             }
+        }
+    }
+}
+
+/** RF-HIJ-05, CA3: "Reenviar" solo en la vencida. */
+@Composable
+private fun SentInvitationRow(invitation: SentInvitation, enabled: Boolean, onResendClick: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = invitation.email, style = PsType.BodyMedium)
+            Text(
+                text = invitation.expiryText,
+                style = PsType.BodySmall,
+                color = if (invitation.expired) MaterialTheme.colorScheme.error else PsColor.TextSecondary,
+            )
+        }
+        if (invitation.expired) {
+            TextButton(onClick = onResendClick, enabled = enabled) { Text(text = "Reenviar") }
         }
     }
 }
@@ -363,6 +395,15 @@ private fun GuardiansScreenPreview() {
                 guardians = listOf(
                     Guardian("me", "Ana", "Pérez", "ana@example.com", GuardianRole.PRINCIPAL),
                     Guardian("other", "Beto", "Gómez", "beto@example.com", GuardianRole.SECONDARY),
+                ),
+                sentInvitations = listOf(
+                    SentInvitation(
+                        id = "inv-1",
+                        email = "cami@example.com",
+                        sentAt = Instant.parse("2026-10-01T15:00:00Z"),
+                        expiresAt = Instant.parse("2026-10-16T15:00:00Z"),
+                        expired = true,
+                    ),
                 ),
                 myAccountId = "me",
                 isLoading = false,

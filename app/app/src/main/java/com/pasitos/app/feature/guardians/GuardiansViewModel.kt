@@ -9,8 +9,10 @@ import com.pasitos.app.core.navigation.PsRoute
 import com.pasitos.app.core.network.NetworkMonitor
 import com.pasitos.app.data.auth.AuthRepository
 import com.pasitos.app.data.child.ChildRepository
+import com.pasitos.app.data.child.model.GuardianRole
 import com.pasitos.app.data.guardian.Guardian
 import com.pasitos.app.data.guardian.GuardianRepository
+import com.pasitos.app.data.guardian.SentInvitation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -89,8 +91,17 @@ class GuardiansViewModel @Inject constructor(
         }
         act(
             request = { guardianRepository.invite(childId, email) },
-            reload = false,
             message = "Le mandamos la invitación a $email. Vence en 15 días.",
+        )
+    }
+
+    /** RF-HIJ-05, CA3: solo las vencidas, para no mandar un email nuevo cada vez que se toca el botón. */
+    fun onResendClick(invitation: SentInvitation) {
+        if (!uiState.value.canAct || !uiState.value.isPrincipal || !invitation.expired) return
+        form.update { it.copy(message = null) }
+        act(
+            request = { guardianRepository.resend(invitation.id) },
+            message = "Le volvimos a mandar la invitación a ${invitation.email}. Vence en 15 días.",
         )
     }
 
@@ -163,25 +174,45 @@ class GuardiansViewModel @Inject constructor(
         form.update { it.copy(dialog = dialog, dialogError = null, message = null) }
     }
 
-    /** Envía la acción del diálogo abierto; si sale bien lo cierra, muestra [message] y vuelve a pedir la lista. */
-    private fun act(request: suspend () -> Result<Unit>, message: String, reload: Boolean = true) {
+    /**
+     * Envía la acción; si sale bien cierra el diálogo, muestra [message] y vuelve a pedir la lista. Si
+     * falla, el error va al diálogo abierto o, sin diálogo (reenviar), al mensaje.
+     */
+    private fun act(request: suspend () -> Result<Unit>, message: String) {
         if (form.value.isWorking) return
         viewModelScope.launch {
             form.update { it.copy(isWorking = true, dialogError = null) }
             request()
                 .onSuccess {
                     form.update { it.copy(isWorking = false, dialog = GuardiansDialog.None, message = message) }
-                    if (reload) load()
+                    load()
                 }
-                .onFailure { error -> form.update { it.copy(isWorking = false, dialogError = error.message) } }
+                .onFailure { error ->
+                    form.update {
+                        if (it.dialog == GuardiansDialog.None) {
+                            it.copy(isWorking = false, message = error.message)
+                        } else {
+                            it.copy(isWorking = false, dialogError = error.message)
+                        }
+                    }
+                }
         }
     }
 
+    /** Los tutores y, si el usuario es el principal, sus invitaciones pendientes (RF-HIJ-05, CA3). */
     private fun load() {
         viewModelScope.launch {
             form.update { it.copy(isLoading = true, loadError = null) }
-            guardianRepository.guardians(childId)
-                .onSuccess { guardians -> form.update { it.copy(isLoading = false, guardians = guardians) } }
+            val result = guardianRepository.guardians(childId).mapCatching { guardians ->
+                val myAccountId = form.value.myAccountId
+                val isPrincipal = guardians.any { it.accountId == myAccountId && it.role == GuardianRole.PRINCIPAL }
+                val sent = if (isPrincipal) guardianRepository.sentInvitations(childId).getOrThrow() else emptyList()
+                guardians to sent
+            }
+            result
+                .onSuccess { (guardians, sent) ->
+                    form.update { it.copy(isLoading = false, guardians = guardians, sentInvitations = sent) }
+                }
                 .onFailure { error -> form.update { it.copy(isLoading = false, loadError = error.message) } }
         }
     }

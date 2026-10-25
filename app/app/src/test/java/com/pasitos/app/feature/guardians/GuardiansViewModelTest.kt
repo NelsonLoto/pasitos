@@ -93,6 +93,66 @@ class GuardiansViewModelTest {
         assertTrue("invite $SOFIA cami@pasitos.test" in guardians.calls)
         assertEquals(GuardiansDialog.None, state().dialog)
         assertEquals("Le mandamos la invitación a cami@pasitos.test. Vence en 15 días.", state().message)
+        // La lista se vuelve a pedir: la invitación nueva aparece entre las enviadas
+        assertEquals(listOf("cami@pasitos.test"), state().sentInvitations.map { it.email })
+    }
+
+    @Test
+    fun `RF-HIJ-05 CA3 el principal ve sus invitaciones enviadas, con la vencida marcada`() = runTest {
+        guardians.sent = listOf(FakeGuardianRepository.sentInvitation(expired = true))
+        val viewModel = viewModel()
+        val state = collectState(viewModel)
+
+        val sent = state().sentInvitations.single()
+        assertEquals("Venció el 16/10/2026", sent.expiryText)
+        assertEquals("Vence el 16/10/2026", sent.copy(expired = false).expiryText)
+    }
+
+    @Test
+    fun `RF-HIJ-05 CA3 reenviar una vencida la renueva y lo avisa`() = runTest {
+        guardians.sent = listOf(FakeGuardianRepository.sentInvitation(expired = true))
+        val viewModel = viewModel()
+        val state = collectState(viewModel)
+
+        viewModel.onResendClick(state().sentInvitations.single())
+
+        assertTrue("resend inv-1" in guardians.calls)
+        assertEquals("Le volvimos a mandar la invitación a cami@pasitos.test. Vence en 15 días.", state().message)
+        assertFalse(state().sentInvitations.single().expired)
+    }
+
+    @Test
+    fun `una invitación vigente no se reenvía`() = runTest {
+        guardians.sent = listOf(FakeGuardianRepository.sentInvitation(expired = false))
+        val viewModel = viewModel()
+        val state = collectState(viewModel)
+
+        viewModel.onResendClick(state().sentInvitations.single())
+
+        assertTrue(guardians.calls.none { it.startsWith("resend") })
+    }
+
+    @Test
+    fun `si el reenvío falla el motivo se muestra en la pantalla`() = runTest {
+        guardians.sent = listOf(FakeGuardianRepository.sentInvitation(expired = true))
+        val viewModel = viewModel()
+        val state = collectState(viewModel)
+        guardians.actionResult = Result.failure(ApiException(ErrorCode.INVITATION_NOT_FOUND, "No se encontró esa invitación"))
+
+        viewModel.onResendClick(state().sentInvitations.single())
+
+        assertEquals("No se encontró esa invitación", state().message)
+    }
+
+    @Test
+    fun `un secundario no pide las invitaciones enviadas`() = runTest {
+        guardians.list = listOf(beto.copy(role = GuardianRole.PRINCIPAL), me.copy(role = GuardianRole.SECONDARY))
+        guardians.sent = listOf(FakeGuardianRepository.sentInvitation())
+        val viewModel = viewModel()
+        val state = collectState(viewModel)
+
+        assertTrue(state().sentInvitations.isEmpty())
+        assertTrue(guardians.calls.none { it.startsWith("sentInvitations") })
     }
 
     @Test

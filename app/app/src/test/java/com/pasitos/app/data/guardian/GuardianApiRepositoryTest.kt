@@ -15,10 +15,12 @@ import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.guardianship.GuardianResponse
 import com.pasitos.shared.api.guardianship.GuardianshipRole
 import com.pasitos.shared.api.guardianship.InviteGuardianRequest
+import com.pasitos.shared.api.guardianship.SentInvitationResponse
 import com.pasitos.shared.api.guardianship.TransferPrincipalRequest
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import java.time.Instant
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -75,6 +77,37 @@ class GuardianApiRepositoryTest {
 
         assertEquals(ErrorCode.ALREADY_GUARDIAN, error.code)
         assertEquals("Ese email ya es tutor de este hijo/a", error.message)
+    }
+
+    @Test
+    fun `RF-HIJ-05 CA3 trae las invitaciones enviadas con el vencimiento que calculó el servidor`() = runTest {
+        server.routes["/api/v1/children/$SOFIA/guardian-invitations"] = { request ->
+            assertEquals(HttpMethod.Get, request.method)
+            json(
+                Json.encodeToString(
+                    listOf(
+                        SentInvitationResponse("inv-2", "nueva@pasitos.test", Instant.parse("2026-10-20T15:00:00Z"), Instant.parse("2026-11-04T15:00:00Z"), expired = false),
+                        SentInvitationResponse("inv-1", "vieja@pasitos.test", Instant.parse("2026-10-01T15:00:00Z"), Instant.parse("2026-10-16T15:00:00Z"), expired = true),
+                    ),
+                ),
+            )
+        }
+
+        val sent = repository.sentInvitations(SOFIA).getOrThrow()
+
+        assertEquals(listOf("nueva@pasitos.test" to false, "vieja@pasitos.test" to true), sent.map { it.email to it.expired })
+    }
+
+    @Test
+    fun `RF-HIJ-05 CA3 reenviar usa el id de la invitación`() = runTest {
+        server.routes["/api/v1/invitations/inv-1/resend"] = { request ->
+            assertEquals(HttpMethod.Post, request.method)
+            respond("", HttpStatusCode.NoContent)
+        }
+
+        repository.resend("inv-1").getOrThrow()
+
+        assertEquals(1, server.requestsTo("/api/v1/invitations/inv-1/resend").size)
     }
 
     @Test
