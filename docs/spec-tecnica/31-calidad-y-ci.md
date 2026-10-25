@@ -25,9 +25,9 @@ y los PRs encadenados) y en cada push a `develop`:
 
 | Job | Se ejecuta si cambia | Pasos |
 |---|---|---|
-| `shared` | `shared/**` | `./gradlew test` |
-| `backend` | `backend/**` o `shared/**` | `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
-| `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
+| `shared` | `shared/**` | Verificación del checksum del wrapper y `./gradlew test` |
+| `backend` | `backend/**` o `shared/**` | Verificación del checksum del wrapper y `./gradlew test` (con Testcontainers). La validación de `openapi.yaml` se agrega con el archivo ([P-14](92-pendientes.md)) |
+| `android` | `app/**`, `shared/**` o `.github/scripts/**` | Verificación del checksum del wrapper, de que no se use la zona horaria del teléfono y `./gradlew assembleDebug testDebugUnitTest lintDebug` |
 | `docker` | `backend/**`, `shared/**`, `docker-compose.yml` o `.dockerignore` | `docker compose --profile full up` construye la imagen del backend y levanta base, Mailpit y backend; verifica que `/health` responda y que la imagen no tenga archivos `.env` (en ningún lugar) ni claves (`*.pem`, `*.jks`, `*.keystore`) en la aplicación ni dentro de los jars del backend y de `shared`, con un `backend/.env` de prueba en el contexto. Las claves no se buscan en el resto del sistema porque la imagen base trae certificados públicos `.pem` ([30](30-infraestructura.md#imagen-del-backend)) |
 | `docs` | Cualquier `.md` del repositorio | Links entre archivos Markdown y sus anclas (`#seccion`), sin consultar internet (lychee) |
 
@@ -55,6 +55,13 @@ y los PRs encadenados) y en cada push a `develop`:
   - con lógica: `PsDatePickerField.kt` y `Child.kt`;
   - vistas previas de diseño, que conviene pasar a fechas fijas: `GrowthChartScreen.kt` y
     `HomeScreen.kt`.
+- **Distribución de Gradle verificada:** `.github/scripts/check-gradle-wrapper.sh` falla en los
+  jobs `shared`, `backend` y `android` si su `gradle-wrapper.properties` no tiene
+  `distributionSha256Sum`. Sin esa línea, el wrapper baja el ZIP de Gradle sin comprobar que sea
+  el oficial, y nada más lo detecta: `setup-gradle` valida solo el `gradle-wrapper.jar`. Un
+  checksum equivocado no necesita control, porque Gradle rechaza el ZIP. Android Studio borra la
+  línea cuando regenera el wrapper, por ejemplo al proponer bajar la versión de AGP o de Gradle
+  (#128).
 - Los scripts de shell y los `gradlew` se guardan con fin de línea LF (`.gitattributes`), para
   que funcionen igual en Linux y en Git Bash de Windows.
 - Duración estimada: entre 8 y 12 minutos cuando corren todos los jobs. El plan gratuito incluye
