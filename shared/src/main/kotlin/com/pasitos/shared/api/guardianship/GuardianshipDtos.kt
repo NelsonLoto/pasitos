@@ -25,6 +25,19 @@ data class InviteGuardianRequest(
     val email: String,
 )
 
+/** `GET /children/{id}/guardian-invitations` (RF-HIJ-05, CA3): las pendientes que mandó el tutor principal. */
+@Serializable
+data class SentInvitationResponse(
+    val id: String,
+    val email: String,
+    @Serializable(with = InstantSerializer::class)
+    val sentAt: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val expiresAt: Instant,
+    /** Vencida (RN-HIJ-07). La calcula el servidor, para no depender del reloj del teléfono. */
+    val expired: Boolean,
+)
+
 /** `GET /me/invitations` (RF-HIJ-06). */
 @Serializable
 data class InvitationResponse(
