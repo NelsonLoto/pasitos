@@ -289,6 +289,21 @@ class DemoSeederTest {
     }
 
     @Test
+    fun `el destino del proceso prevalece sobre dotenv y conserva valores por defecto`() {
+        val environment = mapOf("DB_HOST" to "host-del-proceso", "DB_PORT" to "15432", "DB_NAME" to "demo_aislada", "DB_USER" to "usuario-proceso", "DB_PASSWORD" to "clave-proceso")
+        val file = mapOf("DB_HOST" to "otro-host", "DB_PORT" to "5432", "DB_NAME" to "otra-base", "DB_USER" to "otro-usuario", "DB_PASSWORD" to "otra-clave", "TERMS_VERSION" to "terminos-archivo")
+        val config = demoConfig(TestDatabase.config(), environment::get, file::get)
+        assertEquals("host-del-proceso", config.property("db.host").getString())
+        assertEquals("15432", config.property("db.port").getString())
+        assertEquals("demo_aislada", config.property("db.name").getString())
+        assertEquals("usuario-proceso", config.property("db.user").getString())
+        assertEquals("clave-proceso", config.property("db.password").getString())
+        assertEquals("terminos-archivo", config.property("terms.version").getString())
+        assertEquals(TestDatabase.DECLARATION_VERSION, config.property("declaration.version").getString())
+        requireDemoTarget(config.property("db.name").getString(), "demo_aislada")
+    }
+
+    @Test
     fun `exige confirmar el destino y rechaza credenciales inseguras antes de insertar`() {
         assertFailsWith<IllegalArgumentException> { requireDemoTarget("piloto", null) }
         assertFailsWith<IllegalArgumentException> { requireDemoTarget("piloto", "local") }
