@@ -49,10 +49,16 @@ Requiere JDK 21, PostgreSQL con las migraciones actuales y la configuración hab
 (`backend/.env` o variables de entorno). No cambia versiones ni agrega dependencias o migraciones.
 
 Usá una base dedicada a datos ficticios. `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`
-seleccionan la conexión; `DEMO_DATABASE` confirma exactamente el nombre configurado en `DB_NAME`.
+seleccionan la conexión; en este cargador las variables del proceso prevalecen sobre `.env`,
+y después se usan los valores por defecto del backend. `DEMO_DATABASE` confirma exactamente
+el nombre configurado en `DB_NAME`.
 Confirmar ese nombre no cambia la conexión ni crea una base nueva.
 
-Desde `backend/`, primero cargá el calendario de referencia si la base es nueva:
+Desde `backend/`, primero cargá el calendario de referencia si la base es nueva. La tarea
+existente `seedReferenceData` usa la configuración de `backend/.env`: para preparar otra base,
+ese archivo debe apuntar a la base ficticia elegida, o ejecutarse sin `.env` y con las variables
+de conexión. Su prioridad de configuración no se modifica en T-18. Confirmá ese destino antes
+de ejecutar el comando; `DEMO_DATABASE` protege la carga de demo, no la tarea de calendario:
 
 ```powershell
 .\gradlew.bat seedReferenceData
