@@ -97,3 +97,12 @@ tasks.register<JavaExec>("seedReferenceData") {
     mainClass.set("com.pasitos.backend.seed.SeedReferenceDataKt")
     workingDir = projectDir
 }
+
+// T-18: carga deliberada de cuentas y niños ficticios; no se ejecuta al iniciar el servidor.
+tasks.register<JavaExec>("seedDemoData") {
+    group = "application"
+    description = "Carga los datos ficticios de backend/seed/demo/ (requiere confirmar la base de destino)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.pasitos.backend.seed.SeedDemoDataKt")
+    workingDir = projectDir
+}

@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "guardians": [
+    {
+      "key": "principal",
+      "firstName": "Alex"
+    },
+    {
+      "key": "secundario",
+      "firstName": "Sol"
+    },
+    {
+      "key": "aislado",
+      "firstName": "Río"
+    }
+  ],
+  "children": [
+    {
+      "key": "esperado",
+      "firstName": "Alma",
+      "sex": "FEMALE",
+      "ageMonths": 6,
+      "guardians": [
+        "principal",
+        "secundario"
+      ],
+      "growthObjective": "Dentro de lo esperado (objetivo, sin validar en I2)",
+      "vaccination": "UP_TO_DATE",
+      "birth": {
+        "weightKg": "3.300",
+        "lengthCm": "50.0",
+        "headCircumferenceCm": "34.5"
+      },
+      "measurements": [
+        {
+          "ageMonths": 1,
+          "author": "principal",
+          "values": {
+            "weightKg": "4.400",
+            "lengthCm": "54.5",
+            "headCircumferenceCm": "37.0"
+          }
+        },
+        {
+          "ageMonths": 3,
+          "author": "principal",
+          "values": {
+            "weightKg": "6.400",
+            "lengthCm": "61.5",
+            "headCircumferenceCm": "40.5"
+          }
+        },
+        {
+          "ageMonths": 6,
+          "author": "secundario",
+          "values": {
+            "weightKg": "7.600",
+            "lengthCm": "65.7",
+            "headCircumferenceCm": "43.0"
+          }
+        }
+      ]
+    },
+    {
+      "key": "cruce",
+      "firstName": "Bruno",
+      "sex": "MALE",
+      "ageMonths": 12,
+      "guardians": [
+        "principal",
+        "secundario"
+      ],
+      "growthObjective": "A controlar por cruce de al menos dos líneas en una referencia (objetivo, sin validar en I2)",
+      "vaccination": "OVERDUE",
+      "birth": {
+        "weightKg": "3.400",
+        "lengthCm": "50.0",
+        "headCircumferenceCm": "35.0"
+      },
+      "measurements": [
+        {
+          "ageMonths": 3,
+          "author": "principal",
+          "values": {
+            "weightKg": "7.600",
+            "lengthCm": "61.5",
+            "headCircumferenceCm": "40.5"
+          }
+        },
+        {
+          "ageMonths": 6,
+          "author": "principal",
+          "values": {
+            "weightKg": "9.000",
+            "lengthCm": "67.6",
+            "headCircumferenceCm": "43.3"
+          }
+        },
+        {
+          "ageMonths": 12,
+          "author": "principal",
+          "values": {
+            "weightKg": "9.100",
+            "lengthCm": "75.7",
+            "headCircumferenceCm": "46.1"
+          }
+        }
+      ]
+    },
+    {
+      "key": "consulta",
+      "firstName": "Ciro",
+      "sex": "MALE",
+      "ageMonths": 18,
+      "guardians": [
+        "principal",
+        "secundario"
+      ],
+      "growthObjective": "Consultar con el pediatra por peso sobre p97 (objetivo, sin validar en I2)",
+      "vaccination": "RETROACTIVE",
+      "birth": {
+        "weightKg": "3.600",
+        "lengthCm": "51.0",
+        "headCircumferenceCm": "35.0"
+      },
+      "measurements": [
+        {
+          "ageMonths": 6,
+          "author": "principal",
+          "values": {
+            "weightKg": "9.000",
+            "lengthCm": "68.0",
+            "headCircumferenceCm": "44.0"
+          }
+        },
+        {
+          "ageMonths": 12,
+          "author": "principal",
+          "values": {
+            "weightKg": "15.200",
+            "lengthCm": "77.0",
+            "headCircumferenceCm": "47.0"
+          }
+        },
+        {
+          "ageMonths": 18,
+          "author": "principal",
+          "values": {
+            "weightKg": "18.000",
+            "lengthCm": "82.0",
+            "headCircumferenceCm": "49.0"
+          }
+        }
+      ]
+    },
+    {
+      "key": "prematuro",
+      "firstName": "Dara",
+      "sex": "FEMALE",
+      "ageMonths": 4,
+      "gestationalWeeks": 32,
+      "guardians": [
+        "principal",
+        "secundario"
+      ],
+      "growthObjective": "Edad corregida negativa antes del término; sin percentil en ese punto",
+      "vaccination": "UP_TO_DATE",
+      "birth": {
+        "weightKg": "1.800",
+        "lengthCm": "42.0",
+        "headCircumferenceCm": "30.0"
+      },
+      "measurements": [
+        {
+          "ageMonths": 0,
+          "author": "principal",
+          "values": {
+            "weightKg": "2.000",
+            "lengthCm": "44.0",
+            "headCircumferenceCm": "31.0"
+          },
+          "ageDays": 14
+        },
+        {
+          "ageMonths": 2,
+          "author": "principal",
+          "values": {
+            "weightKg": "3.600",
+            "lengthCm": "52.0",
+            "headCircumferenceCm": "35.0"
+          }
+        },
+        {
+          "ageMonths": 4,
+          "author": "principal",
+          "values": {
+            "weightKg": "5.600",
+            "lengthCm": "60.0",
+            "headCircumferenceCm": "39.0"
+          }
+        }
+      ]
+    },
+    {
+      "key": "escolar",
+      "firstName": "Ema",
+      "sex": "FEMALE",
+      "ageMonths": 72,
+      "guardians": [
+        "aislado"
+      ],
+      "growthObjective": "Cambio de referencia OMS/SAP a los 60 meses; no calcular cruce entre referencias",
+      "vaccination": "UP_TO_DATE",
+      "birth": {
+        "weightKg": "3.200",
+        "lengthCm": "49.0",
+        "headCircumferenceCm": "34.0"
+      },
+      "measurements": [
+        {
+          "ageMonths": 59,
+          "author": "aislado",
+          "values": {
+            "weightKg": "18.000",
+            "lengthCm": "109.0",
+            "headCircumferenceCm": "50.0"
+          }
+        },
+        {
+          "ageMonths": 60,
+          "author": "aislado",
+          "values": {
+            "weightKg": "18.200",
+            "lengthCm": "110.0"
+          }
+        },
+        {
+          "ageMonths": 72,
+          "author": "aislado",
+          "values": {
+            "weightKg": "20.500",
+            "lengthCm": "116.0"
+          }
+        }
+      ]
+    }
+  ]
+}
