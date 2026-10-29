@@ -37,6 +37,8 @@ pediatra vinculado corresponde a la futura integración de RF-CRE-07.
 - La demostración usa una fecha fija y datos de ejemplo; nunca lee la sesión ni un perfil infantil.
 - Permite alternar los tres estados para comparar textos y presentación.
 - La selección del ejemplo sobrevive a una rotación. El contenido puede desplazarse con texto grande.
+- Con texto ampliado, el selector usa los `PsButton` existentes en columna para evitar etiquetas
+  apretadas en el control segmentado. No se modifica el componente compartido.
 - Volver cierra la demostración y conserva la sesión y la navegación habitual de Pasitos.
 - En las mediciones reales se mantiene el aviso de cálculo pendiente: no hay un estado por defecto.
 - El texto propuesto no decide umbrales, cruces ni plausibilidad. Esos criterios requieren el motor
@@ -51,6 +53,23 @@ pediatra vinculado corresponde a la futura integración de RF-CRE-07.
   mediciones no evaluables y datos antiguos según RF-CRE-07.
 
 El PR de propuesta referencia #61 y permanece en borrador; no cierra la validación médica.
+
+## Cómo revisar el prototipo
+
+El código del prototipo está únicamente en `app/app/src/debug/`. No cambia los componentes
+compartidos ni los archivos de `src/main`, y el manifest de release no registra esta actividad.
+La actividad debug está exportada para abrirla durante la revisión con adb; solo muestra
+ejemplos estáticos, ignora los datos del intent y no consulta información del usuario.
+
+Desde la carpeta `app/`, compilar `./gradlew assembleDebug` e instalar el APK de debug en un
+emulador de prueba. Después abrir:
+
+```sh
+adb shell am start -n com.pasitos.app/.feature.growthchart.proposal.GrowthStatusProposalActivity
+```
+
+Usar el selector para comparar los tres mensajes. Probar también rotación, texto grande y
+Volver. La demostración no requiere iniciar sesión ni conectarse al backend.
 
 ## Referencias
 
