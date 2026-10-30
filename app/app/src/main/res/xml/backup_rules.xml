@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copia de seguridad hasta Android 11 (desde Android 12 se usa data_extraction_rules.xml).
+   La base local y sus claves no se copian: la clave maestra vive en el Android Keystore de
+   este teléfono y no viaja, así que en otro teléfono no se podrían descifrar. Los datos vuelven
+   del servidor al iniciar sesión (ADR-17).
+-->
+<full-backup-content>
+    <exclude domain="database" path="." />
+    <exclude domain="file" path="datastore/secrets.preferences_pb" />
+    <exclude domain="sharedpref" path="pasitos_keyset.xml" />
+</full-backup-content>

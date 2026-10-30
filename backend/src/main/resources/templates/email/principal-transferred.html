@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Cambió el tutor principal</title>
+</head>
+<body style="font-family: sans-serif; color: #222;">
+    <p>Hola <span th:text="${firstName}">Ana</span>,</p>
+    <p th:if="${becamePrincipal}">Ahora sos el/la tutor/a principal de
+        <strong th:text="${childName}">Sofía</strong> en Pasitos.</p>
+    <p th:unless="${becamePrincipal}">Dejaste de ser el/la tutor/a principal de
+        <strong th:text="${childName}">Sofía</strong> en Pasitos. Seguís siendo su tutor/a.</p>
+</body>
+</html>

@@ -1,0 +1,55 @@
+# Envía a GitHub las dependencias de los tres builds de Gradle, para que las alertas de Dependabot
+# las cubran (31 · Calidad e integración continua). GitHub no lee los build.gradle.kts, y su envío
+# automático busca un build en la raíz del repositorio, donde no hay ninguno.
+#
+# Es el único workflow con permiso de escritura: corre en push a develop (o a mano), nunca en PRs,
+# y ese permiso solo le sirve para enviar el grafo de dependencias. Las acciones van fijadas por SHA,
+# igual que en ci.yml.
+name: Dependencias
+
+on:
+  push:
+    branches: [develop]
+    # GitHub vuelve a evaluar el grafo enviado con cada vulnerabilidad nueva: solo hace falta
+    # reenviarlo cuando cambian las dependencias
+    paths:
+      - '**/*.gradle.kts'
+      - '**/libs.versions.toml'
+      - '**/gradle-wrapper.properties'
+      - '.github/workflows/dependencias.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  enviar:
+    name: Enviar dependencias (${{ matrix.build }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      # Lo pide la API de envío de dependencias
+      contents: write
+    strategy:
+      # Un build que falla no frena el envío de los otros. Cada uno se envía con su propio
+      # identificador (workflow, job y matriz), así que no se pisan
+      fail-fast: false
+      matrix:
+        build: [app, backend, shared]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/dependency-submission@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          build-root-directory: ${{ matrix.build }}
+          dependency-graph: generate-and-submit
+          # Solo lo que se ejecuta en producción: el backend y shared (runtimeClasspath) y la app
+          # (debug y release). Las herramientas de compilación (plugins de Gradle, lint) y las
+          # pruebas quedan fuera, así una alerta siempre es algo que llega al teléfono o al servidor.
+          # Si AGP renombrara estas configuraciones, sus dependencias desaparecerían del grafo
+          dependency-graph-include-configurations: '^(runtimeClasspath|debugRuntimeClasspath|releaseRuntimeClasspath)$'
+          # Este job corre con permiso de escritura: verifica que el gradle-wrapper.jar sea el oficial
+          validate-wrappers: true

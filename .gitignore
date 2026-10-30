@@ -22,7 +22,10 @@ out/
 # --- Env / secrets ---
 .env
 .env.*
+!.env.example
 *.pem
+pasitos-test-credentials.local.md
+app/app/src/debug/java/com/pasitos/app/TestAccounts.local.kt
 
 # --- macOS ---
 .DS_Store

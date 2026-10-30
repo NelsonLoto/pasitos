@@ -1,0 +1,209 @@
+# Integración continua (ADR-14, 31 · Calidad e integración continua).
+# Cada job corre solo si cambiaron sus carpetas. Un PR no se mergea con algún job en rojo.
+#
+# Las acciones van fijadas por SHA (con su versión en el comentario) para que una etiqueta
+# movida no cambie el código que corre acá. Dependabot las actualiza.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  # En un PR, un push nuevo cancela la corrida anterior; en develop corren todas
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Qué cambió
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      shared: ${{ steps.filter.outputs.shared }}
+      backend: ${{ steps.filter.outputs.backend }}
+      android: ${{ steps.filter.outputs.android }}
+      docs: ${{ steps.filter.outputs.docs }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          # Un cambio en este archivo corre todos los jobs, para probarlo
+          filters: |
+            shared:
+              - 'shared/**'
+              - '.github/workflows/ci.yml'
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - '.github/workflows/ci.yml'
+            android:
+              - 'app/**'
+              - 'shared/**'
+              - '.github/scripts/**'
+              - '.github/workflows/ci.yml'
+            docs:
+              - '**/*.md'
+              - '.github/workflows/ci.yml'
+            docker:
+              - 'backend/**'
+              - 'shared/**'
+              - 'docker-compose.yml'
+              - '.dockerignore'
+              - '.github/workflows/ci.yml'
+
+  shared:
+    name: shared
+    needs: changes
+    if: needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: shared
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: El wrapper de Gradle verifica la distribución (#128)
+        working-directory: .
+        run: .github/scripts/check-gradle-wrapper.sh shared
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: ./gradlew test
+
+  backend:
+    name: backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: El wrapper de Gradle verifica la distribución (#128)
+        working-directory: .
+        run: .github/scripts/check-gradle-wrapper.sh backend
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      # Las pruebas de integración levantan PostgreSQL 16 con Testcontainers (Docker ya está en el runner)
+      - run: ./gradlew test
+      - name: Guardar el informe de pruebas
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: informe-backend
+          path: backend/build/reports/tests/
+          retention-days: 7
+
+  android:
+    name: android
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: El wrapper de Gradle verifica la distribución (#128)
+        working-directory: .
+        run: .github/scripts/check-gradle-wrapper.sh app
+      - name: Sin la zona horaria del teléfono en la app (ADR-26)
+        working-directory: .
+        run: .github/scripts/check-local-date-now.sh
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      # Robolectric descarga una imagen de Android de unos 200 MB la primera vez
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('app/gradle/libs.versions.toml', 'app/app/src/test/resources/robolectric.properties') }}
+      - run: ./gradlew assembleDebug testDebugUnitTest lintDebug
+      - name: Guardar los informes de pruebas y lint
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: informes-android
+          path: |
+            app/app/build/reports/tests/
+            app/app/build/reports/lint-results-debug.html
+          retention-days: 7
+
+  # Construye la imagen del backend y levanta el entorno local completo, como lo hace el equipo
+  docker:
+    name: docker
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Un .env como el de cualquier integrante: la prueba de abajo verifica que no llegue a la imagen
+      - name: Simular un backend/.env local
+        run: printf 'JWT_SECRET=no-tiene-que-llegar-a-la-imagen\n' > backend/.env
+      - name: Levantar base, Mailpit y backend
+        run: docker compose --profile full up --detach --wait --wait-timeout 180
+      - name: El backend responde /health
+        run: curl --fail --silent --show-error http://localhost:8080/health
+      # Como root, para revisar también las carpetas que el usuario de la imagen no puede leer.
+      # Los .env se buscan en todo el sistema. Las claves, solo en /app (donde el Dockerfile copia
+      # la aplicación) y dentro de los jars propios, donde terminaría lo que esté en
+      # src/main/resources: la imagen base trae certificados públicos que también son .pem
+      - name: La imagen no tiene archivos .env ni claves
+        run: |
+          found=$(docker run --rm -i --user root --entrypoint sh pasitos-backend:local -s <<'EOF'
+          set -eu -o pipefail
+          env='(^|/)[.]env([.][^/]*)?$'
+          claves='[.](pem|jks|keystore)$'
+          find / -xdev -type f | awk -v p="$env" '$0 ~ p'
+          find /app -type f | awk -v p="$claves" '$0 ~ p'
+          for jar in /app/lib/backend-*.jar /app/lib/shared-*.jar; do
+            unzip -l "$jar" | awk -v p="$env|$claves" -v j="$jar" 'NR > 3 && $4 ~ p { print j "!/" $4 }'
+          done
+          EOF
+          )
+          if [ -n "$found" ]; then
+            echo "::error::La imagen tiene archivos .env o claves: $found"
+            exit 1
+          fi
+      - name: Logs de los servicios
+        if: failure()
+        run: docker compose --profile full logs
+
+  docs:
+    name: docs
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Solo links entre archivos del repo, con sus anclas (#seccion); no consulta internet
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --offline
+            --include-fragments
+            --no-progress
+            '**/*.md'
+          fail: true

@@ -1,0 +1,15 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %X{call-id} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- outOfOrder está activado a propósito (ADR-23): su advertencia se repite en cada prueba. -->
+    <logger name="org.flywaydb.core.internal.command.DbMigrate" level="ERROR" />
+
+    <!-- En las pruebas solo se muestran advertencias y errores. -->
+    <root level="WARN">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

@@ -1,0 +1,9 @@
+Hola [(${firstName})],
+
+Pediste cambiar el email de tu cuenta de Pasitos a esta dirección. Confirmalo entrando a este
+link:
+
+[(${link})]
+
+Este link vence en 24 horas. Si no pediste este cambio, podés ignorar este email: tu email actual
+sigue siendo el mismo.

@@ -15,8 +15,75 @@
 2. Crear la rama de la tarea: `git checkout -b feature/nombre-de-la-tarea`.
 3. Commitear y pushear: `git push -u origin feature/nombre-de-la-tarea`.
 4. Abrir un Pull Request contra `develop` (no contra `main`) y completar el template.
-5. Esperar al menos 1 aprobación antes de mergear.
+5. Esperar al menos 1 aprobación y la integración continua en verde antes de mergear.
 6. Borrar la rama una vez mergeada (GitHub lo ofrece automáticamente al cerrar el PR).
+
+Cada tarea es un issue de GitHub. La rama lleva el número del issue
+(`feature/42-alta-de-hijo`), el PR incluye `Closes #42` y se abre como borrador apenas se
+empieza, para que el resto del equipo vea qué está en curso. Detalle del proceso en
+[`docs/spec-tecnica/32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md).
+
+## Integración continua
+
+Cada PR corre la integración continua (`.github/workflows/ci.yml`): pruebas de `shared`, del
+backend y de la app, lint, la imagen Docker del backend con el entorno local y los links de la
+documentación. Solo corren los jobs de las carpetas que cambiaron. Detalle en
+[`31-calidad-y-ci.md`](docs/spec-tecnica/31-calidad-y-ci.md#2-integración-continua-adr-14).
+
+- **No se mergea un PR con la integración continua en rojo.** En un repositorio privado de
+  GitHub Free no se puede bloquear técnicamente: depende del equipo, igual que no pushear directo
+  a `develop`.
+- Si un job falla, el detalle está en la pestaña *Checks* del PR, y los informes de pruebas
+  quedan como artefacto. Si falla por algo ajeno al PR (por ejemplo, una descarga que se cortó),
+  primero probá *Re-run failed jobs*.
+- La app no puede usar la zona horaria del teléfono (`LocalDate.now()`,
+  `ZoneId.systemDefault()` y similares): "hoy" es `ArgentinaClock.today()` (ADR-26). Si tu tarea
+  reescribe un archivo de `.github/scripts/local-date-now-allowlist.txt`, sacalo de la lista. Lo
+  podés verificar antes de pushear con `.github/scripts/check-local-date-now.sh`.
+- **Si Android Studio propone bajar la versión de AGP o de Gradle, no aceptes: actualizá Android
+  Studio.** Al bajarla regenera el wrapper y borra `distributionSha256Sum`, la línea que verifica
+  que la distribución de Gradle sea la oficial. La integración continua falla si falta
+  (`.github/scripts/check-gradle-wrapper.sh app backend shared`).
+- Dependabot abre los lunes PRs con actualizaciones de dependencias. Se revisan y mergean como
+  cualquier otro, siguiendo la
+  [política de versiones](docs/spec-tecnica/01-stack.md#política-de-versiones).
+
+## Tablero
+
+El [tablero de Pasitos](https://github.com/users/NelsonLoto/projects/1) mueve solo la mayoría de
+las tarjetas: un issue nuevo entra en `Por hacer`, abrir el PR con `Closes #42` lo pasa a
+`En curso` y mergearlo lo pasa a `Hecho`. Lo único manual es mover la tarjeta a `En revisión`
+cuando marcás el PR como listo para revisar. No muevas a `Hecho` una tarjeta con PR antes del
+merge: eso cierra el issue. Detalle de cada automatización en
+[`32-proceso-de-desarrollo.md`](docs/spec-tecnica/32-proceso-de-desarrollo.md#tablero).
+
+## Antes de tomar una tarea (personas y agentes de IA)
+
+Para no pisar el trabajo de otro integrante, verificá **antes de asignarte un issue o crear una
+rama**:
+
+1. El issue no tiene responsable y está en `Por hacer` en el tablero.
+2. No existe una rama remota con el número del issue:
+   `git fetch --prune` y después `git branch -r | grep "/<número>-"`.
+3. No hay un PR abierto que lo mencione: `gh pr list --search "<número>"`.
+4. Las tareas de las que depende ya están en `Hecho`: el issue no figura como bloqueado
+   (*Blocked by*). Las dependencias están cargadas como dependencias nativas de GitHub, así que
+   alcanza con mirar el issue o con que este comando no devuelva nada:
+   `gh api repos/NelsonLoto/pasitos/issues/<número>/dependencies/blocked_by --jq '.[] | select(.state=="open") | .number'`.
+5. Tu `develop` local tiene lo último que se mergeó en GitHub: después de `git fetch`,
+   `git rev-list --count develop..origin/develop` tiene que dar `0`. Si da más, actualizalo
+   primero con `git checkout develop` y `git pull --ff-only`. Si no puede avanzar porque tu
+   `develop` tiene commits o cambios propios, no sigas y consultá.
+
+Si alguno de los puntos 1 a 4 falla, **no tomes la tarea**: elegí otra o consultá con quien la
+tiene. El punto 5 no impide tomarla: si `develop` está atrasado, se actualiza y se sigue. Recién
+después asignate el issue, movelo a `En curso` y creá la rama **desde `develop` actualizado**.
+
+> **Nota para agentes de IA:** antes de crear una rama o modificar código
+> para una tarea, ejecutá las verificaciones 1 a 5 e informá el resultado a la persona con la que
+> estás trabajando. Si encontrás trabajo en curso sobre la misma tarea o sobre los mismos
+> archivos, detenete y consultá antes de seguir. No asumas que una tarea está libre porque no la
+> ves en tu copia local: el estado real está en GitHub.
 
 ## Promoción a producción
 

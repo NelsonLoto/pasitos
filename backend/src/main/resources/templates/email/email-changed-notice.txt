@@ -1,0 +1,7 @@
+Hola [(${firstName})],
+
+El email de tu cuenta de Pasitos cambió a [(${newEmail})]. A partir de ahora usá esa dirección
+para iniciar sesión.
+
+Si no fuiste vos, alguien más tiene acceso a tu cuenta: entrá con tu contraseña y el email nuevo,
+y cambiala de inmediato desde la app.

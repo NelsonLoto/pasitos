@@ -1,0 +1,61 @@
+# Entorno local (30 · Infraestructura).
+#   docker compose --env-file backend/.env up -d                  base y Mailpit
+#   docker compose --env-file backend/.env --profile full up -d   también el backend
+# Sin --env-file se usan los valores por defecto de acá, que son los de backend/.env.example.
+# Los puertos se publican solo en 127.0.0.1, así no quedan abiertos a otras computadoras de la red.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-pasitos}
+      POSTGRES_USER: ${DB_USER:-pasitos_dev}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pasitos_dev_local}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    volumes:
+      - pasitos_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-pasitos_dev} -d ${DB_NAME:-pasitos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Captura los emails que manda el backend, sin enviarlos: se ven en http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025" # página para ver los emails
+      - "127.0.0.1:1025:1025" # SMTP, para el backend que corre fuera de Docker
+
+  # Opcional: lo habitual es correr el backend desde IntelliJ o con ./gradlew run
+  backend:
+    profiles: [full]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: pasitos-backend:local
+    # Se reconstruye en cada `up`, así corre el código actual. Sin cambios tarda unos segundos
+    pull_policy: build
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    environment:
+      # Dentro de Docker, la base se llama db y escucha en su puerto interno
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-pasitos}
+      DB_USER: ${DB_USER:-pasitos_dev}
+      DB_PASSWORD: ${DB_PASSWORD:-pasitos_dev_local}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      # El backend las lee desde que manda emails (I1-B1)
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  pasitos_pg_data:
