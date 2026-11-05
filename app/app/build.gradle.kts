@@ -6,15 +6,14 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
-// Dummy task to satisfy IDE sync for AGP 9 built-in Kotlin
-tasks.register("prepareKotlinBuildScriptModel") {}
-
 android {
-    namespace = "com.pasitos.app"
-    compileSdk = 37
+    namespace = "com.ninosano.app"
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
-        applicationId = "com.pasitos.app"
+        applicationId = "com.ninosano.app"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
@@ -25,43 +24,27 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            optimization {
+                enable = false
+            }
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
     }
-    testOptions {
-        unitTests.all {
-            // Robolectric con Android 17 accede a una clase interna del JDK al preparar cada prueba
-            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
-        }
-    }
 }
 
 dependencies {
-    // Motor de crecimiento, formato de edades y contratos de la API compartidos con el backend
-    implementation("com.pasitos:shared")
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.auth)
-    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
@@ -70,29 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.process)
-
-    // Base local cifrada y sincronización (ADR-02, ADR-15, ADR-17)
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.sqlcipher.android)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.tink.android)
-    // Inicio con Google (I1-A2): Credential Manager y el ID token de Google
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
-
     testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.androidx.work.testing)
-    testImplementation(libs.ktor.client.mock)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

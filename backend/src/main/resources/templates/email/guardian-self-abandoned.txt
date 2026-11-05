@@ -1,3 +1,0 @@
-Hola [(${firstName})],
-
-[(${formerGuardianFirstName})] dejó de ser tutor/a de [(${childName})] en Pasitos.

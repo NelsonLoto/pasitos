@@ -1,5 +1,0 @@
-Hola [(${firstName})],
-
-[(${inviterFirstName})] te invitó a ser tutor/a de [(${childName})] en Pasitos.
-
-Abrí la app para aceptar o rechazar la invitación.

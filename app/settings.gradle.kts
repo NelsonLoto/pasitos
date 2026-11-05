@@ -1,9 +1,18 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
+}
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -13,8 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "pasitos"
+rootProject.name = "App"
 include(":app")
-
-// Módulo compartido con el backend, como build compuesto (ADR-01).
-includeBuild("../shared")
