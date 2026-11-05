@@ -1,3 +1,0 @@
-Hola [(${firstName})],
-
-[(${responderFirstName})] aceptó tu invitación y ahora es tutor/a de [(${childName})] en Pasitos.

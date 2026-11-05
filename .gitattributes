@@ -1,3 +1,0 @@
-# Los scripts de shell siempre con fin de línea LF, también en Windows: con CRLF, bash falla
-*.sh text eol=lf
-gradlew text eol=lf
