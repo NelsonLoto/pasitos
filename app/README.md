@@ -1,8 +1,10 @@
 # app
 
-Proyecto Android nativo (Kotlin + Jetpack Compose) de la app "Niño Sano".
+App Android de Pasitos (Kotlin + Jetpack Compose), paquete `com.pasitos.app`. Las
+especificaciones están en la carpeta de Google Drive
+[Specs y plan de trabajo](https://drive.google.com/drive/folders/1uXTYhwSPfYaTCs9BrH1HyrU7GV_3y0Y7).
 
-## Stack y versiones
+## Versiones
 
 | Componente | Versión |
 |---|---|
@@ -17,16 +19,19 @@ Proyecto Android nativo (Kotlin + Jetpack Compose) de la app "Niño Sano".
 
 ## Compilar y correr
 
-Abrir esta carpeta (`app/`) como proyecto en Android Studio, o por terminal:
+Abrir esta carpeta (`app/`) como proyecto en Android Studio y correr la configuración `app`, o
+por terminal desde esta carpeta:
 
 ```bash
-./gradlew assembleDebug
+./gradlew assembleDebug testDebugUnitTest   # compila y corre las pruebas unitarias
+./gradlew installDebug                      # instala en el emulador o teléfono conectado
 ```
 
-Si `java` no está en el PATH, usar el JDK embebido de Android Studio:
+En Windows (PowerShell), si `java` no está en el PATH, usar el JDK embebido de Android Studio:
 
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat assembleDebug testDebugUnitTest
 ```
 
 > **Nota:** si el proyecto vive dentro de una carpeta sincronizada por OneDrive,
@@ -35,25 +40,23 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 > de OneDrive, no un error del proyecto — reintentar el build (o excluir
 > `app/build/` y `app/app/build/` de la sincronización) lo resuelve.
 
-## Autenticación (mock)
+## Credenciales de prueba
 
-El backend (`../backend/`) todavía no existe. El login actual usa
-`FakeAuthRepository` (in-memory, con latencia simulada). Credenciales de
-prueba:
+Mientras la app use `FakeAuthRepository` (en memoria), el login acepta:
 
-- **Email:** `demo@ninosano.app`
+- **Email:** `demo@pasitos.app`
 - **Contraseña:** `123456`
 
-Cuando exista el backend real, se agrega `RemoteAuthRepository : AuthRepository`
-y solo cambia el binding en `AuthModule` — ni la UI ni los ViewModels que
-dependen de `AuthRepository` se tocan.
+## Estructura de carpetas
 
-## Estado del scaffold
-
-- Design System de Figma portado a código (`core/designsystem`): colores,
-  tipografía (Baloo 2 + Inter) y componentes reutilizables.
-- Navegación completa de las 15 pantallas del documento funcional
-  (`core/navigation`): solo **Login** está implementada a fondo; el resto
-  son placeholders navegables (`PlaceholderScreen`) a completar pantalla
-  por pantalla, en el orden del documento funcional.
-- Sin persistencia real ni backend: toda la capa de datos es mock/local.
+```
+app/src/main/java/com/pasitos/app/
+├── core/
+│   ├── common/          componentes generales (PlaceholderScreen)
+│   ├── designsystem/    componentes del Design System de Figma (prefijo Ns)
+│   └── navigation/      grafo de navegación y rutas type-safe
+├── data/                un paquete por dominio (auth, child, measurement):
+│                        repositorio, modelo (model/) y módulo de Hilt (di/)
+├── feature/             un paquete por pantalla: Screen, UiState y ViewModel
+└── ui/theme/            colores, tipografía y tema
+```

@@ -1,29 +1,24 @@
-# control-nino-sano-app
+# Pasitos
 
-App de seguimiento y control del niño sano (Práctica III).
+App Android para que tutores y pediatras sigan el crecimiento, las vacunas y el desarrollo de
+niños y niñas de 0 a 15 años.
 
-Permite a padres, madres y tutores registrar mediciones antropométricas y hábitos
-del niño desde el nacimiento hasta la edad escolar, visualizar la curva de
-crecimiento por percentiles (estándar SAP/Argentina), gestionar el calendario de
-vacunación oficial argentino y exportar reportes en PDF para la consulta pediátrica.
+## Especificaciones y plan
 
-El detalle de objetivo, alcance, requerimientos funcionales/no funcionales y stack
-técnico está en [`docs/Documento_Funcional_App_Nino_Sano.docx`](docs/Documento_Funcional_App_Nino_Sano.docx).
+La SPEC funcional, la SPEC técnica, las decisiones y el plan de trabajo están en la carpeta de
+Google Drive [Specs y plan de trabajo](https://drive.google.com/drive/folders/1uXTYhwSPfYaTCs9BrH1HyrU7GV_3y0Y7)
+(acceso para el equipo). En este repositorio quedan solo el código y lo necesario para trabajar
+con él; las tareas están en los issues y en el tablero del proyecto.
 
 ## Estructura del repositorio
 
-- `app/` — Aplicación Android nativa (Kotlin + Jetpack Compose).
-- `backend/` — API propia (Kotlin + Ktor) + base de datos PostgreSQL.
-- `docs/` — Documentación funcional y técnica del proyecto.
-
-## Stack
-
-| Componente | Tecnología |
+| Carpeta | Contenido |
 |---|---|
-| App móvil | Kotlin, Jetpack Compose |
-| Backend | Kotlin, Ktor |
-| Base de datos | PostgreSQL |
-| Autenticación | JWT + Google Sign-In (OAuth2) |
-| Notificaciones push | Firebase Cloud Messaging (solo transporte) |
-| IDE app | Android Studio |
-| IDE backend | IntelliJ IDEA Community |
+| `app/` | App Android (Kotlin + Jetpack Compose). Cómo compilarla y correrla: [`app/README.md`](app/README.md) |
+| `backend/` | API del backend (Kotlin + Ktor): [`backend/README.md`](backend/README.md) |
+| `docs/` | Documento funcional original, solo como referencia histórica. Lo vigente está en Drive |
+| `.github/` | Plantilla de Pull Request |
+
+## Cómo contribuir
+
+Ramas, Pull Requests y verificaciones antes de tomar una tarea: [`CONTRIBUTING.md`](CONTRIBUTING.md).
