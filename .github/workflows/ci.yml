@@ -1,0 +1,102 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      android: ${{ steps.paths.outputs.android }}
+      docs: ${{ steps.paths.outputs.docs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Probar controles de CI
+        run: node --test .github/scripts/ci-checks.test.mjs
+      - name: Detectar componentes afectados
+        id: paths
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: node .github/scripts/ci-checks.mjs changes "$BASE_SHA" "$HEAD_SHA"
+
+  android:
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verificar wrapper y zona horaria
+        run: |
+          bash .github/scripts/check-gradle-wrapper.sh app
+          bash .github/scripts/check-local-date-now.sh
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+          validate-wrappers: true
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: robolectric
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ runner.os }}-${{ hashFiles('app/gradle/libs.versions.toml') }}
+          restore-keys: robolectric-${{ runner.os }}-
+      - name: Compilar, probar y ejecutar lint
+        working-directory: app
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug testDebugUnitTest lintDebug --console=plain
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.ref == 'refs/heads/develop' && steps.robolectric.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ steps.robolectric.outputs.cache-primary-key }}
+      - name: Guardar informes si falla Android
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-reports
+          path: |
+            app/app/build/reports/
+            app/app/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verificar enlaces locales y anclas
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          lycheeVersion: v0.24.2
+          args: --offline --include-fragments=anchor-only --no-progress './**/*.md'
+          fail: true
