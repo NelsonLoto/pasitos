@@ -9,7 +9,7 @@ test('I0-03: solo Markdown no compila Android, incluso dentro de app', () => {
   assert.deepEqual(classify(['app/README.md', 'CONTRIBUTING.md']), { android: false, docs: true });
 });
 test('I0-03: código Android, shared y controles ejecutan Android', () => {
-  for (const file of ['app/app/build.gradle.kts', 'shared/src/Model.kt', '.github/scripts/ci-checks.mjs']) {
+  for (const file of ['app/app/build.gradle.kts', 'shared/src/Model.kt', 'scripts/check.sh', '.github/scripts/ci-checks.mjs']) {
     assert.equal(classify([file]).android, true);
   }
   assert.deepEqual(classify(['.github/workflows/ci.yml']), { android: true, docs: true });

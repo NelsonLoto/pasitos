@@ -9,7 +9,7 @@ export function classify(paths) {
   const all = paths.includes('.github/workflows/ci.yml');
   const code = paths.filter(path => !path.endsWith('.md'));
   return {
-    android: all || code.some(path => /^(app\/|shared\/|\.github\/scripts\/)/.test(path)),
+    android: all || code.some(path => /^(app\/|shared\/|scripts\/|\.github\/scripts\/)/.test(path)),
     docs: all || paths.some(path => path.endsWith('.md')),
   };
 }
