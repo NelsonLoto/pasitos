@@ -29,6 +29,7 @@ por terminal desde esta carpeta:
 ```bash
 ./gradlew assembleDebug testDebugUnitTest   # compila y corre las pruebas unitarias
 ./gradlew installDebug                      # instala en el emulador o teléfono conectado
+./gradlew connectedDebugAndroidTest         # verifica el flujo con Hilt en el emulador
 ```
 
 En Windows (PowerShell), si `java` no está en el PATH, usar el JDK embebido de Android Studio:
