@@ -8,14 +8,18 @@ especificaciones están en la carpeta de Google Drive
 
 | Componente | Versión |
 |---|---|
-| Kotlin | 2.2.10 |
-| AGP | 9.3.2 |
-| Gradle | 9.5.0 |
-| Compose BOM | 2026.02.01 |
+| Kotlin | 2.4.20 |
+| AGP | 9.4.1 |
+| Gradle | 9.8.0 |
+| JDK del daemon de Gradle | 21 (seleccionado por `gradle/gradle-daemon-jvm.properties`) |
+| Compose BOM | 2026.09.00 |
 | compileSdk / targetSdk | 37 |
 | minSdk | 26 (Android 8.0) |
-| DI | Hilt 2.59.2 + KSP 2.2.10-2.0.2 |
-| Navegación | Navigation Compose 2.9.8 (rutas type-safe) |
+| DI | Hilt 2.60.1 + KSP 2.3.12 |
+| Navegación | Navigation Compose 2.10.2 (rutas type-safe) |
+
+El wrapper verifica la distribución de Gradle con `distributionSha256Sum`. Si Android Studio
+propone bajar AGP o Gradle, actualizar Android Studio y conservar ese checksum.
 
 ## Compilar y correr
 
