@@ -1,0 +1,8 @@
+# Usos anteriores a I0-07 presentes en develop al iniciar I0-03.
+# Quitar cada archivo al corregirlo; no agregar nuevas excepciones.
+app/app/src/main/java/com/pasitos/app/data/child/model/Child.kt
+app/app/src/main/java/com/pasitos/app/feature/childonboarding/ChildOnboardingViewModel.kt
+app/app/src/main/java/com/pasitos/app/feature/childselector/ChildSelectorScreen.kt
+app/app/src/main/java/com/pasitos/app/feature/growthchart/GrowthChartScreen.kt
+app/app/src/main/java/com/pasitos/app/feature/home/HomeScreen.kt
+app/app/src/main/java/com/pasitos/app/feature/measurement/MeasurementFormUiState.kt

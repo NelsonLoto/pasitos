@@ -1,33 +1,64 @@
 # Cómo contribuir
 
-## Ramas
+Las especificaciones y el plan vigentes están en
+[Specs y plan de trabajo (Google Drive)](https://drive.google.com/drive/folders/1uXTYhwSPfYaTCs9BrH1HyrU7GV_3y0Y7).
+Este archivo describe cómo trabajar con el repositorio.
 
-- `main` — rama productiva. Solo recibe merges desde `develop` vía Pull Request. Nadie pushea directo acá.
-- `develop` — rama de integración. Acá se juntan todas las features antes de promocionar a `main`.
-- Ramas de trabajo — una por tarea, **no una por persona**, creadas siempre desde `develop`:
-  - `feature/<nombre-corto>` — funcionalidad nueva. Ej: `feature/login-usuario`, `feature/curva-crecimiento`.
-  - `fix/<nombre-corto>` — corrección de bug. Ej: `fix/calculo-percentil-bordes`.
-  - `chore/<nombre-corto>` — configuración, dependencias, tooling. Ej: `chore/setup-ktor`.
+## Antes de tomar una tarea
 
-## Flujo de trabajo
+Personas y agentes de IA deben realizar e informar las verificaciones de
+[32 · Proceso de desarrollo, §4](https://docs.google.com/document/d/1L7vJFUGmlVv4TrmARCOAzYEKt53A0tCr_314hcNZFM4).
+La lista oficial se mantiene únicamente en Drive.
 
-1. Actualizar `develop` local: `git checkout develop && git pull`.
-2. Crear la rama de la tarea: `git checkout -b feature/nombre-de-la-tarea`.
-3. Commitear y pushear: `git push -u origin feature/nombre-de-la-tarea`.
-4. Abrir un Pull Request contra `develop` (no contra `main`) y completar el template.
-5. Esperar al menos 1 aprobación antes de mergear.
-6. Borrar la rama una vez mergeada (GitHub lo ofrece automáticamente al cerrar el PR).
+## Ramas y Pull Requests
 
-## Promoción a producción
+- `develop` es la rama de integración y la base de las ramas de trabajo.
+- `main` recibe promociones desde `develop` mediante PR.
+- Una rama por tarea: `feature/42-alta-de-hijo`, `fix/42-descripcion` o `chore/42-descripcion`.
+- No se permite push directo a `main` ni a `develop`, aunque GitHub lo permita.
 
-Cuando `develop` esté estable y se decida hacer un release, se abre un Pull Request de `develop` → `main`.
+Después de las verificaciones previas:
+
+1. Actualizar `develop` con `git switch develop` y `git pull --ff-only`.
+2. Crear la rama de la tarea desde ese `develop` actualizado.
+3. Publicarla y abrir un PR **en borrador** contra `develop` apenas se empieza.
+4. Completar la plantilla del PR e incluir `Closes #42` para vincular su issue.
+5. Al marcarlo listo para revisar, mover el issue a `En revisión` en el tablero.
+6. Esperar la CI en verde y al menos una aprobación de otro integrante antes del merge.
+7. Eliminar la rama de trabajo después del merge.
+
+No mover manualmente a `Hecho` una tarjeta con PR antes del merge: eso cierra el issue.
+
+## Integración continua
+
+**No se mergea un PR con la CI en rojo.** La revisión y esta regla son obligatorias para el
+equipo aunque no estén forzadas por una protección técnica de ramas.
+
+La CI corre en cada PR y en los pushes a `develop`:
+
+- Cambios de Android: checksum del wrapper, control de zona horaria, compilación, pruebas
+  unitarias y lint. Las pruebas de interfaz se ejecutan en emulador local.
+- Cambios de Markdown: enlaces locales y anclas con lychee, sin consultar enlaces externos.
+- Un cambio en `ci.yml` ejecuta todos los jobs disponibles. Un PR que solo cambia Markdown
+  no compila Android.
+- Si falla un job de Android, sus informes se conservan como artefactos durante siete días.
+
+El backend y `shared` incorporarán sus jobs al crear sus builds en I0-04 e I0-02. El job de
+Docker se incorpora con I0-09.
+
+Usar la hora de Argentina para "hoy". El control temporal y su lista de excepciones están en
+`.github/scripts/check-local-date-now.sh` y `local-date-now-allowlist.txt`: la lista solo puede
+achicarse; al corregir un archivo hay que quitarlo de ella.
+
+No bajar AGP o Gradle por una sugerencia del IDE: actualizar Android Studio y conservar
+`distributionSha256Sum` en el wrapper. Para verificarlo:
+`bash .github/scripts/check-gradle-wrapper.sh app`.
+
+Dependabot revisa las dependencias los lunes a las 06:00 de Argentina. Las actualizaciones se
+revisan en PRs propios; Kotlin, KSP y Hilt se actualizan juntos. Los cambios de especificación
+se realizan en Drive según ADR-30, antes de implementar cambios de comportamiento.
 
 ## Commits
 
-Se recomienda un mensaje de commit corto y descriptivo del *qué* y el *por qué*, evitando mensajes genéricos como "fix" o "cambios".
-
-## Sobre la protección de ramas
-
-GitHub Free no permite activar protección de ramas (bloqueo de push directo, revisión obligatoria) en repositorios **privados** — esa función requiere GitHub Pro o que el repositorio sea público. Como el repo se mantiene privado por manejar datos de salud de menores, `main` y `develop` **no están bloqueadas técnicamente**: nada impide un `git push` directo.
-
-Esto significa que el flujo de arriba (rama por tarea + PR) depende de la disciplina del equipo, no de una regla forzada por GitHub. **No se debe pushear directo a `main` ni a `develop` bajo ninguna circunstancia**, aunque el sistema lo permita. Si en algún momento se evalúa pasar a GitHub Pro o a una organización con plan pago, esta sección se actualiza para reflejar la protección real.
+En español, describiendo qué cambia y por qué, con los prefijos `feat:`, `fix:`, `chore:`,
+`docs:`, `test:` o `refactor:`. Ejemplo: `chore: incorporar CI por componente (I0-03)`.

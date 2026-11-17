@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # I0-04 e I0-02 agregan backend y shared cuando existan sus builds.
+  - package-ecosystem: gradle
+    directories: ['/app']
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+    labels: [app]
+    groups:
+      kotlin-ksp-hilt:
+        patterns:
+          - 'org.jetbrains.kotlin*'
+          - 'com.google.devtools.ksp*'
+          - 'com.google.dagger*'
+      otras-menores-y-parches:
+        patterns: ['*']
+        exclude-patterns:
+          - 'org.jetbrains.kotlin*'
+          - 'com.google.devtools.ksp*'
+          - 'com.google.dagger*'
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Argentina/Buenos_Aires
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+    labels: [infra]
+    groups:
+      acciones-menores-y-parches:
+        patterns: ['*']
+        update-types: [minor, patch]
