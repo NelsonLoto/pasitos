@@ -45,4 +45,4 @@ Los agentes de IA informan el resultado antes de crear una rama o modificar cód
 - [ ] App ejecutada en emulador o dispositivo, si corresponde.
 - [ ] Cambios de comportamiento reflejados previamente en Drive.
 - [ ] Sin secretos ni datos personales en el código o los logs.
-- [ ] PR revisado y aprobado por otro integrante.
+- [ ] PR revisado por quien lo abrió. La revisión de otro integrante es opcional (CONTRIBUTING.md).
