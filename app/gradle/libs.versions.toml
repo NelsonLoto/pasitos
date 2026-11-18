@@ -19,6 +19,7 @@ work = "2.12.0"
 datastore = "1.2.1"
 tink = "1.23.0"
 robolectric = "4.17"
+testCore = "1.7.0"
 
 [libraries]
 # Sin versión: lo resuelve el build compuesto ../shared (settings.gradle.kts).
@@ -55,6 +56,7 @@ androidx-datastore = { module = "androidx.datastore:datastore-preferences", vers
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleRuntimeKtx" }
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "testCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

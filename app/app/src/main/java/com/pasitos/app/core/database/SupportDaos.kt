@@ -38,4 +38,3 @@ interface SyncStateDao {
     @Query("SELECT * FROM sync_state WHERE id = 1")
     fun observe(): Flow<SyncState?>
 }
-
