@@ -15,7 +15,7 @@ La lista oficial se mantiene únicamente en Drive.
 - `develop` es la rama de integración y la base de las ramas de trabajo.
 - `main` recibe promociones desde `develop` mediante PR.
 - Una rama por tarea: `feature/42-alta-de-hijo`, `fix/42-descripcion` o `chore/42-descripcion`.
-- No se permite push directo a `main` ni a `develop`, aunque GitHub lo permita.
+- No se permite push directo a `main` ni a `develop`: GitHub lo bloquea con un ruleset.
 
 Después de las verificaciones previas:
 
@@ -24,15 +24,17 @@ Después de las verificaciones previas:
 3. Publicarla y abrir un PR **en borrador** contra `develop` apenas se empieza.
 4. Completar la plantilla del PR e incluir `Closes #42` para vincular su issue.
 5. Al marcarlo listo para revisar, mover el issue a `En revisión` en el tablero.
-6. Esperar la CI en verde y al menos una aprobación de otro integrante antes del merge.
+6. Esperar la CI en verde y mergear. No hace falta la aprobación de otro integrante (GitHub no
+   deja que el autor apruebe su propio PR). Pedir una revisión es opcional y se recomienda en
+   PRs de autenticación, permisos o datos personales.
 7. Eliminar la rama de trabajo después del merge.
 
 No mover manualmente a `Hecho` una tarjeta con PR antes del merge: eso cierra el issue.
 
 ## Integración continua
 
-**No se mergea un PR con la CI en rojo.** La revisión y esta regla son obligatorias para el
-equipo aunque no estén forzadas por una protección técnica de ramas.
+**No se mergea un PR con la CI en rojo.** GitHub lo bloquea: `develop` y `main` tienen un ruleset
+que exige un PR con los jobs de la CI en verde y no permite force push ni borrar la rama.
 
 La CI corre en cada PR y en los pushes a `develop`:
 
