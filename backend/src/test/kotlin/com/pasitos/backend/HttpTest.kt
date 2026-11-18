@@ -4,7 +4,8 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.pasitos.backend.common.ApiException
-import com.pasitos.backend.common.ErrorResponse
+import com.pasitos.shared.api.ErrorCode
+import com.pasitos.shared.api.ErrorResponse
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -35,14 +36,14 @@ class HttpTest {
             routing {
                 get("/invalid") { throw BadRequestException("synthetic-private-input") }
                 get("/failure") { error("synthetic-private-input") }
-                get("/domain") { throw ApiException(HttpStatusCode.Conflict, ErrorResponse("conflict", "Hay un conflicto")) }
+                get("/domain") { throw ApiException(HttpStatusCode.Forbidden, ErrorResponse(ErrorCode.FORBIDDEN, "No tenés permiso")) }
             }
         }
         for ((path, status, code) in listOf(
-            Triple("/missing", HttpStatusCode.NotFound, "not_found"),
-            Triple("/invalid", HttpStatusCode.BadRequest, "invalid_input"),
-            Triple("/failure", HttpStatusCode.InternalServerError, "internal_error"),
-            Triple("/domain", HttpStatusCode.Conflict, "conflict"),
+            Triple("/missing", HttpStatusCode.NotFound, ErrorCode.NOT_FOUND),
+            Triple("/invalid", HttpStatusCode.BadRequest, ErrorCode.INVALID_INPUT),
+            Triple("/failure", HttpStatusCode.InternalServerError, ErrorCode.INTERNAL_ERROR),
+            Triple("/domain", HttpStatusCode.Forbidden, ErrorCode.FORBIDDEN),
         )) {
             val response = client.get(path)
             assertEquals(status, response.status)

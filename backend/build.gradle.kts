@@ -14,6 +14,7 @@ val ktorVersion = "3.6.0"
 val exposedVersion = "0.61.0"
 val flywayVersion = "13.9.0"
 dependencies {
+    implementation("com.pasitos:shared")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")

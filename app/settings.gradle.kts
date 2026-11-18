@@ -24,3 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "pasitos"
 include(":app")
+
+// Módulo compartido con el backend, como build compuesto: sus cambios se ven al recompilar (ADR-01).
+includeBuild("../shared")
