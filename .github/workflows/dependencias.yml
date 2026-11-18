@@ -5,6 +5,10 @@ on:
     paths:
       - 'app/**/*.gradle.kts'
       - 'app/gradle/**'
+      - 'backend/*.gradle.kts'
+      - 'backend/gradle/**'
+      - 'shared/*.gradle.kts'
+      - 'shared/gradle/**'
       - '.github/workflows/dependencias.yml'
   workflow_dispatch:
 
@@ -36,3 +40,51 @@ jobs:
           validate-wrappers: true
           dependency-graph-include-configurations: '^(debug|release)RuntimeClasspath$'
           additional-arguments: --no-configuration-cache
+
+  backend:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: |
+          bash .github/scripts/check-gradle-wrapper.sh backend
+          chmod +x backend/gradlew
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/dependency-submission@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          build-root-directory: backend
+          cache-provider: basic
+          validate-wrappers: true
+          dependency-graph-include-configurations: '^runtimeClasspath$'
+
+  shared:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: |
+          bash .github/scripts/check-gradle-wrapper.sh shared
+          chmod +x shared/gradlew
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/dependency-submission@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          build-root-directory: shared
+          cache-provider: basic
+          validate-wrappers: true
+          dependency-graph-include-configurations: '^runtimeClasspath$'
