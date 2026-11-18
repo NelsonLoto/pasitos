@@ -37,7 +37,13 @@ android {
     buildFeatures {
         compose = true
     }
-    testOptions { unitTests.isIncludeAndroidResources = true }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric API 37 necesita acceso a FileDescriptor en JDK 21; solo afecta a tests.
+            it.jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
+        }
+    }
 }
 
 dependencies {

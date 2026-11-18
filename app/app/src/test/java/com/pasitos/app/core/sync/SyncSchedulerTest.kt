@@ -45,6 +45,7 @@ class SyncSchedulerTest {
             driver.setAllConstraintsMet(work.id)
             awaitPeriodic(manager, 1, executions)
             driver.setPeriodDelayMet(work.id)
+            driver.setAllConstraintsMet(work.id)
             awaitPeriodic(manager, 2, executions)
         } finally {
             scheduler.cancelSync()
@@ -55,6 +56,7 @@ class SyncSchedulerTest {
     private fun awaitPeriodic(manager: WorkManager, count: Int, executions: AtomicInteger) {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10)
         while (System.nanoTime() < deadline) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
             val state = manager.getWorkInfosForUniqueWork(SyncScheduler.PERIODIC).get().single().state
             if (executions.get() >= count && state == WorkInfo.State.ENQUEUED) return
             Thread.sleep(20)
