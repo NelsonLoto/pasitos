@@ -1,8 +1,9 @@
 version: 2
 updates:
-  # I0-04 e I0-02 agregan backend y shared cuando existan sus builds.
+  # Los tres builds en los mismos PRs: Kotlin y kotlinx.serialization tienen que tener la misma
+  # versión en los tres. El Kotlin del backend se sube a mano en el PR de Kotlin (31, P-16).
   - package-ecosystem: gradle
-    directories: ['/app']
+    directories: ['/app', '/backend', '/shared']
     schedule:
       interval: weekly
       day: monday
@@ -12,7 +13,7 @@ updates:
       default-days: 14
     commit-message:
       prefix: chore
-    labels: [app]
+    labels: [app, backend, shared]
     groups:
       kotlin-ksp-hilt:
         patterns:

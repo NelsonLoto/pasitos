@@ -112,7 +112,7 @@ private fun HomeContent(
             if (child != null) {
                 ChildSelectorChip(
                     name = child.name,
-                    ageAndSex = child.ageAndSexLabel(),
+                    ageAndSex = child.ageAndSexLabel(LocalDate.now()),
                     avatarColor = childAvatarColor(child.id),
                     onClick = onChildChipClick,
                     modifier = Modifier.fillMaxWidth(),
@@ -157,7 +157,7 @@ private fun HomeContent(
                     .background(color = Color(0xFFFBE5D8), shape = RoundedCornerShape(14.dp))
                     .padding(14.dp),
             ) {
-                val stageLabel = state.activeChild?.let { "Consejos para esta etapa · ${it.ageLabel()}" } ?: "Consejos por edad"
+                val stageLabel = state.activeChild?.let { "Consejos para esta etapa · ${it.ageLabel(LocalDate.now())}" } ?: "Consejos por edad"
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "🌱", fontSize = 15.sp)
                     Text(text = stageLabel, style = NsType.BodySmall, modifier = Modifier.padding(start = 6.dp))

@@ -16,6 +16,7 @@ con él; las tareas están en los issues y en el tablero del proyecto.
 |---|---|
 | `app/` | App Android (Kotlin + Jetpack Compose). Cómo compilarla y correrla: [`app/README.md`](app/README.md) |
 | `backend/` | API del backend (Kotlin + Ktor): [`backend/README.md`](backend/README.md) |
+| `shared/` | Biblioteca Kotlin/JVM que usan la app y el backend como build compuesto: cálculos (edades, crecimiento, vacunas) y contratos de la API. Sus pruebas se corren con `./gradlew test` dentro de la carpeta; un cambio se ve en la app y en el backend al recompilarlos |
 | `docs/` | Documento funcional original, solo como referencia histórica. Lo vigente está en Drive |
 | `.github/` | Plantilla de Pull Request |
 

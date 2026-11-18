@@ -9,6 +9,8 @@ export function classify(paths) {
   const all = paths.includes('.github/workflows/ci.yml');
   const code = paths.filter(path => !path.endsWith('.md'));
   return {
+    shared: all || code.some(path => path.startsWith('shared/')),
+    backend: all || code.some(path => /^(backend\/|shared\/)/.test(path)),
     android: all || code.some(path => /^(app\/|shared\/|scripts\/|\.github\/scripts\/)/.test(path)),
     docs: all || paths.some(path => path.endsWith('.md')),
   };

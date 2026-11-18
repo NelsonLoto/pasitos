@@ -122,7 +122,7 @@ private fun ChildRow(child: Child, selected: Boolean, onClick: () -> Unit) {
         ChildAvatar(initial = child.name.take(1).uppercase(), color = childAvatarColor(child.id))
         Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
             Text(text = child.name, style = NsType.BodyRegular)
-            Text(text = child.ageAndSexLabel(), style = NsType.BodySmall, color = NsColor.TextSecondary)
+            Text(text = child.ageAndSexLabel(LocalDate.now()), style = NsType.BodySmall, color = NsColor.TextSecondary)
         }
         if (selected) {
             Icon(

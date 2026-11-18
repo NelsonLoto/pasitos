@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     outputs:
+      shared: ${{ steps.paths.outputs.shared }}
+      backend: ${{ steps.paths.outputs.backend }}
       android: ${{ steps.paths.outputs.android }}
       docs: ${{ steps.paths.outputs.docs }}
     steps:
@@ -32,6 +34,79 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.sha }}
         run: node .github/scripts/ci-checks.mjs changes "$BASE_SHA" "$HEAD_SHA"
+
+  shared:
+    needs: changes
+    if: needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verificar wrapper
+        run: bash .github/scripts/check-gradle-wrapper.sh shared
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+          validate-wrappers: true
+      - name: Probar shared
+        working-directory: shared
+        run: |
+          chmod +x gradlew
+          ./gradlew test --console=plain
+      - name: Guardar informes si falla shared
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: shared-reports
+          path: |
+            shared/build/reports/
+            shared/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verificar wrapper
+        run: bash .github/scripts/check-gradle-wrapper.sh backend
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+          validate-wrappers: true
+      # Testcontainers usa el Docker del runner para levantar PostgreSQL 16.
+      - name: Probar backend
+        working-directory: backend
+        run: |
+          chmod +x gradlew
+          ./gradlew test --console=plain
+      - name: Guardar informes si falla backend
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-reports
+          path: |
+            backend/build/reports/
+            backend/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
 
   android:
     needs: changes
