@@ -1,6 +1,7 @@
 package com.pasitos.backend.common
 
 import io.github.cdimascio.dotenv.dotenv
+import com.pasitos.backend.auth.AuthConfig
 
 enum class AppEnvironment { LOCAL, CI, STAGING }
 
@@ -13,7 +14,7 @@ data class DatabaseConfig(val host: String, val port: Int, val name: String, val
     override fun toString() = "DatabaseConfig([redacted])"
 }
 
-data class AppConfig(val environment: AppEnvironment, val host: String, val port: Int, val database: DatabaseConfig) {
+data class AppConfig(val environment: AppEnvironment, val host: String, val port: Int, val database: DatabaseConfig, val auth: AuthConfig) {
     companion object {
         fun from(values: Map<String, String>): AppConfig {
             fun required(key: String) = values[key]?.takeIf { it.isNotBlank() }
@@ -28,7 +29,9 @@ data class AppConfig(val environment: AppEnvironment, val host: String, val port
             }
             return AppConfig(environment, values["HOST"] ?: "0.0.0.0", port("PORT", "8080"),
                 DatabaseConfig(required("DB_HOST"), port("DB_PORT", "5432"), required("DB_NAME"),
-                    required("DB_USER"), required("DB_PASSWORD")))
+                    required("DB_USER"), required("DB_PASSWORD")),
+                AuthConfig(required("JWT_SECRET"), values["TERMS_VERSION"] ?: "1",
+                    values["AUTH_RATE_LIMIT"]?.let { it.toIntOrNull() ?: error("AUTH_RATE_LIMIT debe ser un entero positivo") } ?: 10))
         }
 
         fun fromEnvironment(environment: Map<String, String> = System.getenv()): AppConfig {
