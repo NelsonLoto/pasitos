@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -20,12 +20,14 @@ try {
   const files = run('tar', '-tf', archive).split(/\r?\n/);
   assert.deepEqual(files.filter(path => envFile.test(path)), [], 'La imagen contiene archivos .env');
   assert.deepEqual(files.filter(path => /^(?:\.\/)?opt\/pasitos\//.test(path) && privateKey.test(path)), [], 'La aplicación contiene claves');
-  docker('cp', container + ':/opt/pasitos/lib', join(temporary, 'lib'));
-  const jars = readdirSync(join(temporary, 'lib')).filter(name => /^(?:pasitos-backend|shared)-.*\.jar$/.test(name));
+  const jars = files.filter(path => /^(?:\.\/)?opt\/pasitos\/lib\/(?:pasitos-backend|shared)-[^/]+\.jar$/.test(path));
   assert.equal(jars.length, 2, 'Deben existir los jars de backend y shared para inspeccionarlos');
+  // Extraer solo archivos: docker cp del directorio conserva 555 y no puede llenarlo
+  // en Linux. El tar ya exportado permite inspeccionar sin cambiar permisos de la imagen.
+  run('tar', '-xf', archive, '-C', temporary, ...jars);
   const jar = process.env.JAVA_HOME ? join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'jar.exe' : 'jar') : 'jar';
   for (const name of jars) {
-    const entries = run(jar, 'tf', join(temporary, 'lib', name)).split(/\r?\n/);
+    const entries = run(jar, 'tf', join(temporary, name)).split(/\r?\n/);
     assert.deepEqual(entries.filter(path => envFile.test(path) || privateKey.test(path)), [], 'Secretos dentro de ' + name);
   }
   console.log('I0-09: uid 10001, aplicación de solo lectura y sin secretos en filesystem ni jars.');
