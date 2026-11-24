@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 @HiltViewModel
 class AppViewModel @Inject constructor(
     childRepository: ChildRepository,
+    sessions: com.pasitos.app.data.auth.SessionRepository,
 ) : ViewModel() {
+    val sessionState = sessions.state
     val activeChildId: StateFlow<String?> = childRepository.activeChildId
 }

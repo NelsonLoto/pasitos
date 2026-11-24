@@ -28,9 +28,15 @@ class BuildCompatibilityTest {
 
     @Test
     fun i0_12ConservaLoginAltaMedicionYCurva() {
-        compose.onAllNodes(hasSetTextAction())[0].performTextInput("demo@pasitos.app")
-        compose.onAllNodes(hasSetTextAction())[1].performTextInput("123456")
-        compose.onNodeWithText("Iniciar sesión").performScrollTo().performClick()
+        // Esta regresión comprueba Hilt y pantallas del prototipo; Google sigue simulado en I0.
+        // El ingreso real y la renovación contra el backend se verifican en RealSessionTest.
+        compose.waitUntil(15_000) {
+            compose.onAllNodesWithText("Continuar con Google").fetchSemanticsNodes().isNotEmpty() ||
+                compose.onAllNodesWithText("+ Agregar hijo/a").fetchSemanticsNodes().isNotEmpty()
+        }
+        if (compose.onAllNodesWithText("Continuar con Google").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithText("Continuar con Google").performScrollTo().performClick()
+        }
         awaitText("+ Agregar hijo/a")
 
         compose.onNodeWithText("+ Agregar hijo/a").performScrollTo().performClick()
@@ -45,7 +51,7 @@ class BuildCompatibilityTest {
         compose.onNodeWithText(dateLabel, substring = true).performClick()
         compose.onNodeWithText("Confirmar").performClick()
         compose.onNodeWithText("Guardar y continuar").performScrollTo().performClick()
-        awaitText("Prueba de versiones")
+        awaitText("Registrar medición →")
 
         compose.onNodeWithText("Registrar medición →").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Peso (kg)")).performTextInput("3.5")
@@ -53,11 +59,17 @@ class BuildCompatibilityTest {
         compose.onNode(hasSetTextAction() and hasText("Perímetro cefálico (cm)"))
             .performScrollTo().performTextInput("35")
         compose.onNodeWithText("Guardar medición").performScrollTo().performClick()
-        awaitText("Prueba de versiones")
+        awaitText("Registrar medición →")
 
         compose.onNodeWithText("Crecimiento").performClick()
         awaitText("Última medición:", substring = true)
         compose.onNodeWithText("Última medición:", substring = true).assertIsDisplayed()
+
+        compose.onNodeWithText("Perfil").performClick()
+        awaitText("Cerrar sesión")
+        compose.onNodeWithText("Cerrar sesión").performClick()
+        awaitText("¿Cerrar sesión?")
+        compose.onNodeWithText("Cancelar").performClick()
     }
 
     private fun awaitText(text: String, substring: Boolean = false) {

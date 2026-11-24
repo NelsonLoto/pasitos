@@ -29,7 +29,6 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
                 userId = "mock-1",
                 email = email.trim(),
                 displayName = "Familia Demo",
-                token = "fake-jwt-token",
             )
             _currentSession.value = session
             Result.success(session)
@@ -44,13 +43,12 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
             userId = "mock-google-1",
             email = "demo.google@pasitos.app",
             displayName = "Familia Demo (Google)",
-            token = "fake-jwt-token",
         )
         _currentSession.value = session
         return Result.success(session)
     }
 
-    override suspend fun register(displayName: String, email: String, password: String): Result<AuthSession> {
+    override suspend fun register(displayName: String, email: String, password: String, acceptTerms: Boolean): Result<AuthSession> {
         delay(800)
         val normalizedEmail = email.trim()
         return if (registeredEmails.any { it.equals(normalizedEmail, ignoreCase = true) }) {
@@ -61,7 +59,6 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
                 userId = "mock-${registeredEmails.size}",
                 email = normalizedEmail,
                 displayName = displayName.trim(),
-                token = "fake-jwt-token",
             )
             _currentSession.value = session
             Result.success(session)

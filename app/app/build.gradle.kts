@@ -23,10 +23,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://localhost:8080/\"")
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"https://unused.invalid/\"")
             optimization {
                 enable = false
             }
+        }
+        create("staging") {
+            initWith(getByName("release"))
+            val endpoint = providers.gradleProperty("STAGING_API_URL").orElse("https://staging.invalid/").get()
+            require(endpoint.startsWith("https://") && !endpoint.contains('"')) { "STAGING_API_URL debe usar HTTPS" }
+            buildConfigField("String", "API_BASE_URL", "\"$endpoint\"")
         }
     }
     compileOptions {
@@ -36,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -47,6 +58,13 @@ android {
 }
 
 dependencies {
+    // Declaración aquí para no superponer el catálogo que está en revisión en #214.
+    val ktorVersion = "3.6.0"
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("io.ktor:ktor-client-auth:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     implementation(libs.pasitos.shared)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
