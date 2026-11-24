@@ -1,0 +1,17 @@
+# Solo los dos builds JVM; nunca la app, .git ni las cachés de la computadora.
+**
+!backend/
+!backend/**
+!shared/
+!shared/**
+**/.env
+**/.env.*
+**/*.pem
+**/*.jks
+**/*.keystore
+**/.gradle
+**/.kotlin
+**/build
+**/src/test
+**/src/androidTest
+**/.idea
