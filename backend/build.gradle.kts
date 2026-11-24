@@ -11,7 +11,7 @@ kotlin { jvmToolchain(21) }
 application { mainClass.set("com.pasitos.backend.ApplicationKt") }
 
 val ktorVersion = "3.6.1"
-val exposedVersion = "0.61.0"
+val exposedVersion = "1.6.1"
 val flywayVersion = "13.12.1"
 dependencies {
     implementation("com.pasitos:shared")
