@@ -21,6 +21,7 @@ jobs:
       backend: ${{ steps.paths.outputs.backend }}
       android: ${{ steps.paths.outputs.android }}
       docs: ${{ steps.paths.outputs.docs }}
+      docker: ${{ steps.paths.outputs.docker }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -159,6 +160,50 @@ jobs:
             app/app/build/test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+  docker:
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      COMPOSE_PROJECT_NAME: pasitos-ci
+      JWT_SECRET: synthetic-ci-signing-key-not-a-secret-00000000000000000000000000000000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Preparar secretos ficticios para comprobar exclusión del contexto
+        run: |
+          printf 'DB_PASSWORD=synthetic-ci-only\n' > backend/.env
+          for module in backend shared; do
+            mkdir -p "$module/src/main/resources/ci-secret-probe"
+            for name in .env .env.local test.pem test.jks test.keystore; do
+              printf 'synthetic-ci-only\n' > "$module/src/main/resources/ci-secret-probe/$name"
+            done
+          done
+      - name: Construir y verificar el entorno completo
+        run: |
+          docker compose --profile full up -d --wait --wait-timeout 180
+          curl --fail --silent http://127.0.0.1:8080/health
+          node .github/scripts/check-docker-image.mjs "$(docker compose ps -q backend)"
+      - name: Guardar logs si falla Docker
+        if: failure()
+        run: docker compose --profile full logs --no-color > docker.log 2>&1
+      - name: Publicar informe si falla Docker
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docker-reports
+          path: docker.log
+          retention-days: 7
+      - name: Detener entorno temporal
+        if: always()
+        run: docker compose --profile full down -v --remove-orphans
 
   docs:
     needs: changes
