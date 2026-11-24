@@ -53,7 +53,7 @@ class SchemaBaselineTest {
         private const val BCRYPT_FORMAT = "\$2a\$12\$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0"
 
         private fun config(databaseName: String) = AppConfig.from(mapOf(
-            "APP_ENV" to "ci", "DB_HOST" to postgres.host,
+            "APP_ENV" to "ci", "DB_HOST" to postgres.host, "JWT_SECRET" to "test-only-".repeat(8),
             "DB_PORT" to postgres.firstMappedPort.toString(), "DB_NAME" to databaseName,
             "DB_USER" to postgres.username, "DB_PASSWORD" to postgres.password,
         ))

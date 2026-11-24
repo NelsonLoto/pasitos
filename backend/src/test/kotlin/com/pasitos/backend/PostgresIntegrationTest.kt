@@ -21,7 +21,7 @@ class PostgresIntegrationTest {
         @Container @JvmStatic val postgres = PostgreSQLContainer("postgres:16-alpine")
     }
     private fun config() = AppConfig.from(mapOf(
-        "APP_ENV" to "ci", "DB_HOST" to postgres.host,
+        "APP_ENV" to "ci", "DB_HOST" to postgres.host, "JWT_SECRET" to "test-only-".repeat(8),
         "DB_PORT" to postgres.firstMappedPort.toString(), "DB_NAME" to postgres.databaseName,
         "DB_USER" to postgres.username, "DB_PASSWORD" to postgres.password,
     ))

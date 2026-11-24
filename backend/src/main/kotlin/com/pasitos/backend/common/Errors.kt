@@ -2,6 +2,7 @@ package com.pasitos.backend.common
 
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.ErrorResponse
+import com.pasitos.backend.auth.AuthFailure
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -16,6 +17,15 @@ class ApiException(val status: HttpStatusCode, val error: ErrorResponse) : Runti
 fun Application.configureErrors() {
     val errorLogger = org.slf4j.LoggerFactory.getLogger("com.pasitos.backend.Errors")
     install(StatusPages) {
+        exception<AuthFailure> { call, cause ->
+            val status = when (cause.code) {
+                ErrorCode.INVALID_INPUT -> HttpStatusCode.BadRequest
+                ErrorCode.EMAIL_ALREADY_IN_USE, ErrorCode.TERMS_REQUIRED -> HttpStatusCode.Conflict
+                ErrorCode.ACCOUNT_LOCKED -> HttpStatusCode(423, "Locked")
+                else -> HttpStatusCode.Unauthorized
+            }
+            call.respond(status, ErrorResponse(cause.code, cause.message, cause.fields))
+        }
         exception<ApiException> { call, cause -> call.respond(cause.status, cause.error) }
         exception<BadRequestException> { call, _ ->
             call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorCode.INVALID_INPUT, "El formato de la solicitud no es válido"))
@@ -28,6 +38,9 @@ fun Application.configureErrors() {
         }
         status(HttpStatusCode.NotFound) { call, status ->
             call.respond(status, ErrorResponse(ErrorCode.NOT_FOUND, "No se encontró ese recurso"))
+        }
+        status(HttpStatusCode.TooManyRequests) { call, status ->
+            call.respond(status, ErrorResponse(ErrorCode.RATE_LIMITED, "Demasiados pedidos. Esperá un momento y volvé a intentar"))
         }
     }
 }
