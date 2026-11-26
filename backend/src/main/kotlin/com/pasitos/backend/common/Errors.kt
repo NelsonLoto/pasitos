@@ -3,6 +3,7 @@ package com.pasitos.backend.common
 import com.pasitos.shared.api.ErrorCode
 import com.pasitos.shared.api.ErrorResponse
 import com.pasitos.backend.auth.AuthFailure
+import com.pasitos.backend.sync.SyncFailure
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -17,6 +18,10 @@ class ApiException(val status: HttpStatusCode, val error: ErrorResponse) : Runti
 fun Application.configureErrors() {
     val errorLogger = org.slf4j.LoggerFactory.getLogger("com.pasitos.backend.Errors")
     install(StatusPages) {
+        exception<SyncFailure> { call, cause ->
+            val status = if (cause.code == ErrorCode.NOT_FOUND) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
+            call.respond(status, ErrorResponse(cause.code, cause.message))
+        }
         exception<AuthFailure> { call, cause ->
             val status = when (cause.code) {
                 ErrorCode.INVALID_INPUT -> HttpStatusCode.BadRequest

@@ -9,6 +9,8 @@ import com.pasitos.backend.auth.AuthService
 import com.pasitos.backend.auth.AuthTokens
 import com.pasitos.backend.auth.PasswordHasher
 import com.pasitos.backend.auth.configureAuth
+import com.pasitos.backend.sync.SyncService
+import com.pasitos.backend.sync.configureSync
 import java.time.Clock
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -30,6 +32,7 @@ fun Application.module(config: AppConfig = AppConfig.fromEnvironment()) {
     configureHttp(database::isHealthy)
     val clock = Clock.systemUTC()
     configureAuth(AuthService(database.database, config.auth, AuthTokens(config.auth, clock), PasswordHasher(), clock), config.auth)
+    configureSync(SyncService(database.database, productionSyncRegistry()))
 }
 
 internal fun Application.configureHttp(isDatabaseHealthy: () -> Boolean) {
