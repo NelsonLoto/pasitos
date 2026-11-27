@@ -220,7 +220,7 @@ class SchemaBaselineTest {
         assertEquals(listOf("set_sync_version"), strings(
             "SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public'",
         ))
-        assertEquals(listOf("$BASELINE_VERSION true"), strings(
+        assertEquals(listOf("$BASELINE_VERSION true", "2026.11.26.0935 true"), strings(
             "SELECT version || ' ' || success::text FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank",
         ))
     }

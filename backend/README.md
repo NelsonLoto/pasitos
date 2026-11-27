@@ -81,6 +81,57 @@ El exceso de pedidos devuelve 429 con `Retry-After`; una cuenta bloqueada devuel
 contraseñas, tokens ni datos personales. Este cambio no conecta todavía la pantalla
 Android de inicio de sesión.
 
+## Sincronización genérica (I0-08, #162)
+
+Las tres rutas requieren la sesión JWT vigente y comparten el límite de 120
+pedidos por minuto por cuenta con `/me`:
+
+| Ruta bajo `/api/v1` | Resultado |
+| --- | --- |
+| `GET /sync/changes?cursor=0` | Cambios posteriores al cursor, hasta 500 filas entre todas las colecciones, `hasMore`, cursor siguiente y avisos de acceso. |
+| `GET /sync/snapshot/{childId}` | Todas las filas vigentes disponibles de un niño autorizado. Sin acceso devuelve 404. |
+| `POST /sync/push` | Procesa `mutations` en orden; cada una confirma o revierte su propia transacción y devuelve APPLIED o REJECTED con código y regla. |
+
+Los contratos están en `shared/api/sync`. En producción el registro de
+`Dependencies.kt` está **vacío**, según ADR-28: I0 prepara el mecanismo y cada
+dominio de I1 conectará su `SyncEntity`. Las entidades de las pruebas son ficticias
+y nunca se registran en la aplicación. Por eso estas rutas todavía no publican ni
+modifican mediciones, hábitos u otros datos reales.
+
+El alcance actual comprende los niños con tutoría activa de la cuenta, excluyendo
+niños borrados. `patients` acepta como máximo 50 UUID, pero no amplía ese alcance:
+los vínculos y permisos pediátricos corresponden a I3. `newChildIds` permite pedir
+una foto completa al recibir acceso a datos anteriores al cursor.
+`revokedChildIds` se consulta por cuenta, aunque la tutoría ya no exista. El cliente
+debe purgar primero los accesos revocados y luego descargar las nuevas fotos.
+
+Cada implementación de `SyncEntity` debe:
+
+- Devolver cambios ordenados por versión, respetando alcance y límite, incluidos
+  los borrados como `deleted:true`. La foto completa excluye filas borradas.
+- Usar `Caller` para aplicar autoría, permisos y privacidad también en lecturas.
+- Validar todas las reglas del dominio en `apply`. Solo MEASUREMENT, HABIT, EVENT
+  y MILESTONE_ACHIEVEMENT admiten escritura por esta vía; los demás usan sus rutas
+  de dominio cuando se implementen.
+- Hacer UPSERT por UUID sin duplicar ni cambiar la versión al repetir los mismos
+  datos; DELETE repetido es APPLIED y una fila borrada no puede resucitar.
+- Rechazar con `SyncRejection(code, message, rule)` y mensajes sin datos personales.
+  La excepción revierte la mutación, sin revertir las anteriores del lote.
+
+La migración nueva instala `set_sync_version()` en las cinco tablas sincronizables
+de la base y en `access_revocations`, conservando las versiones existentes. Cada
+tabla sincronizable nueva deberá instalar el mismo trigger. El servicio que quite
+una tutoría deberá llamar `SyncRepository.recordRevocation` en esa misma transacción;
+esta tarea no agrega todavía la operación de quitar tutores.
+
+Las versiones usan una secuencia global. Para que un cursor no saltee escrituras
+pendientes, los escritores toman el bloqueo asesor transaccional `(162, 1)` antes
+de asignar una versión; las lecturas toman su variante compartida con aislamiento
+READ COMMITTED. Los servicios de dominio deberán tomar `lockForWrite()` antes de
+bloquear o modificar filas sincronizables. Es una coordinación global adecuada al
+volumen inicial: las lecturas pueden compartirla, pero las escrituras se serializan.
+Los manejadores deben mantener estas transacciones breves, sin llamadas de red.
+
 ## Pruebas
 
 ```sh
