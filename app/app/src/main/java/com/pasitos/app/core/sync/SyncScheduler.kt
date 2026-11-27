@@ -17,6 +17,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 enum class SyncReason { APP_OPEN, SESSION_STARTED, LOCAL_CHANGE, MANUAL, NOTIFICATION }
 
@@ -29,6 +31,11 @@ class SyncScheduler @Inject constructor(@ApplicationContext context: Context) {
     fun cancelSync() {
         manager.cancelUniqueWork(NOW)
         manager.cancelUniqueWork(PERIODIC)
+    }
+    suspend fun cancelSyncAndAwait() = withContext(Dispatchers.IO) {
+        manager.cancelUniqueWork(NOW).result.get()
+        manager.cancelUniqueWork(PERIODIC).result.get()
+        Unit
     }
 
     companion object {

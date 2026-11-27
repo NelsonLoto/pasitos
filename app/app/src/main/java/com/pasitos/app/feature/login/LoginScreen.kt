@@ -46,6 +46,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
+    expired: Boolean = false,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -54,7 +55,7 @@ fun LoginScreen(
     }
 
     LoginContent(
-        state = state,
+        state = if (expired && state.generalError == null) state.copy(generalError = "Tu sesión venció") else state,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,

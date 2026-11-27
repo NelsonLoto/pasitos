@@ -43,6 +43,10 @@ class RegisterViewModel @Inject constructor(
 
     fun onSubmit() {
         val state = _uiState.value
+        if (!state.acceptTerms) {
+            _uiState.update { it.copy(generalError = "Aceptá los términos y la política de privacidad para continuar") }
+            return
+        }
         val fullNameError = validateFullName(state.fullName)
         val emailError = validateEmail(state.email)
         val passwordError = validatePassword(state.password)
@@ -60,7 +64,7 @@ class RegisterViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, generalError = null) }
-            authRepository.register(state.fullName, state.email, state.password)
+            authRepository.register(state.fullName, state.email, state.password, state.acceptTerms)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
                     _navigateToHome.send(Unit)
@@ -75,6 +79,7 @@ class RegisterViewModel @Inject constructor(
 
     private fun validateFullName(value: String): String? = when {
         value.isBlank() -> "Ingresá tu nombre completo"
+        value.trim().split(Regex("\\s+"), limit = 2).size < 2 -> "Ingresá tu nombre y apellido"
         else -> null
     }
 
@@ -86,7 +91,7 @@ class RegisterViewModel @Inject constructor(
 
     private fun validatePassword(value: String): String? = when {
         value.isBlank() -> "Ingresá una contraseña"
-        value.length < 6 -> "Mínimo 6 caracteres"
+        value.length < 8 || !value.any(Char::isLetter) || !value.any(Char::isDigit) -> "Usá al menos 8 caracteres, una letra y un número"
         else -> null
     }
 
@@ -95,4 +100,6 @@ class RegisterViewModel @Inject constructor(
         confirmPassword != password -> "Las contraseñas no coinciden"
         else -> null
     }
+
+    fun onTermsChange(accepted: Boolean) { _uiState.update { it.copy(acceptTerms = accepted, generalError = null) } }
 }

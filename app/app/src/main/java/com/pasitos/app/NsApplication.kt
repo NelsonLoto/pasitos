@@ -18,6 +18,9 @@ class NsApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        val ownProcess = getSystemService(android.app.ActivityManager::class.java).runningAppProcesses
+            ?.firstOrNull { it.pid == android.os.Process.myPid() }?.processName
+        if (ownProcess?.endsWith(":session_restart") == true) return
         // Provider difiere WorkManager hasta después de la inyección de su fábrica.
         syncLifecycle.get().start()
     }
