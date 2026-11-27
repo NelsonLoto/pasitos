@@ -188,7 +188,13 @@ jobs:
           done
       - name: Construir y verificar el entorno completo
         run: |
-          docker compose --profile full up -d --wait --wait-timeout 180
+          if JWT_SECRET= docker compose --profile full config --quiet; then
+            echo 'Compose debe rechazar JWT_SECRET vacío antes del arranque'
+            exit 1
+          fi
+          printf 'JWT_SECRET=%s\n' "$JWT_SECRET" >> backend/.env
+          env -u JWT_SECRET docker compose --env-file backend/.env --profile full config --quiet
+          env -u JWT_SECRET docker compose --env-file backend/.env --profile full up -d --wait --wait-timeout 180
           curl --fail --silent http://127.0.0.1:8080/health
           node .github/scripts/check-docker-image.mjs "$(docker compose ps -q backend)"
       - name: Guardar logs si falla Docker
