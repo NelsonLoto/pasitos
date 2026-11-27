@@ -14,10 +14,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -55,6 +58,7 @@ fun RegisterScreen(
         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
         onSubmit = viewModel::onSubmit,
         onLoginClick = onLoginClick,
+        onTermsChange = viewModel::onTermsChange,
     )
 }
 
@@ -68,6 +72,7 @@ private fun RegisterContent(
     onConfirmPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onLoginClick: () -> Unit,
+    onTermsChange: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -131,11 +136,11 @@ private fun RegisterContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Al continuar aceptás los Términos y Condiciones y la Política de Privacidad.",
-                style = NsType.BodySmall,
-                color = NsColor.TextSecondary,
-            )
+            Row {
+                Checkbox(checked = state.acceptTerms, onCheckedChange = onTermsChange, enabled = !state.isLoading,
+                    modifier = Modifier.semantics { contentDescription = "Aceptar términos y política de privacidad" })
+                Text("Acepto los Términos y Condiciones y la Política de Privacidad.", style = NsType.BodySmall)
+            }
 
             state.generalError?.let { error ->
                 Spacer(modifier = Modifier.height(12.dp))

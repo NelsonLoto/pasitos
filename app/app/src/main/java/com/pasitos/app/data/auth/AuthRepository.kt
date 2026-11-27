@@ -4,10 +4,8 @@ import com.pasitos.app.data.auth.model.AuthSession
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Contrato de autenticación (RF01). La implementación actual (ver [FakeAuthRepository])
- * es mock/local: el backend todavía no existe. El día que exista, se agrega
- * RemoteAuthRepository y solo cambia el binding en AuthModule — ni los
- * ViewModels ni las pantallas que dependen de esta interfaz se tocan.
+ * Contrato de autenticación real. La interfaz entrega la cuenta y nunca los tokens.
+ * Google continúa simulado hasta I1-A2.
  */
 interface AuthRepository {
     val currentSession: StateFlow<AuthSession?>
@@ -16,7 +14,7 @@ interface AuthRepository {
 
     suspend fun loginWithGoogle(): Result<AuthSession>
 
-    suspend fun register(displayName: String, email: String, password: String): Result<AuthSession>
+    suspend fun register(displayName: String, email: String, password: String, acceptTerms: Boolean = false): Result<AuthSession>
 
     fun logout()
 }

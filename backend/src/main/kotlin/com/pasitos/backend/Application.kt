@@ -5,6 +5,13 @@ import com.pasitos.backend.common.DatabaseFactory
 import com.pasitos.backend.common.configureErrors
 import com.pasitos.backend.common.configureRequestLogging
 import com.pasitos.backend.health.healthRoutes
+import com.pasitos.backend.auth.AuthService
+import com.pasitos.backend.auth.AuthTokens
+import com.pasitos.backend.auth.PasswordHasher
+import com.pasitos.backend.auth.configureAuth
+import com.pasitos.backend.sync.SyncService
+import com.pasitos.backend.sync.configureSync
+import java.time.Clock
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
@@ -23,6 +30,9 @@ fun Application.module(config: AppConfig = AppConfig.fromEnvironment()) {
     val database = DatabaseFactory(config.database)
     monitor.subscribe(ApplicationStopped) { database.close() }
     configureHttp(database::isHealthy)
+    val clock = Clock.systemUTC()
+    configureAuth(AuthService(database.database, config.auth, AuthTokens(config.auth, clock), PasswordHasher(), clock), config.auth)
+    configureSync(SyncService(database.database, productionSyncRegistry()))
 }
 
 internal fun Application.configureHttp(isDatabaseHealthy: () -> Boolean) {

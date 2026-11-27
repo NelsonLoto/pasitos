@@ -53,7 +53,7 @@ class SchemaBaselineTest {
         private const val BCRYPT_FORMAT = "\$2a\$12\$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0"
 
         private fun config(databaseName: String) = AppConfig.from(mapOf(
-            "APP_ENV" to "ci", "DB_HOST" to postgres.host,
+            "APP_ENV" to "ci", "DB_HOST" to postgres.host, "JWT_SECRET" to "test-only-".repeat(8),
             "DB_PORT" to postgres.firstMappedPort.toString(), "DB_NAME" to databaseName,
             "DB_USER" to postgres.username, "DB_PASSWORD" to postgres.password,
         ))
@@ -220,7 +220,7 @@ class SchemaBaselineTest {
         assertEquals(listOf("set_sync_version"), strings(
             "SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public'",
         ))
-        assertEquals(listOf("$BASELINE_VERSION true"), strings(
+        assertEquals(listOf("$BASELINE_VERSION true", "2026.11.26.0935 true"), strings(
             "SELECT version || ' ' || success::text FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank",
         ))
     }

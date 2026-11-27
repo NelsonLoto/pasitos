@@ -15,16 +15,18 @@ import com.pasitos.app.feature.measurement.MeasurementFormScreen
 import com.pasitos.app.feature.register.RegisterScreen
 
 @Composable
-fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController = navController, startDestination = NsRoute.Login, modifier = modifier) {
+fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier, signedIn: Boolean = false, expired: Boolean = false, needsOnboarding: Boolean = false) {
+    val start = if (!signedIn) NsRoute.Login else if (needsOnboarding) NsRoute.ChildOnboarding else NsRoute.Home
+    NavHost(navController = navController, startDestination = start, modifier = modifier) {
         composable<NsRoute.Login> {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(NsRoute.Home) {
+                    if (!signedIn) navController.navigate(NsRoute.Home) {
                         popUpTo(NsRoute.Login) { inclusive = true }
                     }
                 },
                 onRegisterClick = { navController.navigate(NsRoute.Register) },
+                expired = expired,
             )
         }
         composable<NsRoute.Register> {
@@ -80,6 +82,6 @@ fun NsNavGraph(navController: NavHostController, modifier: Modifier = Modifier) 
         composable<NsRoute.AdviceList> { PlaceholderScreen(title = "Consejos por edad") }
         composable<NsRoute.AdviceDetail> { PlaceholderScreen(title = "Detalle de consejo") }
         composable<NsRoute.ReportExport> { PlaceholderScreen(title = "Exportar reporte PDF") }
-        composable<NsRoute.Profile> { PlaceholderScreen(title = "Perfil / Configuración") }
+        composable<NsRoute.Profile> { com.pasitos.app.feature.profile.SessionProfileScreen() }
     }
 }

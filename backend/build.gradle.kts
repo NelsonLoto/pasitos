@@ -10,9 +10,9 @@ repositories { mavenCentral() }
 kotlin { jvmToolchain(21) }
 application { mainClass.set("com.pasitos.backend.ApplicationKt") }
 
-val ktorVersion = "3.6.0"
+val ktorVersion = "3.6.1"
 val exposedVersion = "0.61.0"
-val flywayVersion = "13.9.0"
+val flywayVersion = "13.12.1"
 dependencies {
     implementation("com.pasitos:shared")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -21,6 +21,11 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-call-id:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    implementation("io.ktor:ktor-server-rate-limit:$ktorVersion")
+    implementation("com.auth0:java-jwt:4.6.2")
+    implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
@@ -29,10 +34,10 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("org.postgresql:postgresql:42.7.14")
-    implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("ch.qos.logback:logback-classic:1.6.6")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     testImplementation(kotlin("test-junit5"))
-    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")

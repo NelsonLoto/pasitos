@@ -33,6 +33,10 @@ enum class ErrorCode(val wireName: String) {
     BUSINESS_RULE("business_rule"),
     RATE_LIMITED("rate_limited"),
     INTERNAL_ERROR("internal_error"),
+    INVALID_CREDENTIALS("invalid_credentials"),
+    EMAIL_ALREADY_IN_USE("email_already_in_use"),
+    ACCOUNT_LOCKED("account_locked"),
+    TERMS_REQUIRED("terms_required"),
 
     /** Un código que esta versión no conoce. El backend nunca lo envía. */
     UNKNOWN("unknown"),
