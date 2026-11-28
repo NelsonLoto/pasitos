@@ -59,7 +59,7 @@ android {
 
 dependencies {
     // Declaración aquí para no superponer el catálogo que está en revisión en #214.
-    val ktorVersion = "3.6.0"
+    val ktorVersion = "3.6.1"
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("io.ktor:ktor-client-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")

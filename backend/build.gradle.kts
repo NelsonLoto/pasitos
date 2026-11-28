@@ -12,7 +12,7 @@ application { mainClass.set("com.pasitos.backend.ApplicationKt") }
 
 val ktorVersion = "3.6.1"
 val exposedVersion = "0.61.0"
-val flywayVersion = "13.12.1"
+val flywayVersion = "13.12.2"
 dependencies {
     implementation("com.pasitos:shared")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -37,7 +37,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("org.postgresql:postgresql:42.7.14")
-    implementation("ch.qos.logback:logback-classic:1.6.6")
+    implementation("ch.qos.logback:logback-classic:1.6.7")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     testImplementation(kotlin("test-junit5"))
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
