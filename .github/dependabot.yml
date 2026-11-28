@@ -27,6 +27,11 @@ updates:
           - 'com.google.devtools.ksp*'
           - 'com.google.dagger*'
         update-types: [minor, patch]
+    # Exposed 1.x cambia los paquetes (org.jetbrains.exposed.v1…): sus versiones mayores se
+    # evalúan aparte (31, P-15).
+    ignore:
+      - dependency-name: 'org.jetbrains.exposed*'
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
