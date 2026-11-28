@@ -25,6 +25,9 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     implementation("io.ktor:ktor-server-rate-limit:$ktorVersion")
     implementation("com.auth0:java-jwt:4.6.2")
+    // Directa para no heredar la 0.24.1 de ktor-server-auth-jwt, que trae Guava 33.6.0 (GHSA-xxph-c9ww-hj94).
+    // La usa I1-B2 para verificar los ID tokens de Google.
+    implementation("com.auth0:jwks-rsa:0.24.2")
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
