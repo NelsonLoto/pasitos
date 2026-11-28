@@ -29,7 +29,7 @@ dependencies {
     // La usa I1-B2 para verificar los ID tokens de Google.
     implementation("com.auth0:jwks-rsa:0.24.2")
     implementation("at.favre.lib:bcrypt:0.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")

@@ -26,7 +26,7 @@ kotlin {
 
 dependencies {
     // api: los tipos @Serializable de shared/api son parte de su interfaz pública.
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     testImplementation(kotlin("test-junit5"))
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
