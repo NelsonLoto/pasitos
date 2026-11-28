@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-pasitos}
+      POSTGRES_USER: ${DB_USER:-pasitos}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pasitos-local-only}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: [CMD, /mailpit, readyz]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  backend:
+    profiles: [full]
+    image: pasitos-backend:local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      APP_ENV: local
+      HOST: 0.0.0.0
+      PORT: "8080"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-pasitos}
+      DB_USER: ${DB_USER:-pasitos}
+      DB_PASSWORD: ${DB_PASSWORD:-pasitos-local-only}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET de al menos 64 caracteres; usar --env-file backend/.env}
+      TERMS_VERSION: ${TERMS_VERSION:-1}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10}
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    ports:
+      - "127.0.0.1:${PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    mem_limit: 512m
+volumes:
+  postgres-data:

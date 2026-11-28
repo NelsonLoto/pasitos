@@ -13,6 +13,8 @@ export function classify(paths) {
     backend: all || code.some(path => /^(backend\/|shared\/)/.test(path)),
     android: all || code.some(path => /^(app\/|shared\/|scripts\/|\.github\/scripts\/)/.test(path)),
     docs: all || paths.some(path => path.endsWith('.md')),
+    docker: all || code.some(path => /^(backend\/|shared\/)/.test(path) ||
+      ['docker-compose.yml', '.dockerignore', '.github/scripts/check-docker-image.mjs'].includes(path)),
   };
 }
 
